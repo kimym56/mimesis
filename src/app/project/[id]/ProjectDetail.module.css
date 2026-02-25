@@ -10,17 +10,22 @@
 .backButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  gap: 0.4rem;
+  margin-bottom: 2.5rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--foreground);
-  transition: opacity 0.2s;
-  z-index: 10;
+  cursor: pointer;
+  /* Minimum touch target */
+  min-height: 44px;
   width: fit-content;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+  z-index: 10;
 }
 
 .backButton:hover {
-  opacity: 0.6;
+  opacity: 1;
 }
 
 .splitLayout {
@@ -52,41 +57,31 @@
 
 .label {
   display: inline-block;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   font-weight: 600;
-  color: rgba(28, 28, 28, 0.5);
-}
-
-@media (prefers-color-scheme: dark) {
-  .label {
-    color: rgba(245, 245, 243, 0.5);
-  }
+  color: var(--foreground-muted);
 }
 
 .info {
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .title {
-  font-size: 2rem;
+  font-family: var(--font-heading);
+  font-size: 1.875rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .description {
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: rgba(28, 28, 28, 0.7);
-  max-width: 500px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .description {
-    color: rgba(245, 245, 243, 0.7);
-  }
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--foreground-muted);
+  max-width: 480px;
 }
 
 .imageContainer {

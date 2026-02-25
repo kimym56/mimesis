@@ -1,0 +1,23 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.orbit-provider.com/cliproxy-api/api/provider/agy",
+    "ANTHROPIC_AUTH_TOKEN": "sk-orbit-4d37513dcb53e0aff34c199adf71bdf5",
+    "ANTHROPIC_MODEL": "gemini-claude-sonnet-4-6-thinking",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "gemini-claude-opus-4-6-thinking",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "gemini-claude-sonnet-4-6-thinking",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gemini-claude-sonnet-4-6"
+  },
+  "description": "Shared Claude Code settings for the Mimesis project",
+  "pwaInstructions": "This is a Next.js 16 App Router portfolio project. Key patterns: use CSS Modules for component styles, keep App Router pages as server components, add projects via src/data/projects.ts. Path alias @/* maps to src/*.",
+  "alwaysApply": [
+    "eslint"
+  ],
+  "branchProtection": [
+    "main"
+  ],
+  "docs": [
+    "https://nextjs.org/docs/app",
+    "https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts",
+    "https://www.framer.com/motion/"
+  ]
+}

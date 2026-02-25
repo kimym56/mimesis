@@ -1,13 +1,19 @@
 :root {
   --background: #F9F9F7;
   --foreground: #1c1c1c;
+  --foreground-muted: rgba(28, 28, 28, 0.6);
   --soft-border: rgba(0, 0, 0, 0.08);
+  --focus-ring: #2563EB;
+
+  --font-heading: var(--font-archivo), sans-serif;
+  --font-body: var(--font-space-grotesk), sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #121212;
     --foreground: #F5F5F3;
+    --foreground-muted: rgba(245, 245, 243, 0.6);
     --soft-border: rgba(255, 255, 255, 0.08);
   }
 }
@@ -18,7 +24,9 @@ body {
   overflow-x: hidden;
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -29,9 +37,27 @@ body {
   margin: 0;
 }
 
+/* Global focus style — never remove without a visible replacement */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Respect reduced-motion preference globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Utilities */
@@ -42,21 +68,17 @@ a {
 }
 
 .title {
+  font-family: var(--font-heading);
   font-size: 2.5rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.15;
   margin-bottom: 1rem;
 }
 
 .subtitle {
   font-size: 1.125rem;
-  color: rgba(28, 28, 28, 0.6);
+  color: var(--foreground-muted);
   max-width: 600px;
-  line-height: 1.6;
-}
-
-@media (prefers-color-scheme: dark) {
-  .subtitle {
-    color: rgba(245, 245, 243, 0.6);
-  }
+  line-height: 1.7;
 }

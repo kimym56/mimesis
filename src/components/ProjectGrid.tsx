@@ -1,20 +1,22 @@
 "use client";
 
 import { Project } from "@/data/projects";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProjectGrid.module.css";
 
 export default function ProjectGrid({ projects }: { projects: Project[] }) {
+    const shouldReduceMotion = useReducedMotion();
+
     return (
         <div className={styles.grid}>
             {projects.map((project, index) => (
                 <motion.div
                     key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    transition={{ duration: 0.5, delay: shouldReduceMotion ? 0 : index * 0.1 }}
                     className={styles.card}
                 >
                     <Link href={`/project/${project.id}`} className={styles.link}>
@@ -25,8 +27,9 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
                                 fill
                                 className={styles.image}
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority={index === 0}
                             />
-                            <div className={styles.overlay}>
+                            <div className={styles.overlay} aria-hidden="true">
                                 <span className={styles.viewText}>View Details</span>
                             </div>
                         </div>
