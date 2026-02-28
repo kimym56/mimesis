@@ -1,36 +1,13 @@
-:root {
-  --background: #F9F9F7;
-  --foreground: #1c1c1c;
-  --foreground-muted: rgba(28, 28, 28, 0.6);
-  --soft-border: rgba(0, 0, 0, 0.08);
-  --focus-ring: #2563EB;
+/* ============================================
+   MIMESIS DESIGN TOKENS
+   Import design system CSS custom properties
+   ============================================ */
 
-  --font-heading: var(--font-archivo), sans-serif;
-  --font-body: var(--font-space-grotesk), sans-serif;
-}
+@import "../styles/tokens.css";
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #121212;
-    --foreground: #F5F5F3;
-    --foreground-muted: rgba(245, 245, 243, 0.6);
-    --soft-border: rgba(255, 255, 255, 0.08);
-  }
-}
-
-[data-theme="dark"] {
-  --background: #121212;
-  --foreground: #F5F5F3;
-  --foreground-muted: rgba(245, 245, 243, 0.6);
-  --soft-border: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme="light"] {
-  --background: #F9F9F7;
-  --foreground: #1c1c1c;
-  --foreground-muted: rgba(28, 28, 28, 0.6);
-  --soft-border: rgba(0, 0, 0, 0.08);
-}
+/* ============================================
+   BASE STYLES
+   ============================================ */
 
 html,
 body {
@@ -39,8 +16,8 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -55,7 +32,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
 }
 
 a {
@@ -74,25 +51,63 @@ a {
   }
 }
 
-/* Utilities */
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
 .container {
-  max-width: 1200px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 var(--container-padding);
 }
 
 .title {
   font-family: var(--font-heading);
-  font-size: 2.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  margin-bottom: 1rem;
+  font-size: var(--text-5xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-md);
 }
 
 .subtitle {
-  font-size: 1.125rem;
+  font-size: var(--text-lg);
   color: var(--foreground-muted);
   max-width: 600px;
-  line-height: 1.7;
+  line-height: var(--leading-relaxed);
+}
+
+/* ============================================
+   PAGE STYLES
+   ============================================ */
+
+.home-page {
+  min-height: 100vh;
+  padding-top: var(--space-4xl);
+  padding-bottom: var(--space-xl);
+}
+
+.home-header {
+  margin-bottom: var(--space-4xl);
+}
+
+/* ============================================
+   ACCESSIBILITY: SKIP LINK
+   ============================================ */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--foreground);
+  color: var(--background);
+  padding: var(--space-sm) var(--space-md);
+  z-index: var(--z-modal);
+  transition: top var(--transition-base);
+  border-radius: 0 0 var(--radius-sm) 0;
+  font-weight: var(--font-medium);
+}
+
+.skip-link:focus {
+  top: 0;
 }

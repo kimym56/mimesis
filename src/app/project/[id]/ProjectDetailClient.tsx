@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProjectDetail.module.css";
+import PageCurlEmbed from "./PageCurlEmbed";
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const shouldReduceMotion = useReducedMotion();
@@ -34,16 +35,20 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                     <div className={styles.paneHeader}>
                         <span className={styles.label}>My Imitation</span>
                     </div>
-                    <div className={styles.imageContainer}>
-                        <Image
-                            src={project.imitationImage}
-                            alt={`${project.title} — imitation recreation`}
-                            fill
-                            className={styles.image}
-                            sizes="(max-width: 1024px) 100vw, 50vw"
-                            priority
-                        />
-                    </div>
+                    {project.interactive ? (
+                        <PageCurlEmbed />
+                    ) : (
+                        <div className={styles.imageContainer}>
+                            <Image
+                                src={project.imitationImage}
+                                alt={`${project.title} — imitation recreation`}
+                                fill
+                                className={styles.image}
+                                sizes="(max-width: 1024px) 100vw, 50vw"
+                                priority
+                            />
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* Right: Original */}
@@ -55,16 +60,32 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             <p className={styles.description}>{project.description}</p>
                         </div>
                     </div>
-                    <div className={styles.imageContainer}>
-                        <Image
-                            src={project.originalImage}
-                            alt={`${project.title} — original reference`}
-                            fill
-                            className={styles.image}
-                            sizes="(max-width: 1024px) 100vw, 50vw"
-                            priority
-                        />
-                    </div>
+                    {project.referenceEmbed ? (
+                        <div className={styles.iframeContainer}>
+                            <iframe
+                                src={project.referenceEmbed}
+                                height="877"
+                                width="504"
+                                frameBorder="0"
+                                allowFullScreen
+                                title="Original reference"
+                                className={styles.referenceIframe}
+                            />
+                        </div>
+                    ) : project.interactive ? (
+                        <PageCurlEmbed demo />
+                    ) : (
+                        <div className={styles.imageContainer}>
+                            <Image
+                                src={project.originalImage}
+                                alt={`${project.title} — original reference`}
+                                fill
+                                className={styles.image}
+                                sizes="(max-width: 1024px) 100vw, 50vw"
+                                priority
+                            />
+                        </div>
+                    )}
                 </motion.div>
             </div>
         </div>

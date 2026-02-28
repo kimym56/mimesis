@@ -7,12 +7,14 @@ const archivo = Archivo({
   subsets: ["latin"],
   variable: "--font-archivo",
   display: "swap",
+  weight: ["500", "600", "700"],
 });
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
   display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -35,8 +37,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`${archivo.variable} ${spaceGrotesk.variable}`}>
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
         <ThemeToggle />
-        {children}
+        <main id="main">
+          {children}
+        </main>
       </body>
     </html>
   );

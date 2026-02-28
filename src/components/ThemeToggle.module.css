@@ -1,24 +1,38 @@
+/* ============================================
+   THEME TOGGLE COMPONENT
+   Design System: Mimesis
+   ============================================ */
+
 .toggle {
   position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 50;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: var(--z-fixed);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 50%;
-  border: 1px solid var(--soft-border);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
   background-color: var(--background);
   color: var(--foreground);
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  transition: background-color var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast),
+              opacity var(--transition-fast),
+              transform var(--transition-fast);
   opacity: 0.7;
 }
 
 .toggle:hover {
   opacity: 1;
+  transform: scale(1.05);
+}
+
+.toggle:active {
+  transform: scale(0.95);
 }
 
 .toggle:focus-visible {
