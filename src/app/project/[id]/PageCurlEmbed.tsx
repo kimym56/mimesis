@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import styles from './ProjectDetail.module.css'
+import { useCallback, useEffect, useRef, useState } from 'react';
+import styles from './ProjectDetail.module.css';
 
 interface Pt { x: number; y: number }
 
@@ -24,8 +24,12 @@ function getOrigin(angleDeg: number, W: number, H: number): { origin: Pt; inward
   }
   const len = Math.sqrt(dx * dx + dy * dy)
   const inward: Pt = { x: -dx / len, y: -dy / len }
-  // max distance from origin to center (in pixels)
-  const maxDist = Math.sqrt((W / 2 - origin.x) ** 2 + (H / 2 - origin.y) ** 2)
+  // max distance: fold must sweep past the farthest corner for a full flip
+  const corners: Pt[] = [{x:0,y:0},{x:W,y:0},{x:W,y:H},{x:0,y:H}]
+  const maxProj = Math.max(...corners.map(c =>
+    (c.x - origin.x) * inward.x + (c.y - origin.y) * inward.y
+  ))
+  const maxDist = 2 * maxProj  // fold is at midpoint, so dist = 2× to reach farthest corner
   return { origin, inward, maxDist }
 }
 
@@ -63,9 +67,8 @@ function draw(
   canvas: HTMLCanvasElement,
   angleDeg: number,
   dist: number,           // 0 = flat, >0 = peeled
-  shadowOpacity: number,
+  backOpacity: number,    // 0–1: opacity of the back face image
   front: OffscreenCanvas | null,
-  back: OffscreenCanvas | null,
   dpr: number
 ) {
   const ctx = canvas.getContext('2d')
@@ -112,6 +115,9 @@ function draw(
   const flatPoly = clipPoly(page, mx, my, awnx, awny)
   const flapPoly = clipPoly(page, mx, my, -awnx, -awny)
 
+  // Normalised curl progress (0 = flat, 1 = fully peeled)
+  const curlP = Math.min(dist / Math.sqrt(W * W + H * H), 1)
+
   // 1. Flat front face
   ctx.save()
   ctx.beginPath()
@@ -119,180 +125,214 @@ function draw(
   ctx.clip()
   if (front) ctx.drawImage(front, 0, 0, W, H)
   else { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H) }
+
   ctx.restore()
 
-  // 2. Shadow on flat page
-  if (flatPoly.length >= 3 && shadowOpacity > 0) {
+  if (flapPoly.length < 3) { ctx.restore(); return }
+
+  // 2. Reflected flap (computed early so we can use its shape for the shadow)
+  const reflectedFlap = flapPoly.map(p => reflectPt(p, mx, my, fdx, fdy))
+
+  // 3. Shadow cast by the curled flap onto the front face — follows the full flap outline
+  if (flatPoly.length >= 3 && reflectedFlap.length >= 3) {
     ctx.save()
     ctx.beginPath()
     tracePoly(ctx, flatPoly)
     ctx.clip()
-    const curlP = Math.min(dist / Math.sqrt(W * W + H * H), 1)
-    const shadowLen = 56 + dist * 0.12
-    const g = ctx.createLinearGradient(mx, my, mx + awnx * shadowLen, my + awny * shadowLen)
-    g.addColorStop(0,   `rgba(0,0,0,${shadowOpacity * curlP})`)
-    g.addColorStop(0.5, `rgba(0,0,0,${shadowOpacity * 0.35 * curlP})`)
-    g.addColorStop(1,   'rgba(0,0,0,0)')
-    ctx.fillStyle = g
-    ctx.fillRect(0, 0, W, H)
+
+    ctx.shadowColor = `rgba(0,0,0,${0.45 * curlP})`
+    ctx.shadowBlur = 14 + dist * 0.08
+    ctx.shadowOffsetX = awnx * 4 * curlP
+    ctx.shadowOffsetY = awny * 4 * curlP
+
+    ctx.beginPath()
+    tracePoly(ctx, reflectedFlap)
+    ctx.fillStyle = '#000'
+    ctx.fill()
+
     ctx.restore()
   }
 
-  if (flapPoly.length < 3) { ctx.restore(); return }
-
-  const reflectedFlap = flapPoly.map(p => reflectPt(p, mx, my, fdx, fdy))
-
-  // 3. Back face
   ctx.save()
   ctx.beginPath()
   tracePoly(ctx, reflectedFlap)
   ctx.clip()
-  if (back) {
-    ctx.save()
-    const ang = Math.atan2(fdy, fdx)
-    ctx.translate(mx, my)
-    ctx.rotate(ang)
-    ctx.scale(-1, 1)
-    ctx.rotate(-ang)
-    ctx.translate(-mx, -my)
-    ctx.drawImage(back, 0, 0, W, H)
-    ctx.restore()
+  if (front) {
+    // Reflect the image across the fold line so it looks like the real back of the paper.
+    // Reflection matrix across line through (mx,my) with direction (fdx,fdy):
+    //   reflect(p) = p + 2 * ((mx,my) - p) projected onto fold normal
+    // In matrix form (fold normal nx=-fdy, ny=fdx):
+    //   [1-2nx²   -2nx*ny ] [x]   [2*(mx*nx²   + my*nx*ny)]
+    //   [-2nx*ny  1-2ny²  ] [y] + [2*(mx*nx*ny + my*ny²  )]
+    const nx = -fdy, ny = fdx   // fold normal (unit, since fdx²+fdy²=1)
+    ctx.transform(
+      1 - 2 * nx * nx, -2 * nx * ny,
+      -2 * nx * ny, 1 - 2 * ny * ny,
+      2 * (mx * nx * nx + my * nx * ny),
+      2 * (mx * nx * ny + my * ny * ny)
+    )
+    ctx.globalAlpha = backOpacity
+    ctx.drawImage(front, 0, 0, W, H)
+    ctx.globalAlpha = 1
+    // Reset transform back to dpr-scaled screen space for shading overlays
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   } else {
-    ctx.fillStyle = '#f5f0ea'
+    ctx.fillStyle = '#f5f3f0'
     ctx.fillRect(-W, -H, W * 3, H * 3)
   }
-  if (shadowOpacity > 0) {
-    const curlP = Math.min(dist / Math.sqrt(W * W + H * H), 1)
-    const bg = ctx.createLinearGradient(mx, my, tip.x * 0.5 + mx * 0.5, tip.y * 0.5 + my * 0.5)
-    bg.addColorStop(0,   `rgba(0,0,0,${shadowOpacity * curlP})`)
-    bg.addColorStop(0.4, `rgba(0,0,0,${shadowOpacity * 0.35 * curlP})`)
-    bg.addColorStop(1,   'rgba(0,0,0,0)')
-    ctx.fillStyle = bg
+
+  // Cylindrical shading on back face — multiple gradient bands to simulate a rolled surface
+  // The key insight: the "rolled" look is created by shading, not geometry.
+  // A cylinder lit from above has a highlight near the top (fold edge),
+  // darkens toward the middle, then gets a rim-light at the far edge.
+  {
+    // Compute distance from fold to the farthest reflected point
+    const flapDists = reflectedFlap.map(p =>
+      (p.x - mx) * awnx + (p.y - my) * awny
+    )
+    const maxFlapDist = Math.max(...flapDists, 1)
+
+    // Gradient runs from fold line outward across the reflected flap
+    const gx0 = mx, gy0 = my
+    const gx1 = mx + awnx * maxFlapDist, gy1 = my + awny * maxFlapDist
+
+    // Dark core shadow — simulates the underside of the curl cylinder
+    const core = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
+    core.addColorStop(0, `rgba(0,0,0,${0.12 * curlP})`)
+    core.addColorStop(0.15, `rgba(0,0,0,${0.28 * curlP})`)
+    core.addColorStop(0.35, `rgba(0,0,0,${0.18 * curlP})`)
+    core.addColorStop(0.6, `rgba(0,0,0,${0.08 * curlP})`)
+    core.addColorStop(0.85, `rgba(0,0,0,${0.15 * curlP})`)
+    core.addColorStop(1, `rgba(0,0,0,${0.25 * curlP})`)
+    ctx.fillStyle = core
+    ctx.fillRect(-W, -H, W * 3, H * 3)
+
+    // Specular highlight near fold edge — the top of the cylinder catches light
+    const spec = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
+    spec.addColorStop(0, `rgba(255,255,255,${0.35 * curlP})`)
+    spec.addColorStop(0.08, `rgba(255,255,255,${0.18 * curlP})`)
+    spec.addColorStop(0.2, 'rgba(255,255,255,0)')
+    spec.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = spec
     ctx.fillRect(-W, -H, W * 3, H * 3)
   }
   ctx.restore()
 
-  // 4. Fold highlight
-  if (reflectedFlap.length >= 3) {
-    ctx.save()
-    ctx.beginPath()
-    tracePoly(ctx, reflectedFlap)
-    ctx.clip()
-    const curlP = Math.min(dist / Math.sqrt(W * W + H * H), 1)
-    const hg = ctx.createLinearGradient(mx, my, mx - awnx * 20, my - awny * 20)
-    hg.addColorStop(0, `rgba(255,255,255,${0.55 * curlP})`)
-    hg.addColorStop(1, 'rgba(255,255,255,0)')
-    ctx.fillStyle = hg
-    ctx.fillRect(-W, -H, W * 3, H * 3)
-    ctx.restore()
-  }
+  // 4. Curved band at the fold — back-face side only (no effect on the front face)
+  {
+    const bandBack = Math.max(6, Math.min(28, dist * 0.12))
+    const x0 = mx, y0 = my                                        // fold line
+    const x1 = mx - awnx * bandBack, y1 = my - awny * bandBack    // back-face edge
 
-  // 5. Front flap sliver
-  if (flapPoly.length >= 3) {
     ctx.save()
+    const bFar = Math.max(W, H) * 2
+    const bx = fdx * bFar, by = fdy * bFar
     ctx.beginPath()
-    tracePoly(ctx, flapPoly)
+    ctx.moveTo(x0 + bx, y0 + by)
+    ctx.lineTo(x0 - bx, y0 - by)
+    ctx.lineTo(x1 - bx, y1 - by)
+    ctx.lineTo(x1 + bx, y1 + by)
+    ctx.closePath()
     ctx.clip()
-    const fg2 = ctx.createLinearGradient(mx, my, mx - awnx * 14, my - awny * 14)
-    fg2.addColorStop(0, 'rgba(255,255,255,0.45)')
-    fg2.addColorStop(1, 'rgba(255,255,255,0)')
-    ctx.fillStyle = fg2
+
+    // Cylinder shadow on back face
+    const cg = ctx.createLinearGradient(x0, y0, x1, y1)
+    cg.addColorStop(0, `rgba(0,0,0,${0.35 * curlP})`)
+    cg.addColorStop(0.3, `rgba(0,0,0,${0.20 * curlP})`)
+    cg.addColorStop(0.7, `rgba(0,0,0,${0.08 * curlP})`)
+    cg.addColorStop(1, `rgba(0,0,0,${0.03 * curlP})`)
+    ctx.fillStyle = cg
     ctx.fillRect(-W, -H, W * 3, H * 3)
+
+    // Specular highlight near fold edge on back face
+    const sg = ctx.createLinearGradient(x0, y0, x1, y1)
+    sg.addColorStop(0, `rgba(255,255,255,${0.30 * curlP})`)
+    sg.addColorStop(0.15, `rgba(255,255,255,${0.12 * curlP})`)
+    sg.addColorStop(0.35, 'rgba(255,255,255,0)')
+    sg.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = sg
+    ctx.fillRect(-W, -H, W * 3, H * 3)
+
     ctx.restore()
   }
 
   ctx.restore()
 }
 
-function makeFront(W: number, H: number, dpr: number): OffscreenCanvas {
+function makeFrontFromImage(img: ImageBitmap, W: number, H: number, dpr: number): OffscreenCanvas {
   const oc = new OffscreenCanvas(Math.round(W * dpr), Math.round(H * dpr))
   const c = oc.getContext('2d')!
   c.scale(dpr, dpr)
-  c.fillStyle = '#ffffff'
-  c.roundRect(0, 0, W, H, 12)
-  c.fill()
-  const p = 28
-  c.fillStyle = '#111'
-  c.font = `600 20px "Archivo", system-ui, sans-serif`
-  c.fillText('The Art of Design', p, p + 24)
-  c.fillStyle = '#777'
-  c.font = `400 13px "Space Grotesk", system-ui, sans-serif`
-  ;['Design is not just what it looks like.', 'Design is how it works.', '', 'The smallest interactions create', 'the most lasting impressions.', '', 'Drag to curl.'].forEach((line, i) => {
-    if (line) c.fillText(line, p, p + 52 + i * 19)
-  })
-  c.fillStyle = '#1a1a1a'
-  c.roundRect(p, H - 100, W - p * 2, 68, 10)
-  c.fill()
-  c.fillStyle = '#ffffff'
-  c.font = `500 12px "Space Grotesk", system-ui, sans-serif`
-  c.fillText('iOS Page Curl', p + 16, H - 100 + 38)
-  return oc
-}
 
-function makeBack(W: number, H: number, dpr: number): OffscreenCanvas {
-  const oc = new OffscreenCanvas(Math.round(W * dpr), Math.round(H * dpr))
-  const c = oc.getContext('2d')!
-  c.scale(dpr, dpr)
-  c.fillStyle = '#f5f0ea'
+  // Clip to rounded rect
+  c.beginPath()
   c.roundRect(0, 0, W, H, 12)
-  c.fill()
-  c.strokeStyle = 'rgba(0,0,0,0.07)'
-  c.lineWidth = 1
-  for (let y = 32; y < H; y += 22) {
-    c.beginPath(); c.moveTo(24, y); c.lineTo(W - 24, y); c.stroke()
-  }
-  c.fillStyle = '#bbb'
-  c.font = `500 12px "Space Grotesk", system-ui, sans-serif`
-  c.fillText('back of page', 24, 40)
+  c.clip()
+
+  // Draw image with cover-fit (fill canvas, center-crop)
+  const iw = img.width, ih = img.height
+  const scale = Math.max(W / iw, H / ih)
+  const sw = iw * scale, sh = ih * scale
+  c.drawImage(img, (W - sw) / 2, (H - sh) / 2, sw, sh)
+
   return oc
 }
 
 export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const frontRef  = useRef<OffscreenCanvas | null>(null)
-  const backRef   = useRef<OffscreenCanvas | null>(null)
+  const frontRef = useRef<OffscreenCanvas | null>(null)
+  const coverRef = useRef<ImageBitmap | null>(null)
 
   // Single source of truth: peel distance in pixels
-  const distRef       = useRef(demo ? 80 : 0)
-  const angleRef      = useRef(45)
+  const distRef = useRef(demo ? 80 : 0)
+  const angleRef = useRef(45)
   const targetAngleRef = useRef(0)
-  const shadowRef     = useRef(0.5)
-  const dragging      = useRef(false)
+  const opacityRef = useRef(0.5)
+  const dragging = useRef(false)
   const downClientRef = useRef<Pt>({ x: 0, y: 0 })
   const distAtDownRef = useRef(0)
-  const rafRef        = useRef(0)
-  const angleRafRef   = useRef(0)
+  const rafRef = useRef(0)
+  const angleRafRef = useRef(0)
 
-  const [shadowOpacity, setShadowOpacity] = useState(0.5)
+  const [opacity, setOpacity] = useState(0.5)
   const [angle, setAngle] = useState(0)
 
   const render = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = window.devicePixelRatio || 1
-    draw(canvas, angleRef.current, distRef.current, shadowRef.current, frontRef.current, backRef.current, dpr)
+    draw(canvas, angleRef.current, distRef.current, opacityRef.current, frontRef.current, dpr)
   }, [])
 
-  const initCanvas = useCallback(() => {
+  const buildSurfaces = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = window.devicePixelRatio || 1
     const W = canvas.offsetWidth
     const H = canvas.offsetHeight
     if (!W || !H) return
-    canvas.width  = Math.round(W * dpr)
+    canvas.width = Math.round(W * dpr)
     canvas.height = Math.round(H * dpr)
-    frontRef.current = makeFront(W, H, dpr)
-    backRef.current  = makeBack(W, H, dpr)
+    if (coverRef.current) {
+      frontRef.current = makeFrontFromImage(coverRef.current, W, H, dpr)
+    }
     render()
   }, [render])
 
   useEffect(() => {
-    initCanvas()
-    const ro = new ResizeObserver(initCanvas)
+    let cancelled = false
+    fetch('/images/love-jones-cover.jpg')
+      .then(r => r.blob())
+      .then(b => createImageBitmap(b))
+      .then(bmp => {
+        if (cancelled) return
+        coverRef.current = bmp
+        buildSurfaces()
+      })
+    const ro = new ResizeObserver(buildSurfaces)
     if (canvasRef.current) ro.observe(canvasRef.current)
-    return () => ro.disconnect()
-  }, [initCanvas])
+    return () => { cancelled = true; ro.disconnect() }
+  }, [buildSurfaces])
 
   // Angle change: animate angleRef toward the target over multiple frames
   useEffect(() => {
@@ -320,9 +360,9 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
   }, [angle, render])
 
   useEffect(() => {
-    shadowRef.current = shadowOpacity
+    opacityRef.current = opacity
     render()
-  }, [shadowOpacity, render])
+  }, [opacity, render])
 
   const onDown = useCallback((clientX: number, clientY: number) => {
     dragging.current = true
@@ -401,8 +441,8 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
             <input
               type="range"
               min="0" max="1" step="0.01"
-              value={shadowOpacity}
-              onChange={(e) => setShadowOpacity(parseFloat(e.target.value))}
+              value={opacity}
+              onChange={(e) => setOpacity(parseFloat(e.target.value))}
               className={styles.slider}
               aria-label="Shadow opacity"
             />
