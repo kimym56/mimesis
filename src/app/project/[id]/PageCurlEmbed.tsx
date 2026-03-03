@@ -5,6 +5,8 @@ import styles from './ProjectDetail.module.css';
 
 interface Pt { x: number; y: number }
 
+const PAD_RATIO = 0.08 // 8% of smaller dimension as padding on each side
+
 // Returns the edge origin point and inward unit direction for a given angle.
 // Angle is in degrees; 0 = right edge, 90 = bottom, 180 = left, 270 = top.
 // Works in pixel space so the direction is visually correct for the canvas size.
@@ -25,7 +27,7 @@ function getOrigin(angleDeg: number, W: number, H: number): { origin: Pt; inward
   const len = Math.sqrt(dx * dx + dy * dy)
   const inward: Pt = { x: -dx / len, y: -dy / len }
   // max distance: fold must sweep past the farthest corner for a full flip
-  const corners: Pt[] = [{x:0,y:0},{x:W,y:0},{x:W,y:H},{x:0,y:H}]
+  const corners: Pt[] = [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }]
   const maxProj = Math.max(...corners.map(c =>
     (c.x - origin.x) * inward.x + (c.y - origin.y) * inward.y
   ))
@@ -69,18 +71,41 @@ function draw(
   dist: number,           // 0 = flat, >0 = peeled
   backOpacity: number,    // 0–1: opacity of the back face image
   front: OffscreenCanvas | null,
-  dpr: number
+  dpr: number,
+  padding: number         // space around the page for curl overflow
 ) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
-  const W = canvas.width / dpr
-  const H = canvas.height / dpr
+  const canvasW = canvas.width / dpr
+  const canvasH = canvas.height / dpr
+  const W = canvasW - 2 * padding
+  const H = canvasH - 2 * padding
+  if (W <= 0 || H <= 0) return
 
   ctx.save()
   ctx.scale(dpr, dpr)
-  ctx.clearRect(0, 0, W, H)
+  ctx.clearRect(0, 0, canvasW, canvasH)
+  ctx.translate(padding, padding)
 
-  const page: Pt[] = [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }]
+  const rPage = Math.min(12, W / 2, H / 2)
+  const page: Pt[] = []
+  const steps = 8
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * (Math.PI / 2) - Math.PI / 2
+    page.push({ x: W - rPage + rPage * Math.cos(a), y: rPage + rPage * Math.sin(a) })
+  }
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * (Math.PI / 2)
+    page.push({ x: W - rPage + rPage * Math.cos(a), y: H - rPage + rPage * Math.sin(a) })
+  }
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * (Math.PI / 2) + Math.PI / 2
+    page.push({ x: rPage + rPage * Math.cos(a), y: H - rPage + rPage * Math.sin(a) })
+  }
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * (Math.PI / 2) + Math.PI
+    page.push({ x: rPage + rPage * Math.cos(a), y: rPage + rPage * Math.sin(a) })
+  }
 
   if (dist <= 0) {
     ctx.save()
@@ -133,37 +158,55 @@ function draw(
   // 2. Reflected flap (computed early so we can use its shape for the shadow)
   const reflectedFlap = flapPoly.map(p => reflectPt(p, mx, my, fdx, fdy))
 
-  // 3. Shadow cast by the curled flap onto the front face — follows the full flap outline
+  // 3. Shadow cast by the curled flap onto the front face
+  // We use a combination of a true outer drop-shadow and an ambient occlusion gradient near the crease.
   if (flatPoly.length >= 3 && reflectedFlap.length >= 3) {
     ctx.save()
     ctx.beginPath()
     tracePoly(ctx, flatPoly)
     ctx.clip()
 
-    ctx.shadowColor = `rgba(0,0,0,${0.45 * curlP})`
-    ctx.shadowBlur = 14 + dist * 0.08
-    ctx.shadowOffsetX = awnx * 4 * curlP
-    ctx.shadowOffsetY = awny * 4 * curlP
+    // 3a. Cast a blurred drop shadow so it bleeds smoothly outside the flap
+    ctx.save()
+    ctx.shadowColor = `rgba(0,0,0,${0.35 * curlP})`
+    ctx.shadowBlur = 10 + dist * 0.15
+    ctx.shadowOffsetX = awnx * (dist * 0.05)
+    ctx.shadowOffsetY = awny * (dist * 0.05)
 
     ctx.beginPath()
     tracePoly(ctx, reflectedFlap)
     ctx.fillStyle = '#000'
     ctx.fill()
+    ctx.restore()
+
+    // 3b. Add a linear gradient acting as ambient occlusion right at the crease line
+    // This creates depth by grounding the base of the curl to the page
+    const aoS = Math.min(W, H) * 0.5
+    const gx0 = mx, gy0 = my
+    const gx1 = mx + awnx * aoS, gy1 = my + awny * aoS
+    const aoGrad = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
+    aoGrad.addColorStop(0, `rgba(0,0,0,${0.5 * curlP})`)
+    aoGrad.addColorStop(0.1, `rgba(0,0,0,${0.15 * curlP})`)
+    aoGrad.addColorStop(1, 'rgba(0,0,0,0)')
+
+    ctx.fillStyle = aoGrad
+    // Fill the whole canvas area; the flatPoly clip ensures it only draws on the flat page
+    ctx.fillRect(-W, -H, W * 3, H * 3)
 
     ctx.restore()
   }
 
+  // 4. Reflected flap image (extends into padding for curl overflow)
   ctx.save()
   ctx.beginPath()
   tracePoly(ctx, reflectedFlap)
   ctx.clip()
+
+  // Fill the background of the flap with white so it's not black or transparent when opacity is low
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(-W, -H, W * 3, H * 3)
+
   if (front) {
-    // Reflect the image across the fold line so it looks like the real back of the paper.
-    // Reflection matrix across line through (mx,my) with direction (fdx,fdy):
-    //   reflect(p) = p + 2 * ((mx,my) - p) projected onto fold normal
-    // In matrix form (fold normal nx=-fdy, ny=fdx):
-    //   [1-2nx²   -2nx*ny ] [x]   [2*(mx*nx²   + my*nx*ny)]
-    //   [-2nx*ny  1-2ny²  ] [y] + [2*(mx*nx*ny + my*ny²  )]
     const nx = -fdy, ny = fdx   // fold normal (unit, since fdx²+fdy²=1)
     ctx.transform(
       1 - 2 * nx * nx, -2 * nx * ny,
@@ -174,29 +217,26 @@ function draw(
     ctx.globalAlpha = backOpacity
     ctx.drawImage(front, 0, 0, W, H)
     ctx.globalAlpha = 1
-    // Reset transform back to dpr-scaled screen space for shading overlays
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   } else {
     ctx.fillStyle = '#f5f3f0'
     ctx.fillRect(-W, -H, W * 3, H * 3)
   }
+  ctx.restore()
 
-  // Cylindrical shading on back face — multiple gradient bands to simulate a rolled surface
-  // The key insight: the "rolled" look is created by shading, not geometry.
-  // A cylinder lit from above has a highlight near the top (fold edge),
-  // darkens toward the middle, then gets a rim-light at the far edge.
+  // 5. Cylindrical shading on back face — follows the reflected flap everywhere
+  ctx.save()
+  ctx.beginPath()
+  tracePoly(ctx, reflectedFlap)
+  ctx.clip()
   {
-    // Compute distance from fold to the farthest reflected point
     const flapDists = reflectedFlap.map(p =>
       (p.x - mx) * awnx + (p.y - my) * awny
     )
     const maxFlapDist = Math.max(...flapDists, 1)
 
-    // Gradient runs from fold line outward across the reflected flap
     const gx0 = mx, gy0 = my
     const gx1 = mx + awnx * maxFlapDist, gy1 = my + awny * maxFlapDist
 
-    // Dark core shadow — simulates the underside of the curl cylinder
     const core = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
     core.addColorStop(0, `rgba(0,0,0,${0.12 * curlP})`)
     core.addColorStop(0.15, `rgba(0,0,0,${0.28 * curlP})`)
@@ -207,10 +247,9 @@ function draw(
     ctx.fillStyle = core
     ctx.fillRect(-W, -H, W * 3, H * 3)
 
-    // Specular highlight near fold edge — the top of the cylinder catches light
     const spec = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
-    spec.addColorStop(0, `rgba(255,255,255,${0.35 * curlP})`)
-    spec.addColorStop(0.08, `rgba(255,255,255,${0.18 * curlP})`)
+    spec.addColorStop(0, `rgba(255,255,255,${0.35 * curlP * backOpacity})`)
+    spec.addColorStop(0.08, `rgba(255,255,255,${0.18 * curlP * backOpacity})`)
     spec.addColorStop(0.2, 'rgba(255,255,255,0)')
     spec.addColorStop(1, 'rgba(255,255,255,0)')
     ctx.fillStyle = spec
@@ -218,15 +257,26 @@ function draw(
   }
   ctx.restore()
 
-  // 4. Curved band at the fold — back-face side only (no effect on the front face)
+  // 6. Curved band at the fold — clipped to reflected flap surface
   {
-    const bandBack = Math.max(6, Math.min(28, dist * 0.12))
-    const x0 = mx, y0 = my                                        // fold line
-    const x1 = mx - awnx * bandBack, y1 = my - awny * bandBack    // back-face edge
+    // The bend radius narrows as the curl progresses (cone effect)
+    // At dist=0, band is small. As we pull further, the band near the center gets wider, but near the tip it stays tight.
+    // We achieve a faux-cone effect by adjusting the width of the specular highlight band based on dist and perspective.
+    const bandBack = Math.max(6, Math.min(40, dist * 0.18))
+    const x0 = mx, y0 = my
+    // To simulate a cone, we shift the gradient endpoints a bit to widen it as it travels inward
+    const x1 = mx - awnx * bandBack, y1 = my - awny * bandBack
 
     ctx.save()
+    ctx.beginPath()
+    tracePoly(ctx, reflectedFlap)
+    ctx.clip()
+
     const bFar = Math.max(W, H) * 2
     const bx = fdx * bFar, by = fdy * bFar
+
+    // We use a slight radial or skew expansion if we wanted true cones, 
+    // but a scaled linear gradient spanning further back creates a very convincing 2.5D softer bend.
     ctx.beginPath()
     ctx.moveTo(x0 + bx, y0 + by)
     ctx.lineTo(x0 - bx, y0 - by)
@@ -235,20 +285,24 @@ function draw(
     ctx.closePath()
     ctx.clip()
 
-    // Cylinder shadow on back face
+    // Base dark crease
     const cg = ctx.createLinearGradient(x0, y0, x1, y1)
-    cg.addColorStop(0, `rgba(0,0,0,${0.35 * curlP})`)
-    cg.addColorStop(0.3, `rgba(0,0,0,${0.20 * curlP})`)
-    cg.addColorStop(0.7, `rgba(0,0,0,${0.08 * curlP})`)
-    cg.addColorStop(1, `rgba(0,0,0,${0.03 * curlP})`)
+    cg.addColorStop(0, `rgba(0,0,0,${0.45 * curlP})`)
+    cg.addColorStop(0.3, `rgba(0,0,0,${0.25 * curlP})`)
+    cg.addColorStop(0.7, `rgba(0,0,0,${0.10 * curlP})`)
+    cg.addColorStop(1, `rgba(0,0,0,${0.02 * curlP})`)
     ctx.fillStyle = cg
     ctx.fillRect(-W, -H, W * 3, H * 3)
 
-    // Specular highlight near fold edge on back face
-    const sg = ctx.createLinearGradient(x0, y0, x1, y1)
-    sg.addColorStop(0, `rgba(255,255,255,${0.30 * curlP})`)
-    sg.addColorStop(0.15, `rgba(255,255,255,${0.12 * curlP})`)
-    sg.addColorStop(0.35, 'rgba(255,255,255,0)')
+    // Specular highlight pushes slightly further away from the crease as we pull the page more
+    const specOffset = x0 - awnx * (bandBack * 0.15)
+    const specOffsetY = y0 - awny * (bandBack * 0.15)
+
+    const sg = ctx.createLinearGradient(specOffset, specOffsetY, x1, y1)
+    sg.addColorStop(0, `rgba(255,255,255,0)`)
+    sg.addColorStop(0.1, `rgba(255,255,255,${0.40 * curlP * backOpacity})`)
+    sg.addColorStop(0.3, `rgba(255,255,255,${0.15 * curlP * backOpacity})`)
+    sg.addColorStop(0.6, 'rgba(255,255,255,0)')
     sg.addColorStop(1, 'rgba(255,255,255,0)')
     ctx.fillStyle = sg
     ctx.fillRect(-W, -H, W * 3, H * 3)
@@ -282,6 +336,7 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const frontRef = useRef<OffscreenCanvas | null>(null)
   const coverRef = useRef<ImageBitmap | null>(null)
+  const pageSizeRef = useRef<{ w: number; h: number; pad: number }>({ w: 0, h: 0, pad: 0 })
 
   // Single source of truth: peel distance in pixels
   const distRef = useRef(demo ? 80 : 0)
@@ -301,7 +356,7 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = window.devicePixelRatio || 1
-    draw(canvas, angleRef.current, distRef.current, opacityRef.current, frontRef.current, dpr)
+    draw(canvas, angleRef.current, distRef.current, opacityRef.current, frontRef.current, dpr, pageSizeRef.current.pad)
   }, [])
 
   const buildSurfaces = useCallback(() => {
@@ -313,8 +368,12 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
     if (!W || !H) return
     canvas.width = Math.round(W * dpr)
     canvas.height = Math.round(H * dpr)
+    const pad = Math.min(W, H) * PAD_RATIO
+    const pageW = W - 2 * pad
+    const pageH = H - 2 * pad
+    pageSizeRef.current = { w: pageW, h: pageH, pad }
     if (coverRef.current) {
-      frontRef.current = makeFrontFromImage(coverRef.current, W, H, dpr)
+      frontRef.current = makeFrontFromImage(coverRef.current, pageW, pageH, dpr)
     }
     render()
   }, [render])
@@ -377,15 +436,16 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = window.devicePixelRatio || 1
-    const W = canvas.width / dpr
-    const H = canvas.height / dpr
+    const canvasW = canvas.width / dpr
+    const canvasH = canvas.height / dpr
     const r = canvas.getBoundingClientRect()
 
-    const { inward, maxDist } = getOrigin(angleRef.current, W, H)
+    const { w: pageW, h: pageH } = pageSizeRef.current
+    const { inward, maxDist } = getOrigin(angleRef.current, pageW, pageH)
 
     // Project pointer delta onto inward direction (in canvas pixel space)
-    const scaleX = W / r.width
-    const scaleY = H / r.height
+    const scaleX = canvasW / r.width
+    const scaleY = canvasH / r.height
     const dragDx = (clientX - downClientRef.current.x) * scaleX
     const dragDy = (clientY - downClientRef.current.y) * scaleY
     const proj = dragDx * inward.x + dragDy * inward.y

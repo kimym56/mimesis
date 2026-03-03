@@ -5,8 +5,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "./ProjectDetail.module.css";
 import PageCurlEmbed from "./PageCurlEmbed";
+import styles from "./ProjectDetail.module.css";
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const shouldReduceMotion = useReducedMotion();
@@ -17,10 +17,10 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
         shouldReduceMotion
             ? {}
             : {
-                  initial: { opacity: 0, x: xOffset },
-                  animate: { opacity: 1, x: 0 },
-                  transition: { duration: 0.6, ease, delay },
-              };
+                initial: { opacity: 0, x: xOffset },
+                animate: { opacity: 1, x: 0 },
+                transition: { duration: 0.6, ease, delay },
+            };
 
     return (
         <div className={styles.container}>
@@ -57,7 +57,24 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         <span className={styles.label}>Original Reference</span>
                         <div className={styles.info}>
                             <h1 className={styles.title}>{project.title}</h1>
-                            <p className={styles.description}>{project.description}</p>
+                            <p className={styles.description}>
+                                {project.description}
+                                {project.referenceUser && (
+                                    <>
+                                        {" "}
+                                        Reference by{" "}
+                                        <a
+                                            href={project.referenceUser.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={styles.referenceLink}
+                                            style={{ textDecoration: 'underline', color: 'inherit' }}
+                                        >
+                                            {project.referenceUser.name}
+                                        </a>.
+                                    </>
+                                )}
+                            </p>
                         </div>
                     </div>
                     {project.referenceEmbed ? (

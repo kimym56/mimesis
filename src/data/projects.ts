@@ -6,6 +6,7 @@ export interface Project {
     imitationImage: string;
     interactive?: boolean;
     referenceEmbed?: string; // iframe src URL
+    referenceUser?: { name: string; url: string };
 }
 
 export const projects: Project[] = [
@@ -13,10 +14,14 @@ export const projects: Project[] = [
         id: "ios-curl-animation",
         title: "iOS Page Curl",
         description: "An interactive recreation of the classic iOS page curl transition — the corner-peel effect used in iBooks and Apple Maps. Drag any corner to peel the page back and reveal the reverse side.",
-        originalImage: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=1200",
-        imitationImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+        originalImage: "/images/love-jones-cover.jpg",
+        imitationImage: "/images/love-jones-cover.jpg",
         interactive: true,
         referenceEmbed: "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7431057068884885504?collapsed=1",
+        referenceUser: {
+            name: "Minsang Choi",
+            url: "https://www.linkedin.com/posts/minsangchoi_metalshader-activity-7431057118914490368-L5TN"
+        }
     },
     {
         id: "editorial-blog",
