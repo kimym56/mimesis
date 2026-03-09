@@ -22,16 +22,13 @@ function getStoredTheme(): Theme | null {
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme | null>(null);
-
-  useEffect(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "light";
     const stored = getStoredTheme();
-    const resolved = stored ?? getSystemTheme();
-    setTheme(resolved);
-  }, []);
+    return stored ?? getSystemTheme();
+  });
 
   useEffect(() => {
-    if (theme === null) return;
     document.documentElement.setAttribute("data-theme", theme);
     try {
       localStorage.setItem("theme", theme);
@@ -42,7 +39,6 @@ export default function ThemeToggle() {
 
   function toggle() {
     setTheme((prev) => {
-      if (prev === null) return getSystemTheme() === "dark" ? "light" : "dark";
       return prev === "dark" ? "light" : "dark";
     });
   }

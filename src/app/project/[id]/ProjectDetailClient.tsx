@@ -5,11 +5,14 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import PageCurlEmbed from "./PageCurlEmbed";
+import PageCurlEmbed3D from "./PageCurlEmbed3D";
 import styles from "./ProjectDetail.module.css";
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const shouldReduceMotion = useReducedMotion();
+    const [mode, setMode] = useState<"2d" | "3d">("2d");
 
     const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -36,7 +39,23 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         <span className={styles.label}>My Imitation</span>
                     </div>
                     {project.interactive ? (
-                        <PageCurlEmbed />
+                        <div className={styles.interactivePane}>
+                            <div className={styles.modeToggle}>
+                                <button
+                                    className={`${styles.modeButton} ${mode === "2d" ? styles.modeButtonActive : ""}`}
+                                    onClick={() => setMode("2d")}
+                                >
+                                    2D Canvas
+                                </button>
+                                <button
+                                    className={`${styles.modeButton} ${mode === "3d" ? styles.modeButtonActive : ""}`}
+                                    onClick={() => setMode("3d")}
+                                >
+                                    3D Shader
+                                </button>
+                            </div>
+                            {mode === "2d" ? <PageCurlEmbed /> : <PageCurlEmbed3D />}
+                        </div>
                     ) : (
                         <div className={styles.imageContainer}>
                             <Image

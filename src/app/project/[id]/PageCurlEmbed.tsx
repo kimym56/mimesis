@@ -333,6 +333,9 @@ function makeFrontFromImage(img: ImageBitmap, W: number, H: number, dpr: number)
 }
 
 export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
+  const initialOpacity = demo ? 0.5 : 1
+  const initialAngle = demo ? 45 : 225
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const frontRef = useRef<OffscreenCanvas | null>(null)
   const coverRef = useRef<ImageBitmap | null>(null)
@@ -340,17 +343,17 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
 
   // Single source of truth: peel distance in pixels
   const distRef = useRef(demo ? 80 : 0)
-  const angleRef = useRef(45)
-  const targetAngleRef = useRef(0)
-  const opacityRef = useRef(0.5)
+  const angleRef = useRef(initialAngle)
+  const targetAngleRef = useRef(initialAngle)
+  const opacityRef = useRef(initialOpacity)
   const dragging = useRef(false)
   const downClientRef = useRef<Pt>({ x: 0, y: 0 })
   const distAtDownRef = useRef(0)
   const rafRef = useRef(0)
   const angleRafRef = useRef(0)
 
-  const [opacity, setOpacity] = useState(0.5)
-  const [angle, setAngle] = useState(0)
+  const [opacity, setOpacity] = useState(initialOpacity)
+  const [angle, setAngle] = useState(initialAngle)
 
   const render = useCallback(() => {
     const canvas = canvasRef.current
@@ -395,7 +398,7 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
 
   // Angle change: animate angleRef toward the target over multiple frames
   useEffect(() => {
-    targetAngleRef.current = (angle + 45) % 360
+    targetAngleRef.current = angle % 360
     cancelAnimationFrame(angleRafRef.current)
 
     function animateAngle() {
@@ -403,7 +406,7 @@ export default function PageCurlEmbed({ demo = false }: { demo?: boolean }) {
       const target = targetAngleRef.current
 
       // Shortest-path delta on the circle
-      let delta = ((target - current + 540) % 360) - 180
+      const delta = ((target - current + 540) % 360) - 180
       if (Math.abs(delta) < 0.3) {
         angleRef.current = target
         render()
