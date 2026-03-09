@@ -26,7 +26,7 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
                                 alt={project.title}
                                 fill
                                 className={styles.image}
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 33vw"
                                 priority={index === 0}
                             />
                             <div className={styles.overlay} aria-hidden="true">

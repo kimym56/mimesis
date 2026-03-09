@@ -7,12 +7,19 @@
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: var(--grid-gap-sm);
-  margin-top: var(--space-4xl);
+  margin-top: clamp(var(--space-lg), 4vw, var(--space-2xl));
 }
 
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--grid-gap-md);
+  }
+}
+
+@media (min-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--grid-gap-md);
   }
 }
@@ -29,7 +36,8 @@
   cursor: pointer;
 }
 
-.link:hover .card {
+.card:hover,
+.card:focus-within {
   transform: translateY(-2px);
 }
 
