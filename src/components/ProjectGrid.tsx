@@ -29,9 +29,6 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
                                 sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 33vw"
                                 priority={index === 0}
                             />
-                            <div className={styles.overlay} aria-hidden="true">
-                                <span className={styles.viewText}>View Details</span>
-                            </div>
                         </div>
                         <div className={styles.info}>
                             <h3 className={styles.title}>{project.title}</h3>
