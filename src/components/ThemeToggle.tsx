@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import styles from "./ThemeToggle.module.css";
 
 type Theme = "light" | "dark";
+const DEFAULT_THEME: Theme = "light";
+const THEME_EVENT = "themechange";
 
 function getSystemTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -21,36 +23,64 @@ function getStoredTheme(): Theme | null {
   return null;
 }
 
+function getThemeSnapshot(): Theme {
+  if (typeof window === "undefined") return DEFAULT_THEME;
+  return getStoredTheme() ?? getSystemTheme();
+}
+
+function subscribe(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const handleMediaChange = () => {
+    if (!getStoredTheme()) onStoreChange();
+  };
+
+  window.addEventListener(THEME_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  mediaQuery.addEventListener("change", handleMediaChange);
+
+  return () => {
+    window.removeEventListener(THEME_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+    mediaQuery.removeEventListener("change", handleMediaChange);
+  };
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  try {
+    localStorage.setItem("theme", theme);
+  } catch {
+    // ignore
+  }
+  window.dispatchEvent(new Event(THEME_EVENT));
+}
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
-    const stored = getStoredTheme();
-    return stored ?? getSystemTheme();
-  });
+  const theme = useSyncExternalStore(
+    subscribe,
+    getThemeSnapshot,
+    () => DEFAULT_THEME,
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    try {
-      localStorage.setItem("theme", theme);
-    } catch {
-      // ignore
-    }
   }, [theme]);
 
   function toggle() {
-    setTheme((prev) => {
-      return prev === "dark" ? "light" : "dark";
-    });
+    applyTheme(theme === "dark" ? "light" : "dark");
   }
 
   const isDark = theme === "dark";
+  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
   return (
     <button
       onClick={toggle}
       className={styles.toggle}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={label}
+      title={label}
     >
       {isDark ? (
         <svg

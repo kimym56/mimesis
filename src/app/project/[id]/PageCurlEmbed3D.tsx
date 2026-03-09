@@ -2,21 +2,21 @@
 
 import { useTexture } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import styles from "./ProjectDetail.module.css";
 
 if (typeof console !== "undefined") {
-  const originalWarn = console.warn;
-  console.warn = (...args) => {
-    const msg = args[0];
-    if (typeof msg === "string") {
-      if (msg.includes("THREE.Clock:")) return;
-      if (msg.includes("THREE.WebGLShadowMap:")) return;
-      if (msg.includes("VIDEOJS: WARN:")) return;
-    }
-    originalWarn(...args);
-  };
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+        const msg = args[0];
+        if (typeof msg === "string") {
+            if (msg.includes("THREE.Clock:")) return;
+            if (msg.includes("THREE.WebGLShadowMap:")) return;
+            if (msg.includes("VIDEOJS: WARN:")) return;
+        }
+        originalWarn(...args);
+    };
 }
 
 // --- SHADERS ---
@@ -170,315 +170,350 @@ void main() {
 `;
 
 function PageComponent({
-  peelDist,
-  angle,
-  opacity,
-  size,
-  liveAngleRadRef,
+    peelDist,
+    angle,
+    opacity,
+    size,
+    liveAngleRadRef,
 }: {
-  peelDist: number;
-  angle: number;
-  opacity: number;
-  size: { w: number; h: number };
-  liveAngleRadRef: React.MutableRefObject<number>;
+    peelDist: number;
+    angle: number;
+    opacity: number;
+    size: { w: number; h: number };
+    liveAngleRadRef: React.MutableRefObject<number>;
 }) {
-  const texture = useTexture("/images/love-jones-cover.jpg");
+    const texture = useTexture("/images/love-jones-cover.jpg");
 
-  const [uniforms] = useState(() => ({
-    uTex: { value: texture },
-    uPeelDist: { value: 0.0 },
-    uOrigin: { value: new THREE.Vector2() },
-    uInward: { value: new THREE.Vector2() },
-    uTargetAngleRad: { value: angle * (Math.PI / 180) },
-    uOpacity: { value: opacity },
-    uSize: { value: new THREE.Vector2(size.w, size.h) },
-    uImageSize: { value: new THREE.Vector2(1024, 1024) },
-  }));
-  const uniformsRef = useRef(uniforms);
+    const [uniforms] = useState(() => ({
+        uTex: { value: texture },
+        uPeelDist: { value: 0.0 },
+        uOrigin: { value: new THREE.Vector2() },
+        uInward: { value: new THREE.Vector2() },
+        uTargetAngleRad: { value: angle * (Math.PI / 180) },
+        uOpacity: { value: opacity },
+        uSize: { value: new THREE.Vector2(size.w, size.h) },
+        uImageSize: { value: new THREE.Vector2(1024, 1024) },
+    }));
+    const uniformsRef = useRef(uniforms);
 
-  useEffect(() => {
-    const uniforms = uniformsRef.current;
-    uniforms.uTex.value = texture;
-    if (texture && texture.image) {
-      const img = texture.image as { width?: number; height?: number };
-      uniforms.uImageSize.value.set(img.width || 1024, img.height || 1024);
-    }
-  }, [texture]);
+    useEffect(() => {
+        const uniforms = uniformsRef.current;
+        uniforms.uTex.value = texture;
+        if (texture && texture.image) {
+            const img = texture.image as { width?: number; height?: number };
+            uniforms.uImageSize.value.set(img.width || 1024, img.height || 1024);
+        }
+    }, [texture]);
 
-  useEffect(() => {
-    uniformsRef.current.uOpacity.value = opacity;
-  }, [opacity]);
+    useEffect(() => {
+        uniformsRef.current.uOpacity.value = opacity;
+    }, [opacity]);
 
-  useEffect(() => {
-    uniformsRef.current.uSize.value.set(size.w, size.h);
-  }, [size.w, size.h]);
+    useEffect(() => {
+        uniformsRef.current.uSize.value.set(size.w, size.h);
+    }, [size.h, size.w]);
 
-  useFrame(() => {
-    const uniforms = uniformsRef.current;
-    uniforms.uPeelDist.value += (peelDist - uniforms.uPeelDist.value) * 0.2;
+    useFrame(() => {
+        const uniforms = uniformsRef.current;
+        uniforms.uPeelDist.value += (peelDist - uniforms.uPeelDist.value) * 0.2;
 
-    const targetAngleRad = angle * (Math.PI / 180);
-    let current = uniforms.uTargetAngleRad.value;
-    const delta =
-      ((targetAngleRad - current + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
-    current += delta * 0.15;
-    uniforms.uTargetAngleRad.value = current;
-    liveAngleRadRef.current = current;
+        const targetAngleRad = angle * (Math.PI / 180);
+        let current = uniforms.uTargetAngleRad.value;
+        const delta =
+            ((targetAngleRad - current + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        current += delta * 0.15;
+        uniforms.uTargetAngleRad.value = current;
+        liveAngleRadRef.current = current;
 
-    const rad = current;
-    const dx = Math.cos(rad);
-    const dy = -Math.sin(rad);
+        const rad = current;
+        const dx = Math.cos(rad);
+        const dy = -Math.sin(rad);
 
-    const tx = dx !== 0 ? Math.abs(size.w / 2 / dx) : Infinity;
-    const ty = dy !== 0 ? Math.abs(size.h / 2 / dy) : Infinity;
-    const t = Math.min(tx, ty);
+        const tx = dx !== 0 ? Math.abs(size.w / 2 / dx) : Infinity;
+        const ty = dy !== 0 ? Math.abs(size.h / 2 / dy) : Infinity;
+        const t = Math.min(tx, ty);
 
-    uniforms.uOrigin.value.set(dx * t, dy * t);
-    uniforms.uInward.value.set(-dx, -dy);
-  });
+        uniforms.uOrigin.value.set(dx * t, dy * t);
+        uniforms.uInward.value.set(-dx, -dy);
+    });
 
-  const onBeforeCompileDepth = useCallback(
-    (shader: THREE.WebGLProgramParametersWithUniforms) => {
-      const uniforms = uniformsRef.current;
-      shader.uniforms.uPeelDist = uniforms.uPeelDist;
-      shader.uniforms.uOrigin = uniforms.uOrigin;
-      shader.uniforms.uInward = uniforms.uInward;
-      shader.uniforms.uSize = uniforms.uSize;
+    const depthUniforms = useMemo(() => {
+        const d = THREE.UniformsUtils.clone(THREE.ShaderLib.depth.uniforms);
+        d.uPeelDist = uniforms.uPeelDist;
+        d.uOrigin = uniforms.uOrigin;
+        d.uInward = uniforms.uInward;
+        d.uSize = uniforms.uSize;
+        return d;
+    }, [uniforms]);
 
-      shader.vertexShader =
-        `
+    const depthVertexShader = useMemo(() => {
+        let vs = THREE.ShaderLib.depth.vertexShader;
+        vs = `
+            varying vec2 vMyUv;
             uniform float uPeelDist;
             uniform vec2 uOrigin;
             uniform vec2 uInward;
             uniform vec2 uSize;
             ${deformChunk}
-        ` + shader.vertexShader;
-
-      shader.vertexShader = shader.vertexShader.replace(
-        "#include <begin_vertex>",
-        `
+        ` + vs;
+        vs = vs.replace(
+            "#include <begin_vertex>",
+            `
+            vMyUv = uv;
             vec3 objectNormal;
-            vec3 transformed = deformPosition(position, uSize, uPeelDist, uOrigin, uInward, objectNormal, vec3(0.0, 0.0, 1.0));
-            `,
-      );
-    },
-    [],
-  );
+            vec3 transformed = deformPosition(position, uSize, uPeelDist, uOrigin, uInward, objectNormal, normal);
+            `
+        );
+        return vs;
+    }, []);
 
-  return (
-    <mesh receiveShadow castShadow>
-      <planeGeometry args={[size.w, size.h, 128, 128]} />
+    const depthFragmentShader = useMemo(() => {
+        let fs = THREE.ShaderLib.depth.fragmentShader;
+        fs = `
+            varying vec2 vMyUv;
+            uniform vec2 uSize;
+            float boxSDF(vec2 p, vec2 b, float r) {
+                vec2 q = abs(p) - b + vec2(r);
+                return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+            }
+        ` + fs;
+        fs = fs.replace(
+            "void main() {",
+            `
+        void main() {
+            vec2 p = (vMyUv - 0.5) * uSize;
+            float cornerRadius = min(uSize.x, uSize.y) * 0.03;
+            if (boxSDF(p, uSize * 0.5, cornerRadius) > 0.0) {
+                discard;
+            }
+            `
+        );
+        return fs;
+    }, []);
 
-      <shaderMaterial
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-        side={THREE.DoubleSide}
-        transparent={true}
-      />
+    return (
+        <mesh receiveShadow castShadow>
+            <planeGeometry args={[size.w, size.h, 512, 512]} />
 
-      <meshDepthMaterial
-        attach="customDepthMaterial"
-        depthPacking={THREE.RGBADepthPacking}
-        onBeforeCompile={onBeforeCompileDepth}
-      />
-    </mesh>
-  );
+            <shaderMaterial
+                vertexShader={vertexShader}
+                fragmentShader={fragmentShader}
+                uniforms={uniforms}
+                side={THREE.DoubleSide}
+                transparent={true}
+            />
+
+            <shaderMaterial
+                attach="customDepthMaterial"
+                vertexShader={depthVertexShader}
+                fragmentShader={depthFragmentShader}
+                uniforms={depthUniforms}
+                defines={{ DEPTH_PACKING: 3201 }}
+                side={THREE.DoubleSide}
+            />
+        </mesh>
+    );
 }
 
 function Scene({
-  peelDist,
-  angle,
-  opacity,
-  maxDistRef,
-  liveAngleRadRef,
+    peelDist,
+    angle,
+    opacity,
+    maxDistRef,
+    liveAngleRadRef,
 }: {
-  peelDist: number;
-  angle: number;
-  opacity: number;
-  maxDistRef: React.MutableRefObject<number>;
-  liveAngleRadRef: React.MutableRefObject<number>;
+    peelDist: number;
+    angle: number;
+    opacity: number;
+    maxDistRef: React.MutableRefObject<number>;
+    liveAngleRadRef: React.MutableRefObject<number>;
 }) {
-  const { viewport } = useThree();
+    const { viewport } = useThree();
 
-  const pad = Math.min(viewport.width, viewport.height) * 0.08;
-  const pageW = viewport.width - 2 * pad;
-  const pageH = viewport.height - 2 * pad;
+    const pad = Math.min(viewport.width, viewport.height) * 0.08;
+    const pageW = viewport.width - 2 * pad;
+    const pageH = viewport.height - 2 * pad;
 
-  // Calculate max drag distance for safety.
-  useEffect(() => {
-    maxDistRef.current = Math.sqrt(pageW * pageW + pageH * pageH) * 2.0;
-  }, [pageW, pageH, maxDistRef]);
+    // Calculate max drag distance for safety.
+    useEffect(() => {
+        maxDistRef.current = Math.sqrt(pageW * pageW + pageH * pageH) * 2.0;
+    }, [pageW, pageH, maxDistRef]);
 
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight
-        position={[2, 5, 2]}
-        intensity={1}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-bias={-0.0001}
-      />
+    return (
+        <>
+            <ambientLight intensity={0.5} color="#ffffff" />
+            <directionalLight
+                position={[5, 10, 5]}
+                intensity={1.2}
+                castShadow
+                shadow-mapSize={[2048, 2048]}
+                shadow-bias={-0.0001}
+                shadow-camera-left={-10}
+                shadow-camera-right={10}
+                shadow-camera-top={10}
+                shadow-camera-bottom={-10}
+                shadow-camera-near={0.1}
+                shadow-camera-far={20}
+            />
 
-      <group>
-        <PageComponent
-          peelDist={peelDist}
-          angle={angle}
-          opacity={opacity}
-          size={{ w: pageW, h: pageH }}
-          liveAngleRadRef={liveAngleRadRef}
-        />
+            <group>
+                <PageComponent
+                    peelDist={peelDist}
+                    angle={angle}
+                    opacity={opacity}
+                    size={{ w: pageW, h: pageH }}
+                    liveAngleRadRef={liveAngleRadRef}
+                />
 
-        <mesh position={[0, 0, -0.05]} receiveShadow>
-          <planeGeometry args={[viewport.width * 2, viewport.height * 2]} />
-          <shadowMaterial opacity={0.4} />
-        </mesh>
-      </group>
-    </>
-  );
+                <mesh position={[0, 0, -0.4]} receiveShadow>
+                    <planeGeometry args={[viewport.width * 2, viewport.height * 2]} />
+                    <shadowMaterial opacity={0.3} transparent depthWrite={false} />
+                </mesh>
+            </group>
+        </>
+    );
 }
 
 export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
-  const initialAngle = demo ? 45 : 225;
-  const initialOpacity = demo ? 0.5 : 1;
+    const initialAngle = demo ? 45 : 225;
+    const initialOpacity = demo ? 0.5 : 1;
 
-  const [angle, setAngle] = useState(initialAngle);
-  const [opacity, setOpacity] = useState(initialOpacity);
-  const [peelDist, setPeelDist] = useState(demo ? 1.5 : 0);
+    const [angle, setAngle] = useState(initialAngle);
+    const [opacity, setOpacity] = useState(initialOpacity);
+    const [peelDist, setPeelDist] = useState(demo ? 1.5 : 0);
 
-  const dragging = useRef(false);
-  const downClient = useRef({ x: 0, y: 0 });
-  const peelAtDown = useRef(0);
-  const maxDistRef = useRef(10);
-  const liveAngleRadRef = useRef(initialAngle * (Math.PI / 180));
+    const dragging = useRef(false);
+    const downClient = useRef({ x: 0, y: 0 });
+    const peelAtDown = useRef(0);
+    const maxDistRef = useRef(10);
+    const liveAngleRadRef = useRef(initialAngle * (Math.PI / 180));
 
-  const wrapperRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (demo) return;
-    dragging.current = true;
-    downClient.current = { x: e.clientX, y: e.clientY };
-    peelAtDown.current = peelDist;
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
+    const handlePointerDown = (e: React.PointerEvent) => {
+        if (demo) return;
+        dragging.current = true;
+        downClient.current = { x: e.clientX, y: e.clientY };
+        peelAtDown.current = peelDist;
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (demo || !dragging.current) return;
+    const handlePointerMove = (e: React.PointerEvent) => {
+        if (demo || !dragging.current) return;
 
-    const rect = wrapperRef.current?.getBoundingClientRect();
-    if (!rect) return;
+        const rect = wrapperRef.current?.getBoundingClientRect();
+        if (!rect) return;
 
-    // Use the same animated angle the shader currently uses.
-    const rad = liveAngleRadRef.current;
-    // Convert inward vector from world Y-up to pointer/canvas Y-down space.
-    const inwardX = -Math.cos(rad);
-    const inwardY = -Math.sin(rad);
+        // Use the same animated angle the shader currently uses.
+        const rad = liveAngleRadRef.current;
+        // Convert inward vector from world Y-up to pointer/canvas Y-down space.
+        const inwardX = -Math.cos(rad);
+        const inwardY = -Math.sin(rad);
 
-    // Movement in pixels
-    const dragDx = e.clientX - downClient.current.x;
-    const dragDy = e.clientY - downClient.current.y;
+        // Movement in pixels
+        const dragDx = e.clientX - downClient.current.x;
+        const dragDy = e.clientY - downClient.current.y;
 
-    // In 2D space, inward proj is calculated in pixels.
-    // Here we need a screen-to-world ratio. We can approximate using rect.width and maxDist.
-    // A generic scale factor so it feels 1:1 with pointer:
-    const screenToWorld =
-      maxDistRef.current /
-      Math.sqrt(rect.width * rect.width + rect.height * rect.height);
+        // In 2D space, inward proj is calculated in pixels.
+        // Here we need a screen-to-world ratio. We can approximate using rect.width and maxDist.
+        // A generic scale factor so it feels 1:1 with pointer:
+        const screenToWorld =
+            maxDistRef.current /
+            Math.sqrt(rect.width * rect.width + rect.height * rect.height);
 
-    const proj = (dragDx * inwardX + dragDy * inwardY) * screenToWorld;
+        const proj = (dragDx * inwardX + dragDy * inwardY) * screenToWorld;
 
-    const bounded = Math.max(
-      0,
-      Math.min(maxDistRef.current, peelAtDown.current + proj * 1.5),
-    );
-    setPeelDist(bounded);
-  };
+        const bounded = Math.max(
+            0,
+            Math.min(maxDistRef.current, peelAtDown.current + proj * 1.5),
+        );
+        setPeelDist(bounded);
+    };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (demo) return;
-    dragging.current = false;
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
-    // Do not reset peelDist! Same behavior as 2D canvas.
-  };
-
-  return (
-    <div
-      ref={wrapperRef}
-      className={styles.embedWrapper}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      onLostPointerCapture={() => {
+    const handlePointerUp = (e: React.PointerEvent) => {
+        if (demo) return;
         dragging.current = false;
-      }}
-      style={{
-        touchAction: "none",
-        cursor: demo ? "default" : "grab",
-        height: "100%",
-        width: "100%",
-        position: "relative",
-      }}
-    >
-      <div className={styles.curlCanvas} style={{ background: "transparent" }}>
-        <Canvas shadows camera={{ position: [0, 0, 5], fov: 50 }}>
-          <Scene
-            peelDist={peelDist}
-            angle={angle}
-            opacity={opacity}
-            maxDistRef={maxDistRef}
-            liveAngleRadRef={liveAngleRadRef}
-          />
-        </Canvas>
-      </div>
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+        // Do not reset peelDist! Same behavior as 2D canvas.
+    };
 
-      {!demo && (
+    return (
         <div
-          className={styles.embedControls}
-          style={{
-            zIndex: 10,
-            position: "absolute",
-            bottom: "16px",
-            right: "16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onPointerMove={(e) => e.stopPropagation()}
-          onPointerUp={(e) => e.stopPropagation()}
+            ref={wrapperRef}
+            className={styles.embedWrapper}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onLostPointerCapture={() => {
+                dragging.current = false;
+            }}
+            style={{
+                touchAction: "none",
+                cursor: demo ? "default" : "grab",
+                height: "100%",
+                width: "100%",
+                position: "relative",
+            }}
         >
-          <div className={styles.controlItem}>
-            <span className={styles.controlLabel}>Opacity</span>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={opacity}
-              onChange={(e) => setOpacity(parseFloat(e.target.value))}
-              className={styles.slider}
-              aria-label="Backside opacity"
-            />
-          </div>
-          <div className={styles.controlItem}>
-            <span className={styles.controlLabel}>Angle</span>
-            <input
-              type="range"
-              min="0"
-              max="315"
-              step="1"
-              value={angle}
-              onChange={(e) => setAngle(parseInt(e.target.value))}
-              className={styles.slider}
-              aria-label="Curl angle"
-            />
-          </div>
+            <div className={styles.curlCanvas} style={{ background: "transparent" }}>
+                <Canvas shadows={true} camera={{ position: [0, 0, 5], fov: 50 }}>
+                    <Scene
+                        peelDist={peelDist}
+                        angle={angle}
+                        opacity={opacity}
+                        maxDistRef={maxDistRef}
+                        liveAngleRadRef={liveAngleRadRef}
+                    />
+                </Canvas>
+            </div>
+
+            {!demo && (
+                <div
+                    className={styles.embedControls}
+                    style={{
+                        zIndex: 10,
+                        position: "absolute",
+                        bottom: "16px",
+                        right: "16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                    }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerMove={(e) => e.stopPropagation()}
+                    onPointerUp={(e) => e.stopPropagation()}
+                >
+                    <div className={styles.controlItem}>
+                        <span className={styles.controlLabel}>Opacity</span>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={opacity}
+                            onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                            className={styles.slider}
+                            aria-label="Backside opacity"
+                        />
+                    </div>
+                    <div className={styles.controlItem}>
+                        <span className={styles.controlLabel}>Angle</span>
+                        <input
+                            type="range"
+                            min="0"
+                            max="315"
+                            step="1"
+                            value={angle}
+                            onChange={(e) => setAngle(parseInt(e.target.value))}
+                            className={styles.slider}
+                            aria-label="Curl angle"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
