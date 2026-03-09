@@ -103,76 +103,74 @@ a {
 .home-header {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: 1fr;
   align-items: stretch;
-  gap: clamp(var(--space-lg), 3vw, var(--space-2xl));
+  gap: 0;
   margin-bottom: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
-  overflow: visible;
-  background: transparent;
+  min-height: clamp(16rem, 72vw, 23rem);
+  overflow: hidden;
+  background-color: var(--background);
   box-shadow: none;
-  isolation: auto;
+  isolation: isolate;
 }
 
 .home-header-copy {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 34rem;
+  max-width: min(34rem, 100%);
 }
 
 .home-header-cover {
-  position: relative;
-  min-height: clamp(13rem, 20vw, 16rem);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  min-height: 0;
   color: var(--foreground-subtle);
   pointer-events: none;
   overflow: hidden;
   isolation: isolate;
 }
 
+.home-header-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(
+      90deg,
+      var(--background) 0%,
+      var(--background) 42%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, transparent 0%, var(--background) 100%);
+}
+
 .home-header-cover-image {
   position: relative;
   z-index: 1;
   object-fit: cover;
-  object-position: center 47%;
-  opacity: 0.4;
+  object-position: center 45%;
+  opacity: 0.5;
   mix-blend-mode: normal;
-  -webkit-mask-image: radial-gradient(118% 96% at 50% 50%, #000 58%, transparent 94%);
-  mask-image: radial-gradient(118% 96% at 50% 50%, #000 58%, transparent 94%);
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .home-header-cover-image {
     filter: invert(1) brightness(0.92);
-    opacity: 0.3;
   }
 }
 
 [data-theme="dark"] .home-header-cover-image {
   filter: invert(1) brightness(0.92);
-  opacity: 0.3;
-}
-
-@media (max-width: 900px) {
-  .home-header {
-    grid-template-columns: 1fr;
-  }
-
-  .home-header-copy {
-    max-width: none;
-  }
-
-  .home-header-cover {
-    min-height: clamp(11rem, 46vw, 15rem);
-  }
-
-  .home-header-cover-image {
-    object-position: center 45%;
-  }
 }
 
 /* ============================================

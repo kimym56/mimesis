@@ -1,6 +1,6 @@
-import Image from "next/image";
 import ProjectGrid from "@/components/ProjectGrid";
 import { projects } from "@/data/projects";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
           <h1 className="title">Mimesis</h1>
           <p className="subtitle">
             “The instinct of imitation is implanted in man from childhood.”
-            <span className="subtitle-attribution">Aristotle, Poetics</span>
+            <span className="subtitle-attribution">- Aristotle, Poetics -</span>
           </p>
         </div>
 
@@ -21,7 +21,7 @@ export default function Home() {
             className="home-header-cover-image"
             fill
             priority
-            sizes="(max-width: 900px) 100vw, 52vw"
+            sizes="(max-width: 1230px) calc(100vw - 3rem), 1200px"
             src="/images/mimesis.svg"
             unoptimized
           />
