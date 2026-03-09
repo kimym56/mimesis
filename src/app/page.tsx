@@ -1,3 +1,4 @@
+import Image from "next/image";
 import ProjectGrid from "@/components/ProjectGrid";
 import { projects } from "@/data/projects";
 
@@ -5,12 +6,26 @@ export default function Home() {
   return (
     <main className="container home-page">
       <header className="home-header">
-        <h1 className="title">Mimesis</h1>
-        <p className="subtitle">
-          A study of visual works and their imitations.
-          A UX portfolio exploring what it takes to recreate premium interfaces
-          with an eye for minimal, soft aesthetics.
-        </p>
+        <div className="home-header-copy">
+          <h1 className="title">Mimesis</h1>
+          <p className="subtitle">
+            “The instinct of imitation is implanted in man from childhood.”
+            <span className="subtitle-attribution">Aristotle, Poetics</span>
+          </p>
+        </div>
+
+        <div aria-hidden="true" className="home-header-cover">
+          <Image
+            alt=""
+            aria-hidden="true"
+            className="home-header-cover-image"
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 52vw"
+            src="/images/mimesis.svg"
+            unoptimized
+          />
+        </div>
       </header>
 
       <ProjectGrid projects={projects} />

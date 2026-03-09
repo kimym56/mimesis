@@ -68,6 +68,7 @@ a {
   letter-spacing: var(--tracking-tight);
   line-height: var(--leading-tight);
   margin-bottom: var(--space-md);
+  text-wrap: balance;
 }
 
 .subtitle {
@@ -75,6 +76,18 @@ a {
   color: var(--foreground-muted);
   max-width: 600px;
   line-height: var(--leading-relaxed);
+  font-style: italic;
+}
+
+.subtitle-attribution {
+  display: block;
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  font-style: normal;
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--foreground-subtle);
 }
 
 /* ============================================
@@ -88,7 +101,78 @@ a {
 }
 
 .home-header {
-  margin-bottom: var(--space-4xl);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: stretch;
+  gap: clamp(var(--space-lg), 3vw, var(--space-2xl));
+  margin-bottom: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  isolation: auto;
+}
+
+.home-header-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 34rem;
+}
+
+.home-header-cover {
+  position: relative;
+  min-height: clamp(13rem, 20vw, 16rem);
+  color: var(--foreground-subtle);
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.home-header-cover-image {
+  position: relative;
+  z-index: 1;
+  object-fit: cover;
+  object-position: center 47%;
+  opacity: 0.4;
+  mix-blend-mode: normal;
+  -webkit-mask-image: radial-gradient(118% 96% at 50% 50%, #000 58%, transparent 94%);
+  mask-image: radial-gradient(118% 96% at 50% 50%, #000 58%, transparent 94%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .home-header-cover-image {
+    filter: invert(1) brightness(0.92);
+    opacity: 0.3;
+  }
+}
+
+[data-theme="dark"] .home-header-cover-image {
+  filter: invert(1) brightness(0.92);
+  opacity: 0.3;
+}
+
+@media (max-width: 900px) {
+  .home-header {
+    grid-template-columns: 1fr;
+  }
+
+  .home-header-copy {
+    max-width: none;
+  }
+
+  .home-header-cover {
+    min-height: clamp(11rem, 46vw, 15rem);
+  }
+
+  .home-header-cover-image {
+    object-position: center 45%;
+  }
 }
 
 /* ============================================
