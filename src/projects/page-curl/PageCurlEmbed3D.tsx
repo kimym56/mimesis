@@ -4,7 +4,7 @@ import { useTexture } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import styles from "./ProjectDetail.module.css";
+import styles from "./PageCurlProject.module.css";
 
 if (typeof console !== "undefined") {
     const originalWarn = console.warn;

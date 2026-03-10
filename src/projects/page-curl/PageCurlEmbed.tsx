@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import styles from './ProjectDetail.module.css';
+import styles from "./PageCurlProject.module.css";
 
 interface Pt { x: number; y: number }
 

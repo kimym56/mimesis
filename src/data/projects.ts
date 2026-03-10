@@ -5,6 +5,7 @@ export interface Project {
     originalImage: string;
     imitationImage: string;
     interactive?: boolean;
+    interactiveDemo?: "page-curl" | "wiper-typography";
     referenceEmbed?: string; // iframe src URL
     referenceUser?: { name: string; url: string };
 }
@@ -17,6 +18,7 @@ export const projects: Project[] = [
         originalImage: "/images/love-jones-cover.jpg",
         imitationImage: "/images/love-jones-cover.jpg",
         interactive: true,
+        interactiveDemo: "page-curl",
         referenceEmbed: "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7431057068884885504?collapsed=1",
         referenceUser: {
             name: "Minsang Choi",
@@ -24,11 +26,14 @@ export const projects: Project[] = [
         }
     },
     {
-        id: "editorial-blog",
-        title: "Editorial Blog",
-        description: "An exploration of serif typography and irregular grid layouts often found in premium editorial sites.",
-        originalImage: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=1200",
-        imitationImage: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=1200",
+        id: "wiper-typography",
+        title: "Wiper Typography",
+        description: "A typography-based wipe simulation inspired by FFF where a moving band mechanically reveals and transforms text in real time with cursor control.",
+        originalImage: "https://images.unsplash.com/photo-1551190822-a9333d879b1f?auto=format&fit=crop&q=80&w=1200",
+        imitationImage: "https://images.unsplash.com/photo-1551190822-a9333d879b1f?auto=format&fit=crop&q=80&w=1200",
+        interactive: true,
+        interactiveDemo: "wiper-typography",
+        referenceEmbed: "https://youtu.be/cpEeqACsF_Q?si=wlaLq1Gm4Ntcn731&t=588",
     },
     {
         id: "creative-portfolio",
