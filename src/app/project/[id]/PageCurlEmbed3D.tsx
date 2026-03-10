@@ -415,7 +415,7 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
     const maxDistRef = useRef(10);
     const liveAngleRadRef = useRef(initialAngle * (Math.PI / 180));
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
+    const canvasContainerRef = useRef<HTMLDivElement>(null);
 
     const handlePointerDown = (e: React.PointerEvent) => {
         if (demo) return;
@@ -428,7 +428,7 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
     const handlePointerMove = (e: React.PointerEvent) => {
         if (demo || !dragging.current) return;
 
-        const rect = wrapperRef.current?.getBoundingClientRect();
+        const rect = canvasContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
 
         // Use the same animated angle the shader currently uses.
@@ -468,24 +468,28 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
 
     return (
         <div
-            ref={wrapperRef}
             className={styles.embedWrapper}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            onLostPointerCapture={() => {
-                dragging.current = false;
-            }}
             style={{
-                touchAction: "none",
-                cursor: demo ? "default" : "grab",
                 height: "100%",
                 width: "100%",
-                position: "relative",
             }}
         >
-            <div className={styles.curlCanvas} style={{ background: "transparent" }}>
+            <div
+                ref={canvasContainerRef}
+                className={styles.curlCanvas}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                onLostPointerCapture={() => {
+                    dragging.current = false;
+                }}
+                style={{
+                    background: "transparent",
+                    touchAction: "none",
+                    cursor: demo ? "default" : "grab",
+                }}
+            >
                 <Canvas shadows={true} camera={{ position: [0, 0, 5], fov: 50 }}>
                     <Scene
                         peelDist={peelDist}
@@ -500,15 +504,6 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
             {!demo && (
                 <div
                     className={styles.embedControls}
-                    style={{
-                        zIndex: 10,
-                        position: "absolute",
-                        bottom: "16px",
-                        right: "16px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                    }}
                     onPointerDown={(e) => e.stopPropagation()}
                     onPointerMove={(e) => e.stopPropagation()}
                     onPointerUp={(e) => e.stopPropagation()}
