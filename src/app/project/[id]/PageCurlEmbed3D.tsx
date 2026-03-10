@@ -72,6 +72,29 @@ vec3 deformPosition(vec3 position, vec2 uSize, float uPeelDist, vec2 uOrigin, ve
 }
 `;
 
+const shadowDeformChunk = `
+vec3 deformShadowPosition(vec3 position, vec2 uSize, float uPeelDist, vec2 uOrigin, vec2 uInward) {
+    if (uPeelDist <= 0.0) {
+        return position;
+    }
+
+    float dp = dot(position.xy - uOrigin, uInward);
+    float foldPos = uPeelDist / 2.0;
+    float d = dp - foldPos;
+    float foldBlend = max(min(uSize.x, uSize.y) * 0.03, 0.02);
+    float peeled = 1.0 - smoothstep(-foldBlend, foldBlend, d);
+    float reflectedD = mix(d, abs(d), peeled);
+    float shadowLift = min(uPeelDist * 0.1, min(uSize.x, uSize.y) * 0.16);
+
+    vec3 transformed = position;
+    transformed.x += uInward.x * (reflectedD - d);
+    transformed.y += uInward.y * (reflectedD - d);
+    transformed.z += shadowLift * peeled;
+
+    return transformed;
+}
+`;
+
 const vertexShader = `
 uniform float uPeelDist;
 uniform vec2 uOrigin;
@@ -254,14 +277,13 @@ function PageComponent({
             uniform vec2 uOrigin;
             uniform vec2 uInward;
             uniform vec2 uSize;
-            ${deformChunk}
+            ${shadowDeformChunk}
         ` + vs;
         vs = vs.replace(
             "#include <begin_vertex>",
             `
             vMyUv = uv;
-            vec3 objectNormal;
-            vec3 transformed = deformPosition(position, uSize, uPeelDist, uOrigin, uInward, objectNormal, normal);
+            vec3 transformed = deformShadowPosition(position, uSize, uPeelDist, uOrigin, uInward);
             `
         );
         return vs;
@@ -333,6 +355,9 @@ function Scene({
     const pad = Math.min(viewport.width, viewport.height) * 0.08;
     const pageW = viewport.width - 2 * pad;
     const pageH = viewport.height - 2 * pad;
+    const shadowPlaneZ = -0.12;
+    const shadowFrustumX = pageW * 0.9;
+    const shadowFrustumY = pageH * 0.9;
 
     // Calculate max drag distance for safety.
     useEffect(() => {
@@ -343,15 +368,17 @@ function Scene({
         <>
             <ambientLight intensity={0.5} color="#ffffff" />
             <directionalLight
-                position={[5, 10, 5]}
+                position={[6, 6, 5]}
                 intensity={1.2}
                 castShadow
-                shadow-mapSize={[2048, 2048]}
+                shadow-mapSize={[4096, 4096]}
                 shadow-bias={-0.0001}
-                shadow-camera-left={-10}
-                shadow-camera-right={10}
-                shadow-camera-top={10}
-                shadow-camera-bottom={-10}
+                shadow-normalBias={0.02}
+                shadow-radius={1.5}
+                shadow-camera-left={-shadowFrustumX}
+                shadow-camera-right={shadowFrustumX}
+                shadow-camera-top={shadowFrustumY}
+                shadow-camera-bottom={-shadowFrustumY}
                 shadow-camera-near={0.1}
                 shadow-camera-far={20}
             />
@@ -365,7 +392,7 @@ function Scene({
                     liveAngleRadRef={liveAngleRadRef}
                 />
 
-                <mesh position={[0, 0, -0.4]} receiveShadow>
+                <mesh position={[0, 0, shadowPlaneZ]} receiveShadow>
                     <planeGeometry args={[viewport.width * 2, viewport.height * 2]} />
                     <shadowMaterial opacity={0.3} transparent depthWrite={false} />
                 </mesh>
