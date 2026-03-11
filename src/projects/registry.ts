@@ -3,12 +3,12 @@ import type { Project } from "@/data/projects";
 import type { InteractiveProjectComponent } from "./types";
 
 const PageCurlProject = dynamic(() => import("./page-curl/PageCurlProject"), {
-  ssr: false,
+  loading: () => null,
 }) as InteractiveProjectComponent;
 
 const WiperTypographyProject = dynamic(
   () => import("./wiper-typography/WiperTypographyProject"),
-  { ssr: false }
+  { loading: () => null }
 ) as InteractiveProjectComponent;
 
 type InteractiveDemoId = NonNullable<Project["interactiveDemo"]>;
