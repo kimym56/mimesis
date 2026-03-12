@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 import type { InteractiveProjectProps } from "../types";
 import {
-  WIPER_MARGIN,
+  mapPointerDragToPhase,
   computeLinePose,
   isPointerInsideActiveRange,
-  mapPointerXToPhase,
+  stepPhaseToward,
 } from "./wiperMath";
 import styles from "./WiperTypographyProject.module.css";
 
@@ -23,6 +23,8 @@ const BASE_PARTICLES_DESKTOP = 120;
 const BASE_PARTICLES_TABLET = 80;
 const BASE_PARTICLES_MOBILE = 50;
 const AUTOPLAY_SPEED = 0.01;
+const POINTER_PHASE_MAX_DELTA = 0.012;
+const INTERACTION_MARGIN = 0;
 
 const randomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
@@ -176,10 +178,14 @@ export default function WiperTypographyProject({
     let phase = 0;
     let autoPhaseAngle = 0;
     let pointerOnCanvas = false;
+    let pointerTargetPhase = phase;
+    let pointerDragStartX = 0;
+    let pointerDragStartPhase = phase;
+    let pointerDragPrimed = false;
 
     const updateDragOverlayBounds = () => {
-      dragLayer.style.left = `${WIPER_MARGIN}px`;
-      dragLayer.style.width = `${Math.max(0, width - WIPER_MARGIN * 2)}px`;
+      dragLayer.style.left = "0px";
+      dragLayer.style.width = `${width}px`;
     };
 
     const buildScene = () => {
@@ -230,37 +236,69 @@ export default function WiperTypographyProject({
       return event.clientX - rect.left;
     };
 
-    const updatePhaseFromPointer = (event: PointerEvent) => {
-      const pointerX = getPointerX(event);
-      if (!isPointerInsideActiveRange(pointerX, width)) {
-        pointerOnCanvas = false;
-        return;
-      }
-      pointerOnCanvas = true;
-      phase = mapPointerXToPhase(pointerX, width);
-    };
-
     const syncAutoplayPhase = () => {
       const safePhase = Math.max(0, Math.min(1, phase));
       autoPhaseAngle = Math.asin(safePhase);
     };
 
-    const onPointerEnter = (event: PointerEvent) => {
-      updatePhaseFromPointer(event);
+    const updatePhaseFromPointer = (event: PointerEvent) => {
+      const pointerX = getPointerX(event);
+      if (!isPointerInsideActiveRange(pointerX, width, INTERACTION_MARGIN)) {
+        if (pointerOnCanvas) {
+          syncAutoplayPhase();
+        }
+        pointerOnCanvas = false;
+        pointerDragPrimed = false;
+        return;
+      }
+
+      if (!pointerOnCanvas) {
+        pointerOnCanvas = true;
+        pointerTargetPhase = phase;
+        pointerDragPrimed = false;
+        return;
+      }
+
+      if (!pointerDragPrimed) {
+        pointerDragStartX = pointerX;
+        pointerDragStartPhase = phase;
+        pointerTargetPhase = phase;
+        pointerDragPrimed = true;
+        return;
+      }
+
+      pointerOnCanvas = true;
+      pointerTargetPhase = mapPointerDragToPhase(
+        pointerX,
+        pointerDragStartX,
+        pointerDragStartPhase,
+        width,
+        INTERACTION_MARGIN,
+      );
+    };
+
+    const onPointerEnter = () => {
+      pointerOnCanvas = true;
+      pointerTargetPhase = phase;
+      pointerDragPrimed = false;
     };
 
     const onPointerLeave = () => {
       pointerOnCanvas = false;
+      pointerDragPrimed = false;
       syncAutoplayPhase();
     };
 
     const onPointerCancel = () => {
       pointerOnCanvas = false;
+      pointerDragPrimed = false;
       syncAutoplayPhase();
     };
 
     const tick = () => {
-      if (!pointerOnCanvas) {
+      if (pointerOnCanvas) {
+        phase = stepPhaseToward(phase, pointerTargetPhase, POINTER_PHASE_MAX_DELTA);
+      } else {
         autoPhaseAngle += AUTOPLAY_SPEED;
         phase = Math.abs(Math.sin(autoPhaseAngle));
       }

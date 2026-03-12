@@ -4,10 +4,22 @@ export interface Project {
   description: string;
   originalImage: string;
   imitationImage: string;
+  previewMedia?: ProjectPreviewMedia;
   interactive?: boolean;
   interactiveDemo?: "page-curl" | "wiper-typography";
   referenceEmbed?: string; // iframe src URL
   referenceUser?: { name: string; url: string };
+}
+
+export interface ProjectPreviewMediaSource {
+  src: string;
+  type: "video/mp4" | "video/webm";
+}
+
+export interface ProjectPreviewMedia {
+  type: "video";
+  poster: string;
+  sources: ProjectPreviewMediaSource[];
 }
 
 export const projects: Project[] = [
@@ -18,6 +30,20 @@ export const projects: Project[] = [
       "An interactive recreation of the classic iOS page curl transition — the corner-peel effect used in iBooks and Apple Maps. Drag any corner to peel the page back and reveal the reverse side.",
     originalImage: "/images/love-jones-cover.jpg",
     imitationImage: "/images/love-jones-cover.jpg",
+    previewMedia: {
+      type: "video",
+      poster: "/images/love-jones-cover.jpg",
+      sources: [
+        {
+          src: "/videos/ios-curl-animation-preview.webm?v=20260311e",
+          type: "video/webm",
+        },
+        {
+          src: "/videos/ios-curl-animation-preview.mp4?v=20260311e",
+          type: "video/mp4",
+        },
+      ],
+    },
     interactive: true,
     interactiveDemo: "page-curl",
     referenceEmbed:
@@ -34,9 +60,27 @@ export const projects: Project[] = [
       "A typography-based wipe simulation inspired by FFF where a moving band mechanically reveals and transforms text in real time with cursor control.",
     originalImage: "/images/wiper-typography-cover.png",
     imitationImage: "/images/wiper-typography-cover.png",
+    previewMedia: {
+      type: "video",
+      poster: "/images/wiper-typography-cover.png",
+      sources: [
+        {
+          src: "/videos/wiper-typography-preview.webm?v=20260311g",
+          type: "video/webm",
+        },
+        {
+          src: "/videos/wiper-typography-preview.mp4?v=20260311g",
+          type: "video/mp4",
+        },
+      ],
+    },
     interactive: true,
     interactiveDemo: "wiper-typography",
-    referenceEmbed: "https://youtu.be/cpEeqACsF_Q?si=wlaLq1Gm4Ntcn731&t=588",
+    referenceEmbed: "https://www.youtube.com/embed/cpEeqACsF_Q?start=588",
+    referenceUser: {
+      name: "Jongmin Kim",
+      url: "https://blog.cmiscm.com/?page_id=3023",
+    },
   },
   {
     id: "creative-portfolio",

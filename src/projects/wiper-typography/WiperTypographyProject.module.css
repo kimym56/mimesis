@@ -25,11 +25,7 @@
 
 .dragLayer {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 100px;
-  min-width: 0;
-  width: calc(100% - 200px);
+  inset: 0;
   cursor: ew-resize;
   touch-action: none;
 }
