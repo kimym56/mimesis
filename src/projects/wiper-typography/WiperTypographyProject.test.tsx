@@ -80,6 +80,7 @@ describe("WiperTypographyProject", () => {
       root.render(<WiperTypographyProject projectId="wiper-typography" />);
     });
 
+    expect(container.textContent).toContain("mock-2d-canvas");
     expect(container.textContent).toContain("2D Canvas");
     expect(container.textContent).toContain("3D Wiper Bars");
     expect(container.textContent).toContain("3D Glyph Field");
