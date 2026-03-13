@@ -20,7 +20,7 @@ function StageScene({
 }: {
   phaseRef: MutableRefObject<number>;
 }) {
-  const { camera, viewport } = useThree();
+  const { viewport } = useThree();
   const barRefs = useRef<Array<THREE.Mesh | null>>([]);
 
   const stageWidth = viewport.width * 0.82;
@@ -39,13 +39,13 @@ function StageScene({
     }));
   }, [stageHeight]);
 
-  useFrame(() => {
+  useFrame((state) => {
     const phase = phaseRef.current;
     const cameraOffset = computeStageCameraOffset(phase);
 
-    camera.position.x += (cameraOffset.x - camera.position.x) * 0.08;
-    camera.position.y += (cameraOffset.y - camera.position.y) * 0.08;
-    camera.lookAt(0, 0, -0.25);
+    state.camera.position.x += (cameraOffset.x - state.camera.position.x) * 0.08;
+    state.camera.position.y += (cameraOffset.y - state.camera.position.y) * 0.08;
+    state.camera.lookAt(0, 0, -0.25);
 
     for (let index = 0; index < lineCount; index += 1) {
       const mesh = barRefs.current[index];
