@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   WIPER_MAX_BAR_DEPTH,
   WIPER_MAX_GLYPH_FIELD_DEPTH,
+  WIPER_MAX_STAGE_CAMERA_OFFSET,
 } from "./wiperConfig";
 import {
   WIPER_MARGIN,
@@ -11,6 +12,7 @@ import {
   computeLineCount,
   computeLineDimensions,
   computeLinePose,
+  computeStageCameraOffset,
   isPointerInsideActiveRange,
   mapPointerDragToPhase,
   mapPointerXToPhase,
@@ -90,6 +92,12 @@ describe("wiperMath", () => {
     expect(Math.abs(computeGlyphLayerDepth(3, 4))).toBeLessThanOrEqual(
       WIPER_MAX_GLYPH_FIELD_DEPTH
     );
+  });
+
+  it("keeps the stage camera offset inside the approved shallow range", () => {
+    const offset = computeStageCameraOffset(0.75);
+    expect(Math.abs(offset.x)).toBeLessThanOrEqual(WIPER_MAX_STAGE_CAMERA_OFFSET);
+    expect(Math.abs(offset.y)).toBeLessThanOrEqual(WIPER_MAX_STAGE_CAMERA_OFFSET);
   });
 
   it("moves phase toward target with capped delta", () => {

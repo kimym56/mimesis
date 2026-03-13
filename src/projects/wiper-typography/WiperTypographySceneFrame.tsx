@@ -40,11 +40,12 @@ export default function WiperTypographySceneFrame({
       <Canvas
         camera={{ position: [0, 0, 6], fov: 40 }}
         dpr={[1, 2]}
+        shadows
         style={{ inset: 0, position: "absolute" }}
       >
         <color attach="background" args={[WIPER_BACKGROUND_COLOR]} />
         <ambientLight intensity={0.55} />
-        <directionalLight intensity={1.05} position={[5, 6, 8]} />
+        <directionalLight castShadow intensity={1.05} position={[5, 6, 8]} />
         <PhaseDriver tick={tick} />
         <Suspense fallback={null}>
           {renderScene({ phaseRef, sizeRef })}

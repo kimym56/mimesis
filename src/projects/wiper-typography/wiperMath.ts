@@ -1,4 +1,8 @@
-import { WIPER_MAX_BAR_DEPTH, WIPER_MAX_GLYPH_FIELD_DEPTH } from "./wiperConfig";
+import {
+  WIPER_MAX_BAR_DEPTH,
+  WIPER_MAX_GLYPH_FIELD_DEPTH,
+  WIPER_MAX_STAGE_CAMERA_OFFSET,
+} from "./wiperConfig";
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -97,6 +101,18 @@ export function computeGlyphLayerDepth(
 
   const normalized = index / (totalLayers - 1);
   return (normalized * 2 - 1) * WIPER_MAX_GLYPH_FIELD_DEPTH;
+}
+
+export function computeStageCameraOffset(phase: number): { x: number; y: number } {
+  const normalizedPhase = clamp(phase, 0, 1);
+
+  return {
+    x: (normalizedPhase * 2 - 1) * WIPER_MAX_STAGE_CAMERA_OFFSET,
+    y:
+      (0.5 - Math.abs(normalizedPhase - 0.5)) *
+      WIPER_MAX_STAGE_CAMERA_OFFSET *
+      0.35,
+  };
 }
 
 export function computeLinePose(

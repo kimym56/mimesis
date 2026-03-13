@@ -8,6 +8,7 @@ export const WIPER_AUTOPLAY_SPEED = 0.01;
 export const WIPER_POINTER_PHASE_MAX_DELTA = 0.012;
 export const WIPER_MAX_BAR_DEPTH = 0.18;
 export const WIPER_MAX_GLYPH_FIELD_DEPTH = 0.72;
+export const WIPER_MAX_STAGE_CAMERA_OFFSET = 0.24;
 
 export const WIPER_PARTICLE_BUDGET = {
   desktop: 120,
