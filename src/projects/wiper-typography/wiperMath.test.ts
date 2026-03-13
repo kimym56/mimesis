@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { WIPER_MAX_BAR_DEPTH } from "./wiperConfig";
+import {
+  WIPER_MAX_BAR_DEPTH,
+  WIPER_MAX_GLYPH_FIELD_DEPTH,
+} from "./wiperConfig";
 import {
   WIPER_MARGIN,
   clamp,
   computeBarDepth,
+  computeGlyphLayerDepth,
   computeLineCount,
   computeLineDimensions,
   computeLinePose,
@@ -79,6 +83,13 @@ describe("wiperMath", () => {
   it("derives shallow bar depth without exceeding the stage cap", () => {
     expect(computeBarDepth(0)).toBeGreaterThan(0);
     expect(computeBarDepth(80)).toBeLessThanOrEqual(WIPER_MAX_BAR_DEPTH);
+  });
+
+  it("assigns glyph layers within the shallow field depth budget", () => {
+    expect(computeGlyphLayerDepth(0, 4)).toBeLessThan(0);
+    expect(Math.abs(computeGlyphLayerDepth(3, 4))).toBeLessThanOrEqual(
+      WIPER_MAX_GLYPH_FIELD_DEPTH
+    );
   });
 
   it("moves phase toward target with capped delta", () => {

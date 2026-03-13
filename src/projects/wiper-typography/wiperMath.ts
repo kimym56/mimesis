@@ -1,4 +1,4 @@
-import { WIPER_MAX_BAR_DEPTH } from "./wiperConfig";
+import { WIPER_MAX_BAR_DEPTH, WIPER_MAX_GLYPH_FIELD_DEPTH } from "./wiperConfig";
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -85,6 +85,18 @@ export function computeLineDimensions(
 
 export function computeBarDepth(index: number): number {
   return clamp(WIPER_MAX_BAR_DEPTH - index * 0.0015, 0.06, WIPER_MAX_BAR_DEPTH);
+}
+
+export function computeGlyphLayerDepth(
+  index: number,
+  totalLayers: number
+): number {
+  if (totalLayers <= 1) {
+    return 0;
+  }
+
+  const normalized = index / (totalLayers - 1);
+  return (normalized * 2 - 1) * WIPER_MAX_GLYPH_FIELD_DEPTH;
 }
 
 export function computeLinePose(
