@@ -59,6 +59,28 @@ export function isPointerInsideActiveRange(
   return pointerX >= margin && pointerX <= width - margin;
 }
 
+export function computeLineCount(
+  height: number,
+  segmentWidth: number,
+  overscan = 1.2
+): number {
+  if (height <= 0 || segmentWidth <= 0) {
+    return 0;
+  }
+
+  return Math.floor((height / segmentWidth) * overscan);
+}
+
+export function computeLineDimensions(
+  index: number,
+  width: number
+): { width: number; height: number } {
+  return {
+    width,
+    height: width - 0.2 * index,
+  };
+}
+
 export function computeLinePose(
   index: number,
   phase: number,

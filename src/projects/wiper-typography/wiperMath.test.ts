@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   WIPER_MARGIN,
   clamp,
+  computeLineCount,
+  computeLineDimensions,
   computeLinePose,
   isPointerInsideActiveRange,
   mapPointerDragToPhase,
@@ -64,6 +66,12 @@ describe("wiperMath", () => {
     expect(Math.round(bottom.x)).toBe(560);
     expect(Math.round(bottom.y)).toBe(622);
     expect(bottom.rotation).toBe(Math.PI);
+  });
+
+  it("derives line counts and dimensions consistently for 2d and 3d scenes", () => {
+    expect(computeLineCount(660, 22)).toBe(36);
+    expect(computeLineDimensions(0, 22)).toEqual({ width: 22, height: 22 });
+    expect(computeLineDimensions(5, 22).height).toBeCloseTo(21);
   });
 
   it("moves phase toward target with capped delta", () => {
