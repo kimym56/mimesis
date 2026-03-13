@@ -61,7 +61,14 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
                 )}
               </div>
               <div className={styles.info}>
-                <h3 className={styles.title}>{project.title}</h3>
+                <div className={styles.titleRow}>
+                  <h3 className={styles.title}>{project.title}</h3>
+                  {project.referenceUser && (
+                    <p className={styles.referenceByline}>
+                      @{project.referenceUser.name}
+                    </p>
+                  )}
+                </div>
                 <p className={styles.description}>{project.description}</p>
               </div>
             </Link>
