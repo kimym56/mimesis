@@ -25,17 +25,19 @@ vi.mock(
 );
 
 vi.mock(
-  "./WiperTypographySceneBars3D",
+  "./WiperTypographySceneGlyphField3D",
   () => ({
-    default: () => <div>mock-3d-bars</div>,
+    default: () => <div>mock-3d-glyphs</div>,
   }),
   { virtual: true }
 );
 
 vi.mock(
-  "./WiperTypographySceneGlyphField3D",
+  "./WiperTypographySceneFrame",
   () => ({
-    default: () => <div>mock-3d-glyphs</div>,
+    default: ({ children }: { children?: React.ReactNode }) => (
+      <div>mock-scene-frame{children}</div>
+    ),
   }),
   { virtual: true }
 );
@@ -96,6 +98,6 @@ describe("WiperTypographyProject", () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(container.textContent).toContain("mock-3d-bars");
+    expect(container.textContent).toContain("mock-scene-frame");
   });
 });
