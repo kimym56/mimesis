@@ -6,6 +6,7 @@ export const WIPER_BAR_COLOR = "rgb(0, 0, 0)";
 export const WIPER_LINE_WIDTH = 22;
 export const WIPER_AUTOPLAY_SPEED = 0.01;
 export const WIPER_POINTER_PHASE_MAX_DELTA = 0.012;
+export const WIPER_MAX_BAR_DEPTH = 0.18;
 
 export const WIPER_PARTICLE_BUDGET = {
   desktop: 120,

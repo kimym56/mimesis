@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { WIPER_MAX_BAR_DEPTH } from "./wiperConfig";
 import {
   WIPER_MARGIN,
   clamp,
+  computeBarDepth,
   computeLineCount,
   computeLineDimensions,
   computeLinePose,
@@ -72,6 +74,11 @@ describe("wiperMath", () => {
     expect(computeLineCount(660, 22)).toBe(36);
     expect(computeLineDimensions(0, 22)).toEqual({ width: 22, height: 22 });
     expect(computeLineDimensions(5, 22).height).toBeCloseTo(21);
+  });
+
+  it("derives shallow bar depth without exceeding the stage cap", () => {
+    expect(computeBarDepth(0)).toBeGreaterThan(0);
+    expect(computeBarDepth(80)).toBeLessThanOrEqual(WIPER_MAX_BAR_DEPTH);
   });
 
   it("moves phase toward target with capped delta", () => {
