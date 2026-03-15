@@ -48,7 +48,7 @@ export default function WiperTypographyCanvas2D({
 }: InteractiveProjectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { containerRef, dragLayerRef, dragLayerProps, phaseRef, sizeRef, tick } =
-    useWiperInteraction({ margin: 0 });
+    useWiperInteraction({ interactionMode: "legacy-phase", margin: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
