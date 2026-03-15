@@ -1,11 +1,12 @@
 "use client";
 
-import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef, type MutableRefObject } from "react";
 import type * as THREE from "three";
 import type { InteractiveProjectProps } from "../types";
+import WiperTypographyExtrudedGlyph3D from "./WiperTypographyExtrudedGlyph3D";
 import WiperTypographySceneFrame from "./WiperTypographySceneFrame";
+import { getWiperGlyphGeometry } from "./wiperGlyphGeometry";
 import {
   computeBarDepth,
   computeGlyphLayerDepth,
@@ -17,10 +18,7 @@ import {
 } from "./wiperSimulation";
 import { useWiperSceneSimulation3D } from "./useWiperSceneSimulation3D";
 
-type GlyphTextMesh = THREE.Object3D & {
-  sync?: () => void;
-  text?: string;
-};
+type GlyphMesh = THREE.Mesh;
 
 const STAGE_GLYPH_LAYER_COUNT = 3;
 
@@ -30,8 +28,8 @@ function StageScene({
   phaseRef: MutableRefObject<number>;
 }) {
   const barRefs = useRef<Array<THREE.Mesh | null>>([]);
-  const glyphRefs = useRef<Array<GlyphTextMesh | null>>([]);
-  const { glyphFontSize, projectX, projectY, scale, simulation, worldHeight, worldWidth } =
+  const glyphRefs = useRef<Array<GlyphMesh | null>>([]);
+  const { glyphScale, projectX, projectY, scale, simulation, worldHeight, worldWidth } =
     useWiperSceneSimulation3D({
       widthRatio: 0.82,
       heightRatio: 0.8,
@@ -48,14 +46,15 @@ function StageScene({
 
       const layerIndex = glyph.index % STAGE_GLYPH_LAYER_COUNT;
       const depth = computeGlyphLayerDepth(layerIndex, STAGE_GLYPH_LAYER_COUNT) * 0.16 - 0.9;
+      const nextGeometry = getWiperGlyphGeometry(glyph.text);
+
+      if (mesh.geometry !== nextGeometry) {
+        mesh.geometry = nextGeometry;
+      }
 
       mesh.position.set(projectX(glyph.x), projectY(glyph.y), depth);
       mesh.rotation.set(0, 0, -glyph.rotation * Math.PI);
-
-      if (mesh.text !== glyph.text) {
-        mesh.text = glyph.text;
-        mesh.sync?.();
-      }
+      mesh.scale.set(glyphScale, glyphScale, glyphScale);
     }
 
     for (const bar of simulation.bars) {
@@ -92,19 +91,16 @@ function StageScene({
         const depth = computeGlyphLayerDepth(layerIndex, STAGE_GLYPH_LAYER_COUNT) * 0.16 - 0.9;
 
         return (
-          <Text
+          <WiperTypographyExtrudedGlyph3D
+            glyph={glyph.text}
             key={glyph.index}
-            anchorX="center"
-            anchorY="middle"
-            color="#ffffff"
-            fontSize={glyphFontSize}
             position={[projectX(glyph.x), projectY(glyph.y), depth]}
             ref={(node) => {
-              glyphRefs.current[glyph.index] = node as GlyphTextMesh | null;
+              glyphRefs.current[glyph.index] = node;
             }}
-          >
-            {glyph.text}
-          </Text>
+            rotationZ={-glyph.rotation * Math.PI}
+            scale={glyphScale}
+          />
         );
       })}
 

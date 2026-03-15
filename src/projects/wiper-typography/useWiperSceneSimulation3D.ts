@@ -2,7 +2,6 @@
 
 import { useThree } from "@react-three/fiber";
 import { useMemo, useState } from "react";
-import { WIPER_GLYPH_FONT_SIZE } from "./wiperConfig";
 import {
   createWiperSimulationState,
   detectWiperParticleCount,
@@ -21,7 +20,7 @@ export interface WiperSceneSimulation3DModel {
   worldHeight: number;
   pixelWidth: number;
   pixelHeight: number;
-  glyphFontSize: number;
+  glyphScale: number;
   projectX: (value: number) => number;
   projectY: (value: number) => number;
 }
@@ -54,7 +53,7 @@ export function useWiperSceneSimulation3D({
     worldHeight: pixelHeight * scale,
     pixelWidth,
     pixelHeight,
-    glyphFontSize: Math.max(WIPER_GLYPH_FONT_SIZE * scale, 0.16),
+    glyphScale: scale,
     projectX: (value) => (value - pixelWidth * 0.5) * scale,
     projectY: (value) => (pixelHeight * 0.5 - value) * scale,
   };

@@ -1,0 +1,118 @@
+// @vitest-environment jsdom
+
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import WiperTypographySceneBars3D from "./WiperTypographySceneBars3D";
+import WiperTypographySceneGlyphField3D from "./WiperTypographySceneGlyphField3D";
+import WiperTypographySceneStage3D from "./WiperTypographySceneStage3D";
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+let container: HTMLDivElement;
+let root: Root;
+let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+const { mockedExtrudedGlyph } = vi.hoisted(() => ({
+  mockedExtrudedGlyph: vi.fn(() => <div data-testid="extruded-glyph" />),
+}));
+
+vi.mock("./WiperTypographyExtrudedGlyph3D", () => ({
+  default: mockedExtrudedGlyph,
+}));
+
+vi.mock("./useWiperSceneSimulation3D", () => ({
+  useWiperSceneSimulation3D: vi.fn(() => ({
+    glyphScale: 0.33,
+    pixelHeight: 100,
+    pixelWidth: 100,
+    projectX: (value: number) => value,
+    projectY: (value: number) => value,
+    scale: 0.01,
+    simulation: {
+      bars: [],
+      glyphs: [
+        {
+          index: 0,
+          kind: "glyph",
+          radius: 20,
+          rotation: 0,
+          text: "T",
+          vx: 0,
+          vy: 0,
+          x: 10,
+          y: 20,
+        },
+      ],
+    },
+    worldHeight: 100,
+    worldWidth: 100,
+  })),
+}));
+
+vi.mock("./WiperTypographySceneFrame", () => ({
+  default: ({
+    renderScene,
+  }: {
+    renderScene: ({ phaseRef }: { phaseRef: { current: number } }) => React.ReactNode;
+  }) => <div>{renderScene({ phaseRef: { current: 0 } })}</div>,
+}));
+
+vi.mock("@react-three/drei", () => ({
+  Text: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock("@react-three/fiber", () => ({
+  useFrame: () => undefined,
+}));
+
+describe("WiperTypographyScene3DGlyphWiring", () => {
+  beforeEach(() => {
+    mockedExtrudedGlyph.mockClear();
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => {
+      root.unmount();
+    });
+    container.remove();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("renders the shared extruded glyph component in all three 3d modes", () => {
+    act(() => {
+      root.render(
+        <>
+          <WiperTypographySceneBars3D projectId="wiper-typography" />
+          <WiperTypographySceneGlyphField3D projectId="wiper-typography" />
+          <WiperTypographySceneStage3D projectId="wiper-typography" />
+        </>
+      );
+    });
+
+    expect(mockedExtrudedGlyph).toHaveBeenCalled();
+  });
+
+  it("passes geometry scale into the shared extruded glyph renderer", () => {
+    act(() => {
+      root.render(<WiperTypographySceneBars3D projectId="wiper-typography" />);
+    });
+
+    const firstCall = mockedExtrudedGlyph.mock.calls[0]?.[0] as
+      | { scale?: number }
+      | undefined;
+
+    expect(firstCall?.scale).toBe(0.33);
+  });
+});

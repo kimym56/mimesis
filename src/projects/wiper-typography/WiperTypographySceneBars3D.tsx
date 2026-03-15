@@ -1,11 +1,12 @@
 "use client";
 
-import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef, type MutableRefObject } from "react";
 import type * as THREE from "three";
 import WiperTypographySceneFrame from "./WiperTypographySceneFrame";
 import type { InteractiveProjectProps } from "../types";
+import WiperTypographyExtrudedGlyph3D from "./WiperTypographyExtrudedGlyph3D";
+import { getWiperGlyphGeometry } from "./wiperGlyphGeometry";
 import { computeBarDepth } from "./wiperMath";
 import {
   stepWiperSimulationState,
@@ -13,10 +14,7 @@ import {
 } from "./wiperSimulation";
 import { useWiperSceneSimulation3D } from "./useWiperSceneSimulation3D";
 
-type GlyphTextMesh = THREE.Object3D & {
-  sync?: () => void;
-  text?: string;
-};
+type GlyphMesh = THREE.Mesh;
 
 function BarsScene({
   phaseRef,
@@ -24,8 +22,8 @@ function BarsScene({
   phaseRef: MutableRefObject<number>;
 }) {
   const barRefs = useRef<Array<THREE.Mesh | null>>([]);
-  const glyphRefs = useRef<Array<GlyphTextMesh | null>>([]);
-  const { glyphFontSize, projectX, projectY, scale, simulation } =
+  const glyphRefs = useRef<Array<GlyphMesh | null>>([]);
+  const { glyphScale, projectX, projectY, scale, simulation } =
     useWiperSceneSimulation3D({
       widthRatio: 0.86,
       heightRatio: 0.86,
@@ -40,13 +38,15 @@ function BarsScene({
         continue;
       }
 
+      const nextGeometry = getWiperGlyphGeometry(glyph.text);
+
+      if (mesh.geometry !== nextGeometry) {
+        mesh.geometry = nextGeometry;
+      }
+
       mesh.position.set(projectX(glyph.x), projectY(glyph.y), -0.68);
       mesh.rotation.set(0, 0, -glyph.rotation * Math.PI);
-
-      if (mesh.text !== glyph.text) {
-        mesh.text = glyph.text;
-        mesh.sync?.();
-      }
+      mesh.scale.set(glyphScale, glyphScale, glyphScale);
     }
 
     for (const bar of simulation.bars) {
@@ -65,19 +65,16 @@ function BarsScene({
   return (
     <>
       {simulation.glyphs.map((glyph: WiperGlyphState) => (
-        <Text
+        <WiperTypographyExtrudedGlyph3D
+          glyph={glyph.text}
           key={glyph.index}
-          anchorX="center"
-          anchorY="middle"
-          color="#ffffff"
-          fontSize={glyphFontSize}
           position={[projectX(glyph.x), projectY(glyph.y), -0.68]}
           ref={(node) => {
-            glyphRefs.current[glyph.index] = node as GlyphTextMesh | null;
+            glyphRefs.current[glyph.index] = node;
           }}
-        >
-          {glyph.text}
-        </Text>
+          rotationZ={-glyph.rotation * Math.PI}
+          scale={glyphScale}
+        />
       ))}
 
       {simulation.bars.map((bar) => (
