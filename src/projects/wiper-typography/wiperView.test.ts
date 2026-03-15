@@ -26,4 +26,15 @@ describe("wiperView", () => {
     expect(pose.position[2]).toBe(6);
     expect(Math.abs(pose.lookAt[0])).toBeGreaterThan(0);
   });
+
+  it("keeps stage phase bias and drag angle in one shared camera pose", () => {
+    const pose = computeWiperCameraPose({
+      view: { yaw: 0.18, pitch: -0.08 },
+      phaseBias: { x: 0.06, y: 0.01 },
+      distance: 6,
+    });
+
+    expect(pose.position[0]).toBeGreaterThan(0);
+    expect(pose.position[1]).toBeGreaterThan(0);
+  });
 });

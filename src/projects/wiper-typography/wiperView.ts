@@ -42,12 +42,12 @@ export function computeWiperCameraPose({
   return {
     position: [
       phaseBias.x + view.yaw * distance * 0.55,
-      phaseBias.y + view.pitch * distance * 0.4,
+      phaseBias.y - view.pitch * distance * 0.4,
       distance,
     ] as const,
     lookAt: [
       phaseBias.x + view.yaw * 0.45,
-      phaseBias.y + view.pitch * 0.3,
+      phaseBias.y + view.pitch * 0.12,
       0,
     ] as const,
   };

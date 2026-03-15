@@ -37,13 +37,8 @@ function StageScene({
       heightRatio: 0.8,
     });
 
-  useFrame((state) => {
+  useFrame(() => {
     stepWiperSimulationState(simulation, phaseRef.current);
-
-    const cameraOffset = computeStageCameraOffset(phaseRef.current);
-    state.camera.position.x += (cameraOffset.x - state.camera.position.x) * 0.08;
-    state.camera.position.y += (cameraOffset.y - state.camera.position.y) * 0.08;
-    state.camera.lookAt(0, 0, -0.25);
 
     for (const glyph of simulation.glyphs) {
       const mesh = glyphRefs.current[glyph.index];
@@ -135,6 +130,13 @@ export default function WiperTypographySceneStage3D({
 }: InteractiveProjectProps) {
   return (
     <WiperTypographySceneFrame
+      cameraBias={(phase) => {
+        const offset = computeStageCameraOffset(phase);
+        return {
+          x: offset.x * 0.45,
+          y: offset.y * 0.55,
+        };
+      }}
       projectId={projectId}
       renderScene={({ phaseRef }) => <StageScene phaseRef={phaseRef} />}
     />
