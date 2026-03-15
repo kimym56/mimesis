@@ -1,107 +1,125 @@
 "use client";
 
 import { Text } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, type MutableRefObject } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useRef, type MutableRefObject } from "react";
 import type * as THREE from "three";
 import type { InteractiveProjectProps } from "../types";
-import { WIPER_GLYPHS } from "./wiperConfig";
 import WiperTypographySceneFrame from "./WiperTypographySceneFrame";
 import {
   computeBarDepth,
-  computeLineCount,
-  computeLineDimensions,
-  computeLinePose,
+  computeGlyphLayerDepth,
   computeStageCameraOffset,
 } from "./wiperMath";
+import {
+  stepWiperSimulationState,
+  type WiperGlyphState,
+} from "./wiperSimulation";
+import { useWiperSceneSimulation3D } from "./useWiperSceneSimulation3D";
+
+type GlyphTextMesh = THREE.Object3D & {
+  sync?: () => void;
+  text?: string;
+};
+
+const STAGE_GLYPH_LAYER_COUNT = 3;
 
 function StageScene({
   phaseRef,
 }: {
   phaseRef: MutableRefObject<number>;
 }) {
-  const { viewport } = useThree();
   const barRefs = useRef<Array<THREE.Mesh | null>>([]);
-
-  const stageWidth = viewport.width * 0.82;
-  const stageHeight = viewport.height * 0.8;
-  const lineWidth = Math.max(stageHeight * 0.034, 0.18);
-  const lineCount = computeLineCount(stageHeight, lineWidth);
-
-  const glyphRows = useMemo(() => {
-    const rowText = Array.from({ length: 6 }, () => WIPER_GLYPHS.join("")).join(" ");
-    const rows = 5;
-
-    return Array.from({ length: rows }, (_, index) => ({
-      key: index,
-      positionY: stageHeight * 0.5 - ((index + 1) * stageHeight) / (rows + 1),
-      text: rowText,
-    }));
-  }, [stageHeight]);
+  const glyphRefs = useRef<Array<GlyphTextMesh | null>>([]);
+  const { glyphFontSize, projectX, projectY, scale, simulation, worldHeight, worldWidth } =
+    useWiperSceneSimulation3D({
+      widthRatio: 0.82,
+      heightRatio: 0.8,
+    });
 
   useFrame((state) => {
-    const phase = phaseRef.current;
-    const cameraOffset = computeStageCameraOffset(phase);
+    stepWiperSimulationState(simulation, phaseRef.current);
 
+    const cameraOffset = computeStageCameraOffset(phaseRef.current);
     state.camera.position.x += (cameraOffset.x - state.camera.position.x) * 0.08;
     state.camera.position.y += (cameraOffset.y - state.camera.position.y) * 0.08;
     state.camera.lookAt(0, 0, -0.25);
 
-    for (let index = 0; index < lineCount; index += 1) {
-      const mesh = barRefs.current[index];
+    for (const glyph of simulation.glyphs) {
+      const mesh = glyphRefs.current[glyph.index];
       if (!mesh) {
         continue;
       }
 
-      const pose = computeLinePose(index, phase, stageWidth, stageHeight, lineWidth);
-      const dimensions = computeLineDimensions(index, lineWidth);
-      const depth = computeBarDepth(index);
+      const layerIndex = glyph.index % STAGE_GLYPH_LAYER_COUNT;
+      const depth = computeGlyphLayerDepth(layerIndex, STAGE_GLYPH_LAYER_COUNT) * 0.16 - 0.9;
 
-      mesh.position.set(
-        pose.x - stageWidth * 0.5,
-        stageHeight * 0.5 - pose.y,
-        depth * 0.5
-      );
-      mesh.rotation.set(0, 0, -pose.rotation);
-      mesh.scale.set(dimensions.width, dimensions.height, depth);
+      mesh.position.set(projectX(glyph.x), projectY(glyph.y), depth);
+      mesh.rotation.set(0, 0, -glyph.rotation * Math.PI);
+
+      if (mesh.text !== glyph.text) {
+        mesh.text = glyph.text;
+        mesh.sync?.();
+      }
+    }
+
+    for (const bar of simulation.bars) {
+      const mesh = barRefs.current[bar.index];
+      if (!mesh) {
+        continue;
+      }
+
+      const depth = computeBarDepth(bar.index);
+      mesh.position.set(projectX(bar.x), projectY(bar.y), depth * 0.5);
+      mesh.rotation.set(0, 0, -bar.rotation);
+      mesh.scale.set(bar.width * scale, bar.height * scale, depth);
     }
   });
 
   return (
     <>
-      <mesh position={[0, -stageHeight * 0.58, -0.18]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[stageWidth * 1.25, stageHeight * 0.9]} />
+      <mesh
+        position={[0, -worldHeight * 0.58, -0.18]}
+        receiveShadow
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[worldWidth * 1.25, worldHeight * 0.9]} />
         <meshStandardMaterial color="#0d4f7c" roughness={0.82} metalness={0.04} />
       </mesh>
 
       <mesh position={[0, 0, -1.05]} receiveShadow>
-        <planeGeometry args={[stageWidth * 1.04, stageHeight * 0.94]} />
+        <planeGeometry args={[worldWidth * 1.04, worldHeight * 0.94]} />
         <meshStandardMaterial color="#0f6299" roughness={0.86} metalness={0.02} />
       </mesh>
 
-      <group position={[0, 0, -0.92]}>
-        {glyphRows.map((row) => (
+      {simulation.glyphs.map((glyph: WiperGlyphState) => {
+        const layerIndex = glyph.index % STAGE_GLYPH_LAYER_COUNT;
+        const depth = computeGlyphLayerDepth(layerIndex, STAGE_GLYPH_LAYER_COUNT) * 0.16 - 0.9;
+
+        return (
           <Text
-            key={row.key}
+            key={glyph.index}
             anchorX="center"
             anchorY="middle"
             color="#ffffff"
-            fontSize={Math.max(stageHeight * 0.1, 0.3)}
-            maxWidth={stageWidth * 0.88}
-            position={[0, row.positionY - stageHeight * 0.5, 0]}
+            fontSize={glyphFontSize}
+            position={[projectX(glyph.x), projectY(glyph.y), depth]}
+            ref={(node) => {
+              glyphRefs.current[glyph.index] = node as GlyphTextMesh | null;
+            }}
           >
-            {row.text}
+            {glyph.text}
           </Text>
-        ))}
-      </group>
+        );
+      })}
 
-      {Array.from({ length: lineCount }, (_, index) => (
+      {simulation.bars.map((bar) => (
         <mesh
-          key={index}
+          key={bar.index}
           castShadow
           receiveShadow
           ref={(node) => {
-            barRefs.current[index] = node;
+            barRefs.current[bar.index] = node;
           }}
         >
           <boxGeometry args={[1, 1, 1]} />
@@ -118,9 +136,7 @@ export default function WiperTypographySceneStage3D({
   return (
     <WiperTypographySceneFrame
       projectId={projectId}
-      renderScene={({ phaseRef }) => (
-        <StageScene phaseRef={phaseRef} />
-      )}
+      renderScene={({ phaseRef }) => <StageScene phaseRef={phaseRef} />}
     />
   );
 }

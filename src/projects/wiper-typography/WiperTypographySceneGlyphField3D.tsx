@@ -1,100 +1,105 @@
 "use client";
 
 import { Text } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, type MutableRefObject } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useRef, type MutableRefObject } from "react";
 import type * as THREE from "three";
 import type { InteractiveProjectProps } from "../types";
-import { WIPER_GLYPHS } from "./wiperConfig";
 import WiperTypographySceneFrame from "./WiperTypographySceneFrame";
 import {
   computeBarDepth,
   computeGlyphLayerDepth,
-  computeLineCount,
-  computeLineDimensions,
-  computeLinePose,
 } from "./wiperMath";
+import {
+  stepWiperSimulationState,
+  type WiperGlyphState,
+} from "./wiperSimulation";
+import { useWiperSceneSimulation3D } from "./useWiperSceneSimulation3D";
+
+type GlyphTextMesh = THREE.Object3D & {
+  sync?: () => void;
+  text?: string;
+};
+
+const GLYPH_LAYER_COUNT = 5;
 
 function GlyphFieldScene({
   phaseRef,
 }: {
   phaseRef: MutableRefObject<number>;
 }) {
-  const { viewport } = useThree();
   const barRefs = useRef<Array<THREE.Mesh | null>>([]);
-
-  const stageWidth = viewport.width * 0.86;
-  const stageHeight = viewport.height * 0.86;
-  const lineWidth = Math.max(stageHeight * 0.035, 0.18);
-  const lineCount = computeLineCount(stageHeight, lineWidth);
-
-  const glyphLayers = useMemo(() => {
-    const layerCount = 4;
-    const rowCount = 4;
-    const rowText = Array.from({ length: 5 }, () => WIPER_GLYPHS.join("")).join(" ");
-
-    return Array.from({ length: layerCount }, (_, layerIndex) => ({
-      key: layerIndex,
-      z: computeGlyphLayerDepth(layerIndex, layerCount) * 0.35 - 0.55,
-      rows: Array.from({ length: rowCount }, (_, rowIndex) => ({
-        key: `${layerIndex}-${rowIndex}`,
-        positionY:
-          stageHeight * 0.5 - ((rowIndex + 1) * stageHeight) / (rowCount + 1),
-        text: rowText,
-      })),
-    }));
-  }, [stageHeight]);
+  const glyphRefs = useRef<Array<GlyphTextMesh | null>>([]);
+  const { glyphFontSize, projectX, projectY, scale, simulation } =
+    useWiperSceneSimulation3D({
+      widthRatio: 0.86,
+      heightRatio: 0.86,
+    });
 
   useFrame(() => {
-    const phase = phaseRef.current;
+    stepWiperSimulationState(simulation, phaseRef.current);
 
-    for (let index = 0; index < lineCount; index += 1) {
-      const mesh = barRefs.current[index];
+    for (const glyph of simulation.glyphs) {
+      const mesh = glyphRefs.current[glyph.index];
       if (!mesh) {
         continue;
       }
 
-      const pose = computeLinePose(index, phase, stageWidth, stageHeight, lineWidth);
-      const dimensions = computeLineDimensions(index, lineWidth);
-      const depth = computeBarDepth(index) * 0.9;
+      const layerIndex = glyph.index % GLYPH_LAYER_COUNT;
+      const depth = computeGlyphLayerDepth(layerIndex, GLYPH_LAYER_COUNT) * 0.42 - 0.5;
 
-      mesh.position.set(
-        pose.x - stageWidth * 0.5,
-        stageHeight * 0.5 - pose.y,
-        depth * 0.5
-      );
-      mesh.rotation.set(0, 0, -pose.rotation);
-      mesh.scale.set(dimensions.width, dimensions.height, depth);
+      mesh.position.set(projectX(glyph.x), projectY(glyph.y), depth);
+      mesh.rotation.set(0, 0, -glyph.rotation * Math.PI);
+
+      if (mesh.text !== glyph.text) {
+        mesh.text = glyph.text;
+        mesh.sync?.();
+      }
+    }
+
+    for (const bar of simulation.bars) {
+      const mesh = barRefs.current[bar.index];
+      if (!mesh) {
+        continue;
+      }
+
+      const depth = computeBarDepth(bar.index) * 0.9;
+      mesh.position.set(projectX(bar.x), projectY(bar.y), depth * 0.5);
+      mesh.rotation.set(0, 0, -bar.rotation);
+      mesh.scale.set(bar.width * scale, bar.height * scale, depth);
     }
   });
 
   return (
     <>
-      {glyphLayers.map((layer) => (
-        <group key={layer.key} position={[0, 0, layer.z]}>
-          {layer.rows.map((row) => (
-            <Text
-              key={row.key}
-              anchorX="center"
-              anchorY="middle"
-              color="#ffffff"
-              fontSize={Math.max(stageHeight * 0.095, 0.28)}
-              maxWidth={stageWidth * 0.88}
-              position={[0, row.positionY - stageHeight * 0.5, 0]}
-            >
-              {row.text}
-            </Text>
-          ))}
-        </group>
-      ))}
+      {simulation.glyphs.map((glyph: WiperGlyphState) => {
+        const layerIndex = glyph.index % GLYPH_LAYER_COUNT;
+        const depth = computeGlyphLayerDepth(layerIndex, GLYPH_LAYER_COUNT) * 0.42 - 0.5;
 
-      {Array.from({ length: lineCount }, (_, index) => (
+        return (
+          <Text
+            key={glyph.index}
+            anchorX="center"
+            anchorY="middle"
+            color="#ffffff"
+            fontSize={glyphFontSize}
+            position={[projectX(glyph.x), projectY(glyph.y), depth]}
+            ref={(node) => {
+              glyphRefs.current[glyph.index] = node as GlyphTextMesh | null;
+            }}
+          >
+            {glyph.text}
+          </Text>
+        );
+      })}
+
+      {simulation.bars.map((bar) => (
         <mesh
-          key={index}
+          key={bar.index}
           castShadow
           receiveShadow
           ref={(node) => {
-            barRefs.current[index] = node;
+            barRefs.current[bar.index] = node;
           }}
         >
           <boxGeometry args={[1, 1, 1]} />
@@ -111,9 +116,7 @@ export default function WiperTypographySceneGlyphField3D({
   return (
     <WiperTypographySceneFrame
       projectId={projectId}
-      renderScene={({ phaseRef }) => (
-        <GlyphFieldScene phaseRef={phaseRef} />
-      )}
+      renderScene={({ phaseRef }) => <GlyphFieldScene phaseRef={phaseRef} />}
     />
   );
 }
