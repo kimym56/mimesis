@@ -18,6 +18,15 @@ import {
   mapPointerDragToPhase,
 } from "./wiperMath";
 import {
+  beginDesktopViewDrag,
+  createWiperInteractionState,
+  endDesktopViewDrag,
+  handleDesktopHoverMove,
+  primeTouchPhaseDrag,
+  updateDesktopViewDrag,
+  updateTouchPhaseDrag,
+} from "./wiperInteractionState";
+import {
   stepIdlePhase,
   stepInteractivePhase,
   syncAutoplayAngle,
@@ -28,10 +37,19 @@ interface WiperSize {
   height: number;
 }
 
+export type WiperInteractionMode = "legacy-phase" | "desktop-view-drag";
+
+export interface WiperViewRefValue {
+  yaw: number;
+  pitch: number;
+  isDraggingView: boolean;
+}
+
 interface UseWiperInteractionOptions {
   margin?: number;
   autoplaySpeed?: number;
   maxDelta?: number;
+  interactionMode?: WiperInteractionMode;
 }
 
 export interface WiperInteractionModel {
@@ -39,11 +57,14 @@ export interface WiperInteractionModel {
   dragLayerRef: RefObject<HTMLDivElement | null>;
   phaseRef: MutableRefObject<number>;
   sizeRef: MutableRefObject<WiperSize>;
+  viewRef: MutableRefObject<WiperViewRefValue>;
   reducedMotion: boolean;
   tick: () => number;
   dragLayerProps: {
     onPointerEnter: PointerEventHandler<HTMLDivElement>;
     onPointerMove: PointerEventHandler<HTMLDivElement>;
+    onPointerDown: PointerEventHandler<HTMLDivElement>;
+    onPointerUp: PointerEventHandler<HTMLDivElement>;
     onPointerLeave: PointerEventHandler<HTMLDivElement>;
     onPointerCancel: PointerEventHandler<HTMLDivElement>;
   };
@@ -56,6 +77,7 @@ export function useWiperInteraction(
     margin = WIPER_MARGIN,
     autoplaySpeed = WIPER_AUTOPLAY_SPEED,
     maxDelta = WIPER_POINTER_PHASE_MAX_DELTA,
+    interactionMode = "legacy-phase",
   } = options;
 
   const prefersReducedMotion = useReducedMotion() ?? false;
@@ -64,12 +86,18 @@ export function useWiperInteraction(
   const dragLayerRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef(0);
   const sizeRef = useRef<WiperSize>({ width: 1, height: 1 });
+  const viewRef = useRef<WiperViewRefValue>({
+    yaw: 0,
+    pitch: 0,
+    isDraggingView: false,
+  });
   const autoPhaseAngleRef = useRef(0);
   const pointerOnStageRef = useRef(false);
   const pointerTargetPhaseRef = useRef(0);
   const pointerDragStartXRef = useRef(0);
   const pointerDragStartPhaseRef = useRef(0);
   const pointerDragPrimedRef = useRef(false);
+  const interactionStateRef = useRef(createWiperInteractionState());
 
   useEffect(() => {
     const element = containerRef.current;
@@ -95,6 +123,18 @@ export function useWiperInteraction(
     };
   }, []);
 
+  const syncInteractionState = (
+    nextState: ReturnType<typeof createWiperInteractionState>
+  ) => {
+    interactionStateRef.current = nextState;
+    pointerTargetPhaseRef.current = nextState.pointerTargetPhase;
+    viewRef.current = {
+      yaw: nextState.view.yaw,
+      pitch: nextState.view.pitch,
+      isDraggingView: nextState.isDraggingView,
+    };
+  };
+
   const getPointerX = (clientX: number): number => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) {
@@ -119,6 +159,48 @@ export function useWiperInteraction(
   const onPointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
     const pointerX = getPointerX(event.clientX);
     const width = sizeRef.current.width;
+
+    if (interactionMode === "desktop-view-drag") {
+      if (event.pointerType === "touch") {
+        syncInteractionState(
+          updateTouchPhaseDrag(interactionStateRef.current, {
+            pointerX,
+            width,
+            margin,
+          })
+        );
+        return;
+      }
+
+      if (viewRef.current.isDraggingView) {
+        syncInteractionState(
+          updateDesktopViewDrag(interactionStateRef.current, {
+            pointerX,
+            pointerY: event.clientY,
+            width,
+            height: sizeRef.current.height,
+          })
+        );
+        return;
+      }
+
+      if (!isPointerInsideActiveRange(pointerX, width, margin)) {
+        if (pointerOnStageRef.current) {
+          leavePointerMode();
+        }
+        return;
+      }
+
+      pointerOnStageRef.current = true;
+      syncInteractionState(
+        handleDesktopHoverMove(interactionStateRef.current, {
+          pointerX,
+          width,
+          margin,
+        })
+      );
+      return;
+    }
 
     if (!isPointerInsideActiveRange(pointerX, width, margin)) {
       if (pointerOnStageRef.current) {
@@ -151,16 +233,107 @@ export function useWiperInteraction(
     );
   };
 
+  const onPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode !== "desktop-view-drag") {
+      return;
+    }
+
+    const pointerX = getPointerX(event.clientX);
+    const width = sizeRef.current.width;
+
+    if (event.pointerType === "touch") {
+      pointerOnStageRef.current = true;
+      syncInteractionState(
+        primeTouchPhaseDrag(interactionStateRef.current, {
+          pointerX,
+          phase: phaseRef.current,
+        })
+      );
+      event.currentTarget.setPointerCapture(event.pointerId);
+      return;
+    }
+
+    if (!isPointerInsideActiveRange(pointerX, width, margin)) {
+      return;
+    }
+
+    pointerOnStageRef.current = true;
+    syncInteractionState(
+      beginDesktopViewDrag(interactionStateRef.current, {
+        pointerX,
+        pointerY: event.clientY,
+        phase: phaseRef.current,
+      })
+    );
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onPointerUp: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode !== "desktop-view-drag") {
+      leavePointerMode();
+      return;
+    }
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    if (event.pointerType === "touch") {
+      interactionStateRef.current = {
+        ...interactionStateRef.current,
+        isTouchDraggingPhase: false,
+      };
+      leavePointerMode();
+      return;
+    }
+
+    if (viewRef.current.isDraggingView) {
+      syncInteractionState(endDesktopViewDrag(interactionStateRef.current));
+    }
+  };
+
   const onPointerLeave: PointerEventHandler<HTMLDivElement> = () => {
+    if (interactionMode === "desktop-view-drag" && viewRef.current.isDraggingView) {
+      return;
+    }
+
     leavePointerMode();
   };
 
-  const onPointerCancel: PointerEventHandler<HTMLDivElement> = () => {
+  const onPointerCancel: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode === "desktop-view-drag" && viewRef.current.isDraggingView) {
+      syncInteractionState(endDesktopViewDrag(interactionStateRef.current));
+    }
+
+    if (
+      interactionMode === "desktop-view-drag" &&
+      event.currentTarget.hasPointerCapture(event.pointerId)
+    ) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    interactionStateRef.current = {
+      ...interactionStateRef.current,
+      isTouchDraggingPhase: false,
+    };
     leavePointerMode();
   };
 
   const tick = (): number => {
-    if (pointerOnStageRef.current) {
+    if (interactionMode === "desktop-view-drag") {
+      if (viewRef.current.isDraggingView) {
+        return phaseRef.current;
+      }
+
+      if (pointerOnStageRef.current || interactionStateRef.current.isTouchDraggingPhase) {
+        phaseRef.current = stepInteractivePhase(
+          phaseRef.current,
+          pointerTargetPhaseRef.current,
+          maxDelta
+        );
+        return phaseRef.current;
+      }
+    } else if (pointerOnStageRef.current) {
       phaseRef.current = stepInteractivePhase(
         phaseRef.current,
         pointerTargetPhaseRef.current,
@@ -181,11 +354,14 @@ export function useWiperInteraction(
     dragLayerRef,
     phaseRef,
     sizeRef,
+    viewRef,
     reducedMotion: prefersReducedMotion,
     tick,
     dragLayerProps: {
       onPointerEnter,
       onPointerMove,
+      onPointerDown,
+      onPointerUp,
       onPointerLeave,
       onPointerCancel,
     },
