@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  WIPER_MAX_BAR_DEPTH,
+  WIPER_MAX_GLYPH_FIELD_DEPTH,
+  WIPER_MAX_STAGE_CAMERA_OFFSET,
+} from "./wiperConfig";
+import {
   WIPER_MARGIN,
   clamp,
+  computeBarDepth,
+  computeGlyphLayerDepth,
+  computeLineCount,
+  computeLineDimensions,
   computeLinePose,
+  computeStageCameraOffset,
   isPointerInsideActiveRange,
   mapPointerDragToPhase,
   mapPointerXToPhase,
@@ -64,6 +74,30 @@ describe("wiperMath", () => {
     expect(Math.round(bottom.x)).toBe(560);
     expect(Math.round(bottom.y)).toBe(622);
     expect(bottom.rotation).toBe(Math.PI);
+  });
+
+  it("derives line counts and dimensions consistently for 2d and 3d scenes", () => {
+    expect(computeLineCount(660, 22)).toBe(36);
+    expect(computeLineDimensions(0, 22)).toEqual({ width: 22, height: 22 });
+    expect(computeLineDimensions(5, 22).height).toBeCloseTo(21);
+  });
+
+  it("derives shallow bar depth without exceeding the stage cap", () => {
+    expect(computeBarDepth(0)).toBeGreaterThan(0);
+    expect(computeBarDepth(80)).toBeLessThanOrEqual(WIPER_MAX_BAR_DEPTH);
+  });
+
+  it("assigns glyph layers within the shallow field depth budget", () => {
+    expect(computeGlyphLayerDepth(0, 4)).toBeLessThan(0);
+    expect(Math.abs(computeGlyphLayerDepth(3, 4))).toBeLessThanOrEqual(
+      WIPER_MAX_GLYPH_FIELD_DEPTH
+    );
+  });
+
+  it("keeps the stage camera offset inside the approved shallow range", () => {
+    const offset = computeStageCameraOffset(0.75);
+    expect(Math.abs(offset.x)).toBeLessThanOrEqual(WIPER_MAX_STAGE_CAMERA_OFFSET);
+    expect(Math.abs(offset.y)).toBeLessThanOrEqual(WIPER_MAX_STAGE_CAMERA_OFFSET);
   });
 
   it("moves phase toward target with capped delta", () => {
