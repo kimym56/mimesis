@@ -25,14 +25,6 @@ vi.mock(
 );
 
 vi.mock(
-  "./WiperTypographySceneGlyphField3D",
-  () => ({
-    default: () => <div>mock-3d-glyphs</div>,
-  }),
-  { virtual: true }
-);
-
-vi.mock(
   "./WiperTypographySceneFrame",
   () => ({
     default: ({ children }: { children?: React.ReactNode }) => (
@@ -77,19 +69,19 @@ describe("WiperTypographyProject", () => {
     container.remove();
   });
 
-  it("renders four mode buttons and switches to a selected 3d mode", () => {
+  it("renders only the supported wiper modes and switches to 3d stage", () => {
     act(() => {
       root.render(<WiperTypographyProject projectId="wiper-typography" />);
     });
 
     expect(container.textContent).toContain("mock-2d-canvas");
     expect(container.textContent).toContain("2D Canvas");
-    expect(container.textContent).toContain("3D Wiper Bars");
-    expect(container.textContent).toContain("3D Glyph Field");
     expect(container.textContent).toContain("3D Stage");
+    expect(container.textContent).not.toContain("3D Wiper Bars");
+    expect(container.textContent).not.toContain("3D Glyph Field");
 
     const button = container.querySelector(
-      '[data-mode="3d-bars"]'
+      '[data-mode="3d-stage"]'
     ) as HTMLButtonElement | null;
 
     expect(button).not.toBeNull();
@@ -98,6 +90,6 @@ describe("WiperTypographyProject", () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(container.textContent).toContain("mock-scene-frame");
+    expect(container.textContent).toContain("mock-3d-stage");
   });
 });

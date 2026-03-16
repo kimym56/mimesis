@@ -2,7 +2,7 @@
 
 import styles from "./WiperTypographyProject.module.css";
 
-export type WiperRenderMode = "2d" | "3d-bars" | "3d-glyphs" | "3d-stage";
+export type WiperRenderMode = "2d" | "3d-stage";
 
 interface WiperModeOption {
   id: WiperRenderMode;
@@ -11,8 +11,6 @@ interface WiperModeOption {
 
 const MODE_OPTIONS: WiperModeOption[] = [
   { id: "2d", label: "2D Canvas" },
-  { id: "3d-bars", label: "3D Wiper Bars" },
-  { id: "3d-glyphs", label: "3D Glyph Field" },
   { id: "3d-stage", label: "3D Stage" },
 ];
 

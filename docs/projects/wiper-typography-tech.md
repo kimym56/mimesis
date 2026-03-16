@@ -2,23 +2,37 @@
 
 ## Overview
 
-This project is a canvas-based motion study that simulates a set of black wiping blades moving through a field of falling typographic particles. The implementation is built around one normalized control value called `phase`. Almost every visible behavior, from blade rotation to horizontal sweep position, is derived from that single number.
+This project is a motion study built around a shared `phase` value that drives a set of black wiping blades through a field of falling typographic particles. The live portfolio project currently exposes two render modes behind one shell:
+
+- `2D Canvas`
+- `3D Stage`
+
+Both modes inherit the same wipe language and simulation model, but render it through different surfaces.
 
 At the portfolio level, the project is registered in `src/data/projects.ts` with `id: "wiper-typography"` and `interactiveDemo: "wiper-typography"`. That metadata is what causes the interactive demo to render on the project detail page.
 
 ## Tech Stack
 
 - `Next.js 16` and `React 19` provide the page shell and lifecycle hooks.
-- `TypeScript` is used for the simulation, entity logic, and geometry helpers.
-- `Canvas 2D` is the rendering surface for the entire effect.
-- `CSS Modules` in `src/projects/wiper-typography/WiperTypographyProject.module.css` define the canvas wrapper and pointer layer.
-- `Vitest` covers the extracted math helpers in `src/projects/wiper-typography/wiperMath.test.ts`.
+- `TypeScript` is used for the shell, simulation, interaction, and geometry helpers.
+- `Canvas 2D` renders the flat mode in `src/projects/wiper-typography/WiperTypographyCanvas2D.tsx`.
+- `React Three Fiber` and `Three.js` render the staged 3D mode in `src/projects/wiper-typography/WiperTypographySceneStage3D.tsx`.
+- `CSS Modules` in `src/projects/wiper-typography/WiperTypographyProject.module.css` define the shared shell and mode toggle.
+- `Vitest` covers the extracted math, interaction, and scene wiring helpers.
 
 ## File Map
 
 ### `src/projects/wiper-typography/WiperTypographyProject.tsx`
 
-This is the full runtime for the effect. It owns the canvas, the animation loop, the device-aware scene construction, pointer behavior, and the two entity classes used in the simulation.
+This is the shell component for the project. It owns the mode state and swaps between the maintained `2D Canvas` and `3D Stage` renderers.
+
+### `src/projects/wiper-typography/WiperTypographyCanvas2D.tsx`
+
+This is the imperative canvas runtime for the flat version of the piece. It owns canvas sizing, frame updates, and drawing for the 2D renderer.
+
+### `src/projects/wiper-typography/WiperTypographySceneStage3D.tsx`
+
+This is the maintained 3D renderer. It stages the same bars and glyph language inside a shallow perspective scene and delegates shared camera and interaction behavior to `WiperTypographySceneFrame.tsx`.
 
 ### `src/projects/wiper-typography/wiperMath.ts`
 
@@ -37,20 +51,20 @@ This test file covers the helper layer, not the entire animation system. That is
 
 ## Runtime Architecture
 
-The React component itself is mostly a shell around an imperative simulation. The important architectural decision is that React is not used as the animation engine.
+The top-level React component is a shell around two renderer implementations. The important architectural decision is that React is not used as the animation engine for either renderer.
 
 React is responsible for:
-- mounting the container, canvas, and invisible drag layer
-- giving the effect stable DOM refs
-- starting and cleaning up the imperative runtime in `useEffect`
+- mounting the shared project shell and mode toggle
+- giving each renderer stable refs
+- switching between the maintained 2D and 3D renderers
 
-The imperative runtime is responsible for:
+The imperative runtimes are responsible for:
 - canvas sizing and device-pixel-ratio setup
 - entity creation
 - autoplay and pointer interaction
-- drawing and physics updates on each animation frame
+- drawing or updating scene objects on each animation frame
 
-That split is the reason the component stays performant even though it animates many moving objects. There is no per-frame React re-render.
+That split is the reason the project stays performant even though it animates many moving objects. There is no per-frame React re-render.
 
 ## Scene Model
 

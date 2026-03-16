@@ -6,8 +6,6 @@ import WiperTypographyCanvas2D from "./WiperTypographyCanvas2D";
 import WiperTypographyModeToggle, {
   type WiperRenderMode,
 } from "./WiperTypographyModeToggle";
-import WiperTypographySceneBars3D from "./WiperTypographySceneBars3D";
-import WiperTypographySceneGlyphField3D from "./WiperTypographySceneGlyphField3D";
 import WiperTypographySceneStage3D from "./WiperTypographySceneStage3D";
 import styles from "./WiperTypographyProject.module.css";
 
@@ -16,8 +14,6 @@ const MODE_COMPONENTS: Record<
   ComponentType<InteractiveProjectProps>
 > = {
   "2d": WiperTypographyCanvas2D,
-  "3d-bars": WiperTypographySceneBars3D,
-  "3d-glyphs": WiperTypographySceneGlyphField3D,
   "3d-stage": WiperTypographySceneStage3D,
 };
 

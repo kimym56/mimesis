@@ -10,8 +10,6 @@ import {
   it,
   vi,
 } from "vitest";
-import WiperTypographySceneBars3D from "./WiperTypographySceneBars3D";
-import WiperTypographySceneGlyphField3D from "./WiperTypographySceneGlyphField3D";
 import WiperTypographySceneStage3D from "./WiperTypographySceneStage3D";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -90,15 +88,9 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("renders the shared extruded glyph component in all three 3d modes", () => {
+  it("renders the shared extruded glyph component in the remaining 3d mode", () => {
     act(() => {
-      root.render(
-        <>
-          <WiperTypographySceneBars3D projectId="wiper-typography" />
-          <WiperTypographySceneGlyphField3D projectId="wiper-typography" />
-          <WiperTypographySceneStage3D projectId="wiper-typography" />
-        </>
-      );
+      root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
     });
 
     expect(mockedExtrudedGlyph).toHaveBeenCalled();
@@ -106,7 +98,7 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
 
   it("passes geometry scale into the shared extruded glyph renderer", () => {
     act(() => {
-      root.render(<WiperTypographySceneBars3D projectId="wiper-typography" />);
+      root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
     });
 
     const firstCall = mockedExtrudedGlyph.mock.calls[0]?.[0] as
