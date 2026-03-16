@@ -13,6 +13,11 @@ Mimesis is a UX portfolio that displays original visual works side-by-side with 
 - `npm start` - Start production server
 - `npm run lint` - Run ESLint
 
+## Workflow
+
+- Work directly in the repository's `main` branch by default.
+- Do not create or use git worktrees for this repository unless the user explicitly asks for a branch or isolated workspace.
+
 ## Tech Stack
 
 - **Next.js 16** with App Router (not Pages Router)
