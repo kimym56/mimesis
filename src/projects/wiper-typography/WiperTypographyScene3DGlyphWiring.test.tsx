@@ -18,7 +18,13 @@ let container: HTMLDivElement;
 let root: Root;
 let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
-const { mockedExtrudedGlyph } = vi.hoisted(() => ({
+const {
+  mockedCockpitShell,
+  mockedCockpitWipers,
+  mockedExtrudedGlyph,
+} = vi.hoisted(() => ({
+  mockedCockpitShell: vi.fn(() => <div data-stage-part="cockpit-shell" />),
+  mockedCockpitWipers: vi.fn(() => <div data-stage-part="cockpit-wipers" />),
   mockedExtrudedGlyph: vi.fn(() => <div data-testid="extruded-glyph" />),
 }));
 
@@ -26,26 +32,13 @@ vi.mock("./WiperTypographyExtrudedGlyph3D", () => ({
   default: mockedExtrudedGlyph,
 }));
 
-vi.mock(
-  "./WiperTypographyCockpitShell3D",
-  () => ({
-    default: () => (
-      <>
-        <div data-cockpit-role="center-display" />
-        <div data-cockpit-role="yoke" />
-      </>
-    ),
-  }),
-  { virtual: true }
-);
+vi.mock("./WiperTypographyCockpitShell3D", () => ({
+  default: mockedCockpitShell,
+}));
 
-vi.mock(
-  "./WiperTypographyCockpitWipers3D",
-  () => ({
-    default: () => <div data-cockpit-role="wipers" />,
-  }),
-  { virtual: true }
-);
+vi.mock("./WiperTypographyCockpitWipers3D", () => ({
+  default: mockedCockpitWipers,
+}));
 
 vi.mock("./useWiperSceneSimulation3D", () => ({
   useWiperSceneSimulation3D: vi.fn(() => ({
@@ -94,6 +87,8 @@ vi.mock("@react-three/fiber", () => ({
 
 describe("WiperTypographyScene3DGlyphWiring", () => {
   beforeEach(() => {
+    mockedCockpitShell.mockClear();
+    mockedCockpitWipers.mockClear();
     mockedExtrudedGlyph.mockClear();
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     container = document.createElement("div");
@@ -129,13 +124,48 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
     expect(firstCall?.scale).toBeCloseTo(0.396, 3);
   });
 
-  it("renders the tesla cockpit anchors through the dedicated shell", () => {
+  it("composes the dedicated cockpit shell and wiper assemblies", () => {
     act(() => {
       root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
     });
 
-    expect(container.querySelector('[data-cockpit-role="center-display"]')).not.toBeNull();
-    expect(container.querySelector('[data-cockpit-role="yoke"]')).not.toBeNull();
-    expect(container.querySelector('[data-cockpit-role="wipers"]')).not.toBeNull();
+    expect(mockedCockpitShell).toHaveBeenCalled();
+    expect(mockedCockpitWipers).toHaveBeenCalled();
+
+    const shellProps = mockedCockpitShell.mock.calls[0]?.[0] as
+      | {
+          windshieldY?: number;
+          windshieldZ?: number;
+          worldHeight?: number;
+          worldWidth?: number;
+        }
+      | undefined;
+    const wiperProps = mockedCockpitWipers.mock.calls[0]?.[0] as
+      | {
+          phaseRef?: { current: number };
+          windshieldZ?: number;
+          worldHeight?: number;
+          worldWidth?: number;
+        }
+      | undefined;
+
+    expect(shellProps).toEqual(
+      expect.objectContaining({
+        windshieldY: 2,
+        windshieldZ: 0.08,
+        worldHeight: 100,
+        worldWidth: 100,
+      })
+    );
+    expect(wiperProps).toEqual(
+      expect.objectContaining({
+        phaseRef: { current: 0 },
+        windshieldZ: 0.08,
+        worldHeight: 100,
+        worldWidth: 100,
+      })
+    );
+    expect(container.querySelector('[data-stage-part="cockpit-shell"]')).not.toBeNull();
+    expect(container.querySelector('[data-stage-part="cockpit-wipers"]')).not.toBeNull();
   });
 });

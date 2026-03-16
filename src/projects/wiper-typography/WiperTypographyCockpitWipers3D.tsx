@@ -111,15 +111,24 @@ export default function WiperTypographyCockpitWipers3D({
   });
 
   return (
-    <>
+    <group data-cockpit-role="wipers">
       <mesh position={[0, -worldHeight * 0.43, windshieldZ + 0.02]} receiveShadow>
         <boxGeometry args={[worldWidth * 1.02, worldHeight * 0.055, 0.12]} />
         <meshStandardMaterial color={WIPER_STAGE_COWL_COLOR} metalness={0.08} roughness={0.82} />
       </mesh>
 
-      <mesh position={[0, -worldHeight * 0.39, windshieldZ + 0.05]} receiveShadow rotation={[-0.12, 0, 0]}>
+      <mesh
+        position={[0, -worldHeight * 0.39, windshieldZ + 0.05]}
+        receiveShadow
+        rotation={[-0.12, 0, 0]}
+      >
         <boxGeometry args={[worldWidth * 0.94, worldHeight * 0.03, 0.06]} />
         <meshStandardMaterial color={WIPER_STAGE_TRIM_COLOR} metalness={0.12} roughness={0.68} />
+      </mesh>
+
+      <mesh position={[0, -worldHeight * 0.405, windshieldZ + 0.075]} receiveShadow>
+        <boxGeometry args={[worldWidth * 0.78, worldHeight * 0.018, 0.04]} />
+        <meshStandardMaterial color={WIPER_STAGE_TRIM_COLOR} metalness={0.1} roughness={0.64} />
       </mesh>
 
       <group position={leftMount}>
@@ -145,6 +154,6 @@ export default function WiperTypographyCockpitWipers3D({
           }}
         />
       </group>
-    </>
+    </group>
   );
 }
