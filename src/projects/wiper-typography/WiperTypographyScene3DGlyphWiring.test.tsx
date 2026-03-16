@@ -26,6 +26,27 @@ vi.mock("./WiperTypographyExtrudedGlyph3D", () => ({
   default: mockedExtrudedGlyph,
 }));
 
+vi.mock(
+  "./WiperTypographyCockpitShell3D",
+  () => ({
+    default: () => (
+      <>
+        <div data-cockpit-role="center-display" />
+        <div data-cockpit-role="yoke" />
+      </>
+    ),
+  }),
+  { virtual: true }
+);
+
+vi.mock(
+  "./WiperTypographyCockpitWipers3D",
+  () => ({
+    default: () => <div data-cockpit-role="wipers" />,
+  }),
+  { virtual: true }
+);
+
 vi.mock("./useWiperSceneSimulation3D", () => ({
   useWiperSceneSimulation3D: vi.fn(() => ({
     glyphScale: 0.33,
@@ -106,5 +127,15 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
       | undefined;
 
     expect(firstCall?.scale).toBeCloseTo(0.396, 3);
+  });
+
+  it("renders the tesla cockpit anchors through the dedicated shell", () => {
+    act(() => {
+      root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
+    });
+
+    expect(container.querySelector('[data-cockpit-role="center-display"]')).not.toBeNull();
+    expect(container.querySelector('[data-cockpit-role="yoke"]')).not.toBeNull();
+    expect(container.querySelector('[data-cockpit-role="wipers"]')).not.toBeNull();
   });
 });
