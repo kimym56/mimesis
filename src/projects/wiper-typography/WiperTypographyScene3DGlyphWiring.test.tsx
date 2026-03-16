@@ -96,7 +96,7 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
     expect(mockedExtrudedGlyph).toHaveBeenCalled();
   });
 
-  it("passes geometry scale into the shared extruded glyph renderer", () => {
+  it("applies a larger cockpit-stage glyph scale to the shared extruded renderer", () => {
     act(() => {
       root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
     });
@@ -105,6 +105,6 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
       | { scale?: number }
       | undefined;
 
-    expect(firstCall?.scale).toBe(0.33);
+    expect(firstCall?.scale).toBeCloseTo(0.396, 3);
   });
 });

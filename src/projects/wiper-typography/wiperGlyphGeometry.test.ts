@@ -30,4 +30,12 @@ describe("wiperGlyphGeometry", () => {
     expect(Math.abs(center.x)).toBeLessThan(0.001);
     expect(Math.abs(center.y)).toBeLessThan(0.001);
   });
+
+  it("extrudes glyphs with the thicker cockpit-stage depth", () => {
+    const bounds = new Box3().setFromBufferAttribute(
+      getWiperGlyphGeometry("T").attributes.position
+    );
+
+    expect(bounds.max.z - bounds.min.z).toBeCloseTo(16, 1);
+  });
 });
