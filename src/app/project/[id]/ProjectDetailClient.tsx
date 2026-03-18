@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { interactiveProjectRegistry } from "@/projects/registry";
+import ProjectReferenceContent from "./ProjectReferenceContent";
 import styles from "./ProjectDetail.module.css";
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
@@ -98,30 +99,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               </p>
             </div>
           </div>
-          {project.referenceEmbed ? (
-            <div className={styles.iframeContainer}>
-              <iframe
-                src={project.referenceEmbed}
-                height="877"
-                width="504"
-                frameBorder="0"
-                allowFullScreen
-                title="Original reference"
-                className={styles.referenceIframe}
-              />
-            </div>
-          ) : (
-            <div className={styles.imageContainer}>
-              <Image
-                src={project.originalImage}
-                alt={`${project.title} — original reference`}
-                fill
-                className={styles.image}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-            </div>
-          )}
+          <ProjectReferenceContent project={project} />
         </motion.div>
       </div>
     </div>

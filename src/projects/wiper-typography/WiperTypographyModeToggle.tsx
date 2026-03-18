@@ -2,7 +2,7 @@
 
 import styles from "./WiperTypographyProject.module.css";
 
-export type WiperRenderMode = "2d" | "3d-stage";
+export type WiperRenderMode = "2d" | "3d-driver";
 
 interface WiperModeOption {
   id: WiperRenderMode;
@@ -11,7 +11,7 @@ interface WiperModeOption {
 
 const MODE_OPTIONS: WiperModeOption[] = [
   { id: "2d", label: "2D Canvas" },
-  { id: "3d-stage", label: "3D Stage" },
+  { id: "3d-driver", label: "3D Driver View" },
 ];
 
 export default function WiperTypographyModeToggle({

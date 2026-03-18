@@ -2,29 +2,27 @@
 
 ## Overview
 
-This project is a motion study built around a shared `phase` value that drives a set of black wiping blades through a field of falling typographic particles. The live portfolio project currently exposes two render modes behind one shell:
+This project is a motion study built around a shared `phase` value that drives a set of black wiping blades through a field of falling typographic particles. The live portfolio project currently exposes one maintained render mode:
 
 - `2D Canvas`
-- `3D Stage`
 
-Both modes inherit the same wipe language and simulation model, but render it through different surfaces.
+The live portfolio project now renders only the maintained 2D canvas runtime. The earlier `3D Stage` experiment remains in the repository as retained implementation work, but it is no longer exposed through the project UI.
 
 At the portfolio level, the project is registered in `src/data/projects.ts` with `id: "wiper-typography"` and `interactiveDemo: "wiper-typography"`. That metadata is what causes the interactive demo to render on the project detail page.
 
 ## Tech Stack
 
 - `Next.js 16` and `React 19` provide the page shell and lifecycle hooks.
-- `TypeScript` is used for the shell, simulation, interaction, and geometry helpers.
+- `TypeScript` is used for the shell, simulation, interaction, and helper modules.
 - `Canvas 2D` renders the flat mode in `src/projects/wiper-typography/WiperTypographyCanvas2D.tsx`.
-- `React Three Fiber` and `Three.js` render the staged 3D mode in `src/projects/wiper-typography/WiperTypographySceneStage3D.tsx`.
-- `CSS Modules` in `src/projects/wiper-typography/WiperTypographyProject.module.css` define the shared shell and mode toggle.
-- `Vitest` covers the extracted math, interaction, and scene wiring helpers.
+- `CSS Modules` in `src/projects/wiper-typography/WiperTypographyProject.module.css` define the shared shell and canvas wrapper.
+- `Vitest` covers the extracted math, interaction, and project-shell wiring helpers.
 
 ## File Map
 
 ### `src/projects/wiper-typography/WiperTypographyProject.tsx`
 
-This is the shell component for the project. It owns the mode state and swaps between the maintained `2D Canvas` and `3D Stage` renderers.
+This is the shell component for the project. It is now a thin wrapper that mounts the maintained `2D Canvas` renderer inside the shared interactive pane.
 
 ### `src/projects/wiper-typography/WiperTypographyCanvas2D.tsx`
 
@@ -32,7 +30,7 @@ This is the imperative canvas runtime for the flat version of the piece. It owns
 
 ### `src/projects/wiper-typography/WiperTypographySceneStage3D.tsx`
 
-This is the maintained 3D renderer. It stages the same bars and glyph language inside a shallow perspective scene and delegates shared camera and interaction behavior to `WiperTypographySceneFrame.tsx`.
+This is the retained 3D stage experiment. It still stages the same bars and glyph language inside a shallow perspective scene and delegates shared camera and interaction behavior to `WiperTypographySceneFrame.tsx`, but it is no longer mounted by the live portfolio project shell.
 
 ### `src/projects/wiper-typography/wiperMath.ts`
 
@@ -51,12 +49,12 @@ This test file covers the helper layer, not the entire animation system. That is
 
 ## Runtime Architecture
 
-The top-level React component is a shell around two renderer implementations. The important architectural decision is that React is not used as the animation engine for either renderer.
+The top-level React component is a shell around one live renderer implementation. The important architectural decision is that React is not used as the animation engine for the animation itself.
 
 React is responsible for:
-- mounting the shared project shell and mode toggle
-- giving each renderer stable refs
-- switching between the maintained 2D and 3D renderers
+- mounting the shared project shell
+- giving the live renderer stable refs
+- mounting the maintained 2D renderer
 
 The imperative runtimes are responsible for:
 - canvas sizing and device-pixel-ratio setup

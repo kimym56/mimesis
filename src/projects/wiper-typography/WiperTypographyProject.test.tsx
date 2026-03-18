@@ -25,19 +25,9 @@ vi.mock(
 );
 
 vi.mock(
-  "./WiperTypographySceneFrame",
+  "./WiperTypographyDriverView3D",
   () => ({
-    default: ({ children }: { children?: React.ReactNode }) => (
-      <div>mock-scene-frame{children}</div>
-    ),
-  }),
-  { virtual: true }
-);
-
-vi.mock(
-  "./WiperTypographySceneStage3D",
-  () => ({
-    default: () => <div>mock-3d-stage</div>,
+    default: () => <div>mock-3d-driver-view</div>,
   }),
   { virtual: true }
 );
@@ -69,19 +59,18 @@ describe("WiperTypographyProject", () => {
     container.remove();
   });
 
-  it("renders only the supported wiper modes and switches to 3d stage", () => {
+  it("renders 2d canvas by default and switches to 3d driver view", () => {
     act(() => {
       root.render(<WiperTypographyProject projectId="wiper-typography" />);
     });
 
     expect(container.textContent).toContain("mock-2d-canvas");
     expect(container.textContent).toContain("2D Canvas");
-    expect(container.textContent).toContain("3D Stage");
-    expect(container.textContent).not.toContain("3D Wiper Bars");
-    expect(container.textContent).not.toContain("3D Glyph Field");
+    expect(container.textContent).toContain("3D Driver View");
+    expect(container.textContent).not.toContain("mock-3d-driver-view");
 
     const button = container.querySelector(
-      '[data-mode="3d-stage"]'
+      '[data-mode="3d-driver"]'
     ) as HTMLButtonElement | null;
 
     expect(button).not.toBeNull();
@@ -90,6 +79,6 @@ describe("WiperTypographyProject", () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(container.textContent).toContain("mock-3d-stage");
+    expect(container.textContent).toContain("mock-3d-driver-view");
   });
 });

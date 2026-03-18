@@ -3,10 +3,10 @@
 import { useState, type ComponentType } from "react";
 import type { InteractiveProjectProps } from "../types";
 import WiperTypographyCanvas2D from "./WiperTypographyCanvas2D";
+import WiperTypographyDriverView3D from "./WiperTypographyDriverView3D";
 import WiperTypographyModeToggle, {
   type WiperRenderMode,
 } from "./WiperTypographyModeToggle";
-import WiperTypographySceneStage3D from "./WiperTypographySceneStage3D";
 import styles from "./WiperTypographyProject.module.css";
 
 const MODE_COMPONENTS: Record<
@@ -14,7 +14,7 @@ const MODE_COMPONENTS: Record<
   ComponentType<InteractiveProjectProps>
 > = {
   "2d": WiperTypographyCanvas2D,
-  "3d-stage": WiperTypographySceneStage3D,
+  "3d-driver": WiperTypographyDriverView3D,
 };
 
 export default function WiperTypographyProject({

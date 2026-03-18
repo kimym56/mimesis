@@ -6,9 +6,18 @@ export interface Project {
   imitationImage: string;
   previewMedia?: ProjectPreviewMedia;
   interactive?: boolean;
-  interactiveDemo?: "page-curl" | "wiper-typography";
+  interactiveDemo?: "page-curl" | "wiper-typography" | "bw-circle";
   referenceEmbed?: string; // iframe src URL
+  referencePreview?: ProjectReferencePreview;
   referenceUser?: { name: string; url: string };
+}
+
+export interface ProjectReferencePreview {
+  platform: "threads";
+  url: string;
+  image: string;
+  title: string;
+  description: string;
 }
 
 export interface ProjectPreviewMediaSource {
@@ -80,6 +89,28 @@ export const projects: Project[] = [
     referenceUser: {
       name: "Jongmin Kim",
       url: "https://blog.cmiscm.com/?page_id=3023",
+    },
+  },
+  {
+    id: "black-white-circle",
+    title: "Black & White Circle",
+    description:
+      "A monochrome yin-yang playground recreating SABUM's black and white circle study with a second pseudo-sync mode driven by YouTube playback time.",
+    originalImage: "/images/black-white-circle-cover.svg",
+    imitationImage: "/images/black-white-circle-cover.svg",
+    interactive: true,
+    interactiveDemo: "bw-circle",
+    referencePreview: {
+      platform: "threads",
+      url: "https://www.threads.com/@byunsabum/post/DTkg4CWkyVS",
+      image: "/images/threads-black-white-circle-reference.jpg",
+      title: "Sabum Byun on Threads",
+      description:
+        "Inspired by the black and white spoon silhouettes in the stage background of Netflix's Culinary Class Wars, I reimagined the visual using Vibe Coding. The design features black and white symmetry with contrasting backgrounds, where the small circles inside represent the competing chefs.",
+    },
+    referenceUser: {
+      name: "SABUM",
+      url: "https://www.threads.com/@byunsabum/post/DTkg4CWkyVS",
     },
   },
   {

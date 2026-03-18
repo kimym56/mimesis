@@ -1,0 +1,172 @@
+.interactivePane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.modeToggle {
+  display: flex;
+  gap: 2px;
+  align-self: flex-start;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  padding: 2px;
+  margin-bottom: var(--space-md);
+}
+
+.modeButton {
+  padding: 6px 16px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--foreground-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modeButton:hover {
+  color: var(--foreground);
+}
+
+.modeButtonActive {
+  color: var(--foreground);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.syncPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm);
+  background: color-mix(in srgb, var(--background) 88%, var(--foreground) 12%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.inputRow {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.linkInput {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.loadButton {
+  padding: 0 18px;
+  color: var(--background);
+  background: var(--foreground);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.errorText {
+  font-size: var(--text-xs);
+  color: #b42318;
+}
+
+.playerFrame {
+  position: relative;
+  width: min(100%, 24rem);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: #000;
+}
+
+.playerHost {
+  width: 100%;
+  height: 100%;
+}
+
+.sceneShell {
+  position: relative;
+  flex: 1;
+  min-height: 40vh;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 32%),
+    linear-gradient(180deg, #f3f1eb 0%, #dbd8d2 100%);
+}
+
+.cameraToggle {
+  position: absolute;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.cameraButton {
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(16, 16, 16, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.cameraButtonActive {
+  color: #101010;
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.86);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: manipulation;
+}
+
+@media (min-width: 1024px) {
+  .sceneShell {
+    min-height: 0;
+    height: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .loadButton {
+    min-height: 44px;
+  }
+
+  .cameraToggle {
+    top: auto;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    flex-direction: row;
+  }
+}

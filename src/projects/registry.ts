@@ -10,10 +10,14 @@ const WiperTypographyProject = dynamic(
   () => import("./wiper-typography/WiperTypographyProject"),
   { loading: () => null }
 ) as InteractiveProjectComponent;
+const BwCircleProject = dynamic(() => import("./bw-circle/BwCircleProject"), {
+  loading: () => null,
+}) as InteractiveProjectComponent;
 
 type InteractiveDemoId = NonNullable<Project["interactiveDemo"]>;
 
 export const interactiveProjectRegistry: Record<InteractiveDemoId, InteractiveProjectComponent> = {
+  "bw-circle": BwCircleProject,
   "page-curl": PageCurlProject,
   "wiper-typography": WiperTypographyProject,
 };

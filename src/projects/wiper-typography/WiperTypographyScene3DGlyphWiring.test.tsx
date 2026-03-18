@@ -10,7 +10,7 @@ import {
   it,
   vi,
 } from "vitest";
-import WiperTypographySceneStage3D from "./WiperTypographySceneStage3D";
+import WiperTypographyDriverView3D from "./WiperTypographyDriverView3D";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -19,25 +19,24 @@ let root: Root;
 let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
 const {
-  mockedCockpitShell,
-  mockedCockpitWipers,
   mockedExtrudedGlyph,
+  mockedTeslaModel,
 } = vi.hoisted(() => ({
-  mockedCockpitShell: vi.fn(() => <div data-stage-part="cockpit-shell" />),
-  mockedCockpitWipers: vi.fn(() => <div data-stage-part="cockpit-wipers" />),
   mockedExtrudedGlyph: vi.fn(() => <div data-testid="extruded-glyph" />),
+  mockedTeslaModel: vi.fn(() => <div data-driver-view-part="tesla-model" />),
+}));
+
+const { mockedFetch } = vi.hoisted(() => ({
+  mockedFetch: vi.fn(),
+}));
+
+vi.mock("./WiperTypographyTeslaModel", () => ({
+  default: mockedTeslaModel,
+  TESLA_DRIVER_VIEW_MODEL_PATH: "/models/tesla_2018_model_3.glb",
 }));
 
 vi.mock("./WiperTypographyExtrudedGlyph3D", () => ({
   default: mockedExtrudedGlyph,
-}));
-
-vi.mock("./WiperTypographyCockpitShell3D", () => ({
-  default: mockedCockpitShell,
-}));
-
-vi.mock("./WiperTypographyCockpitWipers3D", () => ({
-  default: mockedCockpitWipers,
 }));
 
 vi.mock("./useWiperSceneSimulation3D", () => ({
@@ -69,27 +68,22 @@ vi.mock("./useWiperSceneSimulation3D", () => ({
   })),
 }));
 
-vi.mock("./WiperTypographySceneFrame", () => ({
-  default: ({
-    renderScene,
-  }: {
-    renderScene: ({ phaseRef }: { phaseRef: { current: number } }) => React.ReactNode;
-  }) => <div>{renderScene({ phaseRef: { current: 0 } })}</div>,
-}));
-
 vi.mock("@react-three/drei", () => ({
-  Text: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  Html: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock("@react-three/fiber", () => ({
+  Canvas: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   useFrame: () => undefined,
 }));
 
 describe("WiperTypographyScene3DGlyphWiring", () => {
   beforeEach(() => {
-    mockedCockpitShell.mockClear();
-    mockedCockpitWipers.mockClear();
     mockedExtrudedGlyph.mockClear();
+    mockedTeslaModel.mockClear();
+    mockedFetch.mockReset();
+    mockedFetch.mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", mockedFetch);
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -101,71 +95,18 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
       root.unmount();
     });
     container.remove();
+    vi.unstubAllGlobals();
     consoleErrorSpy.mockRestore();
   });
 
-  it("renders the shared extruded glyph component in the remaining 3d mode", () => {
-    act(() => {
-      root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
+  it("composes the tesla model and shared glyph meshes in the driver view", async () => {
+    await act(async () => {
+      root.render(<WiperTypographyDriverView3D projectId="wiper-typography" />);
+      await Promise.resolve();
     });
 
+    expect(mockedTeslaModel).toHaveBeenCalled();
     expect(mockedExtrudedGlyph).toHaveBeenCalled();
-  });
-
-  it("applies a larger cockpit-stage glyph scale to the shared extruded renderer", () => {
-    act(() => {
-      root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
-    });
-
-    const firstCall = mockedExtrudedGlyph.mock.calls[0]?.[0] as
-      | { scale?: number }
-      | undefined;
-
-    expect(firstCall?.scale).toBeCloseTo(0.396, 3);
-  });
-
-  it("composes the dedicated cockpit shell and wiper assemblies", () => {
-    act(() => {
-      root.render(<WiperTypographySceneStage3D projectId="wiper-typography" />);
-    });
-
-    expect(mockedCockpitShell).toHaveBeenCalled();
-    expect(mockedCockpitWipers).toHaveBeenCalled();
-
-    const shellProps = mockedCockpitShell.mock.calls[0]?.[0] as
-      | {
-          windshieldY?: number;
-          windshieldZ?: number;
-          worldHeight?: number;
-          worldWidth?: number;
-        }
-      | undefined;
-    const wiperProps = mockedCockpitWipers.mock.calls[0]?.[0] as
-      | {
-          phaseRef?: { current: number };
-          windshieldZ?: number;
-          worldHeight?: number;
-          worldWidth?: number;
-        }
-      | undefined;
-
-    expect(shellProps).toEqual(
-      expect.objectContaining({
-        windshieldY: 2,
-        windshieldZ: 0.08,
-        worldHeight: 100,
-        worldWidth: 100,
-      })
-    );
-    expect(wiperProps).toEqual(
-      expect.objectContaining({
-        phaseRef: { current: 0 },
-        windshieldZ: 0.08,
-        worldHeight: 100,
-        worldWidth: 100,
-      })
-    );
-    expect(container.querySelector('[data-stage-part="cockpit-shell"]')).not.toBeNull();
-    expect(container.querySelector('[data-stage-part="cockpit-wipers"]')).not.toBeNull();
+    expect(container.querySelector('[data-driver-view-part="tesla-model"]')).not.toBeNull();
   });
 });
