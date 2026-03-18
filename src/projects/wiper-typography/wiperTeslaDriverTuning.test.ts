@@ -37,14 +37,39 @@ describe("wiperTeslaDriverTuning", () => {
   });
 
   it("keeps lil-gui ranges broad enough for exploratory driver-view tuning", () => {
-    expect(TESLA_DRIVER_VIEW_FOV_RANGE.max).toBeGreaterThan(96);
-    expect(getControlRange("cameraOffsetZ").max).toBeGreaterThan(0.45);
-    expect(getControlRange("cameraOffsetZ").min).toBeLessThan(0.05);
-    expect(getControlRange("lookAtOffsetX").min).toBeLessThan(-0.4);
-    expect(getControlRange("lookAtOffsetY").max).toBeGreaterThan(0.15);
-    expect(getControlRange("windscreenWidthScale").max).toBeGreaterThan(0.9);
-    expect(getControlRange("windscreenCenterOffsetNormal").min).toBeLessThan(-0.08);
-    expect(getControlRange("glyphWidthScale").max).toBeGreaterThan(1);
-    expect(getControlRange("glyphDepthOffset").min).toBeLessThan(-0.03);
+    expect(TESLA_DRIVER_VIEW_FOV_RANGE).toEqual({
+      min: 8,
+      max: 170,
+    });
+    expect(getControlRange("cameraOffsetX")).toMatchObject({ min: -1.5, max: 1.5 });
+    expect(getControlRange("cameraOffsetY")).toMatchObject({ min: -1.5, max: 1.5 });
+    expect(getControlRange("cameraOffsetZ")).toMatchObject({ min: -1.5, max: 2.5 });
+    expect(getControlRange("lookAtOffsetX")).toMatchObject({ min: -2, max: 2 });
+    expect(getControlRange("lookAtOffsetY")).toMatchObject({ min: -2, max: 2 });
+    expect(getControlRange("lookAtOffsetZ")).toMatchObject({ min: -2, max: 2 });
+    expect(getControlRange("windscreenWidthScale")).toMatchObject({
+      min: 0.05,
+      max: 3,
+    });
+    expect(getControlRange("windscreenHeightScale")).toMatchObject({
+      min: 0.05,
+      max: 3,
+    });
+    expect(getControlRange("windscreenCenterOffsetX")).toMatchObject({
+      min: -2,
+      max: 2,
+    });
+    expect(getControlRange("windscreenCenterOffsetY")).toMatchObject({
+      min: -2,
+      max: 2,
+    });
+    expect(getControlRange("windscreenCenterOffsetNormal")).toMatchObject({
+      min: -1.5,
+      max: 1.5,
+    });
+    expect(getControlRange("glyphWidthScale")).toMatchObject({ min: 0.05, max: 3 });
+    expect(getControlRange("glyphHeightScale")).toMatchObject({ min: 0.05, max: 3 });
+    expect(getControlRange("glyphYBias")).toMatchObject({ min: -2, max: 3 });
+    expect(getControlRange("glyphDepthOffset")).toMatchObject({ min: -1, max: 1 });
   });
 });
