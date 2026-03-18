@@ -14,7 +14,13 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import { Box3, type Object3D, type PerspectiveCamera, Vector3 } from "three";
+import {
+  Box3,
+  type BufferGeometry,
+  type Object3D,
+  type PerspectiveCamera,
+  Vector3,
+} from "three";
 import type { InteractiveProjectProps } from "../types";
 import WiperTypographyExtrudedGlyph3D from "./WiperTypographyExtrudedGlyph3D";
 import WiperTypographyTeslaModel, {
@@ -32,12 +38,16 @@ import {
   type WiperGlyphState,
 } from "./wiperSimulation";
 import {
+  createTeslaDriverGlyphProjectionInsets,
+  createTeslaDriverGlyphQuaternion,
   createTeslaDriverViewLayout,
+  createTeslaDriverViewPlaneFromPoints,
   getTeslaDriverWiperRotation,
   projectTeslaDriverGlyphPosition,
   type TeslaDriverViewLayout,
 } from "./wiperTeslaDriverLayout";
 import {
+  clampTeslaDriverViewFov,
   DEFAULT_TESLA_DRIVER_VIEW_TUNING,
   type TeslaDriverViewTuning,
 } from "./wiperTeslaDriverTuning";
@@ -52,7 +62,9 @@ const DRIVER_VIEW_INITIAL_CAMERA_POSITION: [number, number, number] = [
   -0.43,
 ];
 const DRIVER_VIEW_INITIAL_LOOK_AT: [number, number, number] = [-0.23, 0.56, -0.82];
-const DRIVER_VIEW_INITIAL_FOV = DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov;
+const DRIVER_VIEW_INITIAL_FOV = clampTeslaDriverViewFov(
+  DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov
+);
 
 function DriverViewGuiController({
   setTuning,
@@ -93,6 +105,7 @@ function DriverViewGlyphField({
   const cycleDuration = getDriverViewCycleDuration(reducedMotion);
   const scratchBoxRef = useRef(new Box3());
   const scratchCenterRef = useRef(new Vector3());
+  const scratchPlanePointRef = useRef(new Vector3());
   const scratchSizeRef = useRef(new Vector3());
   const scratchSteeringPositionRef = useRef(new Vector3());
 
@@ -107,7 +120,11 @@ function DriverViewGlyphField({
     }
 
     const steeringDummy = scene.getObjectByName("steering_dummy");
-    const windscreenMesh = scene.getObjectByName("windscreen_ok_glass0_0");
+    const windscreenMesh =
+      (scene.getObjectByName("windscreen_ok_glass0_0") ??
+        scene.getObjectByName("windscreen_ok_glass.0_0")) as
+        | (Object3D & { geometry?: BufferGeometry })
+        | null;
     const wiperDummy = scene.getObjectByName("dvornik_dummy");
 
     if (!steeringDummy || !windscreenMesh || !wiperDummy) {
@@ -122,10 +139,41 @@ function DriverViewGlyphField({
     const windscreenBox = scratchBoxRef.current.setFromObject(windscreenMesh);
     const windscreenCenter = windscreenBox.getCenter(scratchCenterRef.current);
     const windscreenSize = windscreenBox.getSize(scratchSizeRef.current);
+    const windscreenGeometry = windscreenMesh.geometry;
+    const windscreenPlane =
+      windscreenGeometry != null
+        ? (() => {
+            const positionAttribute = windscreenGeometry.getAttribute("position");
+
+            if (!positionAttribute) {
+              return undefined;
+            }
+
+            const scratchPoint = scratchPlanePointRef.current;
+            const points: Array<[number, number, number]> = [];
+
+            for (let index = 0; index < positionAttribute.count; index += 1) {
+              scratchPoint
+                .set(
+                  positionAttribute.getX(index),
+                  positionAttribute.getY(index),
+                  positionAttribute.getZ(index)
+                )
+                .applyMatrix4(windscreenMesh.matrixWorld);
+              points.push([scratchPoint.x, scratchPoint.y, scratchPoint.z]);
+            }
+
+            return createTeslaDriverViewPlaneFromPoints({
+              driverPosition: steeringPosition.toArray() as [number, number, number],
+              points,
+            });
+          })()
+        : undefined;
 
     layoutRef.current = createTeslaDriverViewLayout({
       steeringPosition: steeringPosition.toArray() as [number, number, number],
       windscreenCenter: windscreenCenter.toArray() as [number, number, number],
+      windscreenPlane,
       windscreenSize: windscreenSize.toArray() as [number, number, number],
     }, tuning);
     wiperDummyRef.current = wiperDummy;
@@ -138,9 +186,10 @@ function DriverViewGlyphField({
     const phase = computeDriverViewPhase(state.clock.getElapsedTime(), cycleDuration);
     phaseRef.current = phase;
     const perspectiveCamera = state.camera as PerspectiveCamera;
+    const clampedFov = clampTeslaDriverViewFov(tuning.fov);
 
-    if (perspectiveCamera.fov !== tuning.fov) {
-      perspectiveCamera.fov = tuning.fov;
+    if (perspectiveCamera.fov !== clampedFov) {
+      perspectiveCamera.fov = clampedFov;
       perspectiveCamera.updateProjectionMatrix();
     }
 
@@ -172,11 +221,18 @@ function DriverViewGlyphField({
       const position = projectTeslaDriverGlyphPosition(
         layout,
         glyph.x / Math.max(pixelWidth, 1),
-        glyph.y / Math.max(pixelHeight, 1)
+        glyph.y / Math.max(pixelHeight, 1),
+        createTeslaDriverGlyphProjectionInsets({
+          glyphRadius: glyph.radius,
+          pixelHeight,
+          pixelWidth,
+        })
       );
 
       mesh.position.set(...position);
-      mesh.rotation.set(0, 0, -glyph.rotation * Math.PI);
+      mesh.quaternion.copy(
+        createTeslaDriverGlyphQuaternion(layout, -glyph.rotation * Math.PI)
+      );
       mesh.scale.set(glyphScale, glyphScale, glyphScale);
     }
   });
@@ -367,7 +423,7 @@ export default function WiperTypographyDriverView3D({
       <Canvas
         camera={{
           position: DRIVER_VIEW_INITIAL_CAMERA_POSITION,
-          fov: tuning.fov ?? DRIVER_VIEW_INITIAL_FOV,
+          fov: clampTeslaDriverViewFov(tuning.fov ?? DRIVER_VIEW_INITIAL_FOV),
           near: 0.01,
           far: 30,
         }}

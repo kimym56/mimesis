@@ -12,7 +12,16 @@ export interface BwCircleMimesisLayout {
   bounce: number;
   circleRadius: number;
   ballRadius: number;
+  particleCountPerSet: number;
   speedScale: number;
+}
+
+export interface BwCircleParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
 }
 
 export interface BwCircleSyncCueInput {
@@ -32,6 +41,78 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function createSeededRandom(seed: number) {
+  let state = seed >>> 0 || 1;
+
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
+function sampleNormal(random: () => number) {
+  let u = 0;
+
+  while (u <= Number.EPSILON) {
+    u = random();
+  }
+
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * random());
+}
+
+function sampleUniformDiscPoint({
+  circleRadius,
+  padding,
+  random,
+}: {
+  circleRadius: number;
+  padding: number;
+  random: () => number;
+}) {
+  const angle = random() * Math.PI * 2;
+  const distance = Math.sqrt(random()) * Math.max(circleRadius - padding, 0);
+
+  return {
+    x: Math.cos(angle) * distance,
+    y: Math.sin(angle) * distance,
+  };
+}
+
+function sampleBoundaryCenterBiasedPoint({
+  boundaryAngle,
+  circleRadius,
+  padding,
+  random,
+}: {
+  boundaryAngle: number;
+  circleRadius: number;
+  padding: number;
+  random: () => number;
+}) {
+  const maxDistance = Math.max(circleRadius - padding, 0);
+  const acrossSigma = maxDistance * 0.09;
+  const alongSigma = maxDistance * 0.2;
+
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const across = sampleNormal(random) * acrossSigma;
+    const along = sampleNormal(random) * alongSigma;
+    const x =
+      -Math.sin(boundaryAngle) * across + Math.cos(boundaryAngle) * along;
+    const y =
+      Math.cos(boundaryAngle) * across + Math.sin(boundaryAngle) * along;
+
+    if (Math.hypot(x, y) <= maxDistance) {
+      return { x, y };
+    }
+  }
+
+  return sampleUniformDiscPoint({ circleRadius, padding, random });
+}
+
+function getCircleRadius(width: number) {
+  return (width < 768 ? 0.336 : 0.175) * width;
+}
+
 const CAMERA_SEQUENCE: BwCircleCameraMode[] = ["normal", "white", "black"];
 
 export function createMimesisCue({
@@ -45,11 +126,23 @@ export function createMimesisCue({
   };
 }
 
-export function createMimesisLayout(width: number): BwCircleMimesisLayout {
-  const isMobile = width < 768;
-  const physicsScale = clamp(width / 1440, 0.4, 1.2);
-  const circleRadius = isMobile ? width * 0.336 : width * 0.175;
+export function createMimesisLayout(
+  sceneWidth: number,
+  viewportWidth = sceneWidth,
+): BwCircleMimesisLayout {
+  const isMobile = sceneWidth < 768;
+  const physicsScale = clamp(sceneWidth / 1440, 0.4, 1.2);
+  const circleRadius = getCircleRadius(sceneWidth);
   const ballRadius = Math.max(6, circleRadius * 0.056);
+  const referenceCircleRadius = getCircleRadius(viewportWidth);
+  const particleDensityRatio =
+    referenceCircleRadius > 0
+      ? (circleRadius / referenceCircleRadius) ** 2
+      : 1;
+  const particleCountPerSet = Math.max(
+    1,
+    Math.round(5000 * particleDensityRatio),
+  );
 
   return {
     isMobile,
@@ -58,8 +151,52 @@ export function createMimesisLayout(width: number): BwCircleMimesisLayout {
     bounce: isMobile ? 0.8 : 0.85,
     circleRadius,
     ballRadius,
+    particleCountPerSet,
     speedScale: isMobile ? 0.6 : 1,
   };
+}
+
+export function createBwCircleParticles({
+  boundaryAngle = 0,
+  circleRadius,
+  count,
+  seed,
+}: {
+  boundaryAngle?: number;
+  circleRadius: number;
+  count: number;
+  seed: number;
+}): BwCircleParticle[] {
+  const random = createSeededRandom(seed);
+  const particles: BwCircleParticle[] = [];
+  const biasedParticleCount = Math.round(count * 0.18);
+
+  for (let index = 0; index < count; index += 1) {
+    const radius = 1 + random() * 1.5;
+    const position =
+      index < biasedParticleCount
+        ? sampleBoundaryCenterBiasedPoint({
+            boundaryAngle,
+            circleRadius,
+            padding: radius + 2,
+            random,
+          })
+        : sampleUniformDiscPoint({
+            circleRadius,
+            padding: radius + 2,
+            random,
+          });
+
+    particles.push({
+      x: position.x,
+      y: position.y,
+      vx: (random() - 0.5) * 0.8,
+      vy: (random() - 0.5) * 0.8,
+      radius,
+    });
+  }
+
+  return particles;
 }
 
 export function createSyncCue({

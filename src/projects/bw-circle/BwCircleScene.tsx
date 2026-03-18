@@ -4,9 +4,11 @@ import { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import type { BwCirclePlaybackState } from "./BwCircleProject";
 import {
+  createBwCircleParticles,
   createMimesisCue,
   createMimesisLayout,
   createSyncCue,
+  type BwCircleParticle,
 } from "./bwCircleSimulation";
 import styles from "./BwCircleProject.module.css";
 
@@ -27,6 +29,8 @@ interface BallState {
 interface SceneState {
   leftBall: BallState;
   rightBall: BallState;
+  leftParticles: BwCircleParticle[];
+  rightParticles: BwCircleParticle[];
 }
 
 function createBall(
@@ -47,8 +51,13 @@ function createBall(
   };
 }
 
-function createSceneState(width: number): SceneState {
-  const layout = createMimesisLayout(width);
+function createSceneState(sceneWidth: number, viewportWidth: number): SceneState {
+  const layout = createMimesisLayout(sceneWidth, viewportWidth);
+  const seedBase = Math.max(1, Math.round(sceneWidth));
+  const now = new Date();
+  const boundaryAngle = createMimesisCue({
+    secondsWithinMinute: now.getSeconds() + now.getMilliseconds() / 1000,
+  }).angle;
 
   return {
     leftBall: createBall(
@@ -63,6 +72,18 @@ function createSceneState(width: number): SceneState {
       3 * layout.speedScale,
       "#ffffff",
     ),
+    leftParticles: createBwCircleParticles({
+      boundaryAngle,
+      circleRadius: layout.circleRadius,
+      count: layout.particleCountPerSet,
+      seed: seedBase * 17 + 1,
+    }),
+    rightParticles: createBwCircleParticles({
+      boundaryAngle,
+      circleRadius: layout.circleRadius,
+      count: layout.particleCountPerSet,
+      seed: seedBase * 17 + 2,
+    }),
   };
 }
 
@@ -80,6 +101,88 @@ function drawBall(
   context.fillStyle = ball.color;
   context.fill();
   context.restore();
+}
+
+function updateParticles({
+  angle,
+  ball,
+  circleRadius,
+  isRightHalf,
+  particles,
+}: {
+  angle: number;
+  ball: BallState;
+  circleRadius: number;
+  isRightHalf: boolean;
+  particles: BwCircleParticle[];
+}) {
+  const repelRadius = 60;
+  const gravity = 0.004;
+  const damping = 0.98;
+  const minSpeed = 0.3;
+  const resetSpeed = 0.5;
+  const boundaryBounce = 0.8;
+
+  for (const particle of particles) {
+    const toBallX = particle.x - ball.x;
+    const toBallY = particle.y - ball.y;
+    const distanceToBall = Math.hypot(toBallX, toBallY);
+
+    if (distanceToBall < repelRadius && distanceToBall > 0.0001) {
+      const force = ((repelRadius - distanceToBall) / repelRadius) * 1.5;
+      particle.vx += (toBallX / distanceToBall) * force;
+      particle.vy += (toBallY / distanceToBall) * force;
+    }
+
+    particle.vy += gravity;
+    particle.x += particle.vx;
+    particle.y += particle.vy;
+    particle.vx *= damping;
+    particle.vy *= damping;
+
+    const speed = Math.hypot(particle.vx, particle.vy);
+    if (speed < minSpeed) {
+      const nextAngle = Math.random() * Math.PI * 2;
+      particle.vx = Math.cos(nextAngle) * resetSpeed;
+      particle.vy = Math.sin(nextAngle) * resetSpeed;
+    }
+
+    const distanceFromCenter = Math.hypot(particle.x, particle.y);
+    const maxDistance = circleRadius - particle.radius;
+
+    if (distanceFromCenter > maxDistance && distanceFromCenter > 0.0001) {
+      const normalX = particle.x / distanceFromCenter;
+      const normalY = particle.y / distanceFromCenter;
+      const dotProduct = particle.vx * normalX + particle.vy * normalY;
+
+      particle.x = normalX * maxDistance;
+      particle.y = normalY * maxDistance;
+      particle.vx -= 2 * dotProduct * normalX;
+      particle.vy -= 2 * dotProduct * normalY;
+    }
+
+    const rotatedX =
+      particle.x * Math.cos(-angle) - particle.y * Math.sin(-angle);
+    const rotatedY =
+      particle.x * Math.sin(-angle) + particle.y * Math.cos(-angle);
+    const boundary = isRightHalf ? particle.radius : -particle.radius;
+    const isOutside = isRightHalf ? rotatedX < boundary : rotatedX > boundary;
+
+    if (isOutside) {
+      const velocityX =
+        particle.vx * Math.cos(-angle) - particle.vy * Math.sin(-angle);
+      const velocityY =
+        particle.vx * Math.sin(-angle) + particle.vy * Math.cos(-angle);
+      const nextVelocityX = -velocityX * boundaryBounce;
+
+      particle.vx =
+        nextVelocityX * Math.cos(angle) - velocityY * Math.sin(angle);
+      particle.vy =
+        nextVelocityX * Math.sin(angle) + velocityY * Math.cos(angle);
+      particle.x = boundary * Math.cos(angle) - rotatedY * Math.sin(angle);
+      particle.y = boundary * Math.sin(angle) + rotatedY * Math.cos(angle);
+    }
+  }
 }
 
 function updateBall({
@@ -185,7 +288,7 @@ export default function BwCircleScene({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const playbackRef = useRef(playback);
   const modeRef = useRef(mode);
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioEnabledRef = useRef(false);
 
@@ -213,7 +316,7 @@ export default function BwCircleScene({
     let width = 0;
     let height = 0;
     let animationFrame = 0;
-    let sceneState = createSceneState(1440);
+    let sceneState = createSceneState(1440, 1440);
 
     const resize = () => {
       const parent = canvas.parentElement;
@@ -231,11 +334,11 @@ export default function BwCircleScene({
       canvas.style.width = `${bounds.width}px`;
       canvas.style.height = `${bounds.height}px`;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      sceneState = createSceneState(bounds.width);
+      sceneState = createSceneState(bounds.width, window.innerWidth);
     };
 
     const render = () => {
-      const layout = createMimesisLayout(width || window.innerWidth);
+      const layout = createMimesisLayout(width || window.innerWidth, window.innerWidth);
       const ballRadius = layout.ballRadius;
       const now = new Date();
       const secondsWithinMinute =
@@ -296,6 +399,20 @@ export default function BwCircleScene({
         isLeftSide: false,
         speedBoost,
       });
+      updateParticles({
+        angle,
+        ball: sceneState.leftBall,
+        circleRadius: layout.circleRadius,
+        isRightHalf: false,
+        particles: sceneState.leftParticles,
+      });
+      updateParticles({
+        angle,
+        ball: sceneState.rightBall,
+        circleRadius: layout.circleRadius,
+        isRightHalf: true,
+        particles: sceneState.rightParticles,
+      });
 
       context.clearRect(0, 0, width, height);
 
@@ -325,6 +442,20 @@ export default function BwCircleScene({
       context.beginPath();
       context.arc(0, 0, layout.circleRadius, 0, Math.PI * 2);
       context.clip();
+      context.beginPath();
+      context.fillStyle = "#ffffff";
+      for (const particle of sceneState.rightParticles) {
+        context.moveTo(particle.x + particle.radius, particle.y);
+        context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+      }
+      context.fill();
+      context.beginPath();
+      context.fillStyle = "#000000";
+      for (const particle of sceneState.leftParticles) {
+        context.moveTo(particle.x + particle.radius, particle.y);
+        context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+      }
+      context.fill();
       drawBall(context, sceneState.leftBall, ballRadius);
       drawBall(context, sceneState.rightBall, ballRadius);
       context.restore();

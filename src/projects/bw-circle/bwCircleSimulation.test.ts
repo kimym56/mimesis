@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  createBwCircleParticles,
   createMimesisCue,
   createMimesisLayout,
   createSyncCue,
@@ -75,7 +76,20 @@ describe("createMimesisLayout", () => {
     expect(layout.bounce).toBeCloseTo(0.85);
     expect(layout.circleRadius).toBeCloseTo(252);
     expect(layout.ballRadius).toBeCloseTo(14.112);
+    expect(layout.particleCountPerSet).toBe(5000);
     expect(layout.speedScale).toBe(1);
+  });
+
+  it("scales particle density by circle-area ratio for split-pane desktop scenes", () => {
+    const createLayout = createMimesisLayout as (
+      sceneWidth: number,
+      viewportWidth?: number,
+    ) => ReturnType<typeof createMimesisLayout>;
+    const layout = createLayout(544, 1440);
+
+    expect(layout.isMobile).toBe(true);
+    expect(layout.circleRadius).toBeCloseTo(182.784);
+    expect(layout.particleCountPerSet).toBe(2631);
   });
 
   it("matches the original mobile sizing and scaled physics", () => {
@@ -87,6 +101,46 @@ describe("createMimesisLayout", () => {
     expect(layout.bounce).toBeCloseTo(0.8);
     expect(layout.circleRadius).toBeCloseTo(126);
     expect(layout.ballRadius).toBeCloseTo(7.056);
+    expect(layout.particleCountPerSet).toBe(5000);
     expect(layout.speedScale).toBeCloseTo(0.6);
+  });
+});
+
+describe("createBwCircleParticles", () => {
+  it("creates a deterministic full-disc particle field with slight center-line bias", () => {
+    const particles = createBwCircleParticles({
+      circleRadius: 100,
+      count: 400,
+      seed: 42,
+      boundaryAngle: 0,
+    });
+
+    expect(particles).toEqual(
+      createBwCircleParticles({
+        circleRadius: 100,
+        count: 400,
+        seed: 42,
+        boundaryAngle: 0,
+      }),
+    );
+    expect(particles).toHaveLength(400);
+    expect(particles.some((particle) => particle.x < 0)).toBe(true);
+    expect(particles.some((particle) => particle.x > 0)).toBe(true);
+
+    const centerBandParticles = particles.filter(
+      (particle) => Math.abs(particle.x) <= 12 && Math.abs(particle.y) <= 24,
+    );
+    const outerCoverageParticles = particles.filter(
+      (particle) => Math.hypot(particle.x, particle.y) >= 55,
+    );
+
+    expect(centerBandParticles.length).toBeGreaterThanOrEqual(20);
+    expect(outerCoverageParticles.length).toBeGreaterThanOrEqual(120);
+
+    for (const particle of particles) {
+      expect(Math.hypot(particle.x, particle.y) + particle.radius).toBeLessThanOrEqual(
+        100,
+      );
+    }
   });
 });

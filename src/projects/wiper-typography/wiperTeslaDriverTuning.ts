@@ -17,6 +17,15 @@ export interface TeslaDriverViewTuning {
   windscreenWidthScale: number;
 }
 
+export const TESLA_DRIVER_VIEW_FOV_RANGE = {
+  min: 12,
+  max: 140,
+} as const;
+
+export function clampTeslaDriverViewFov(value: number) {
+  return Math.min(TESLA_DRIVER_VIEW_FOV_RANGE.max, Math.max(TESLA_DRIVER_VIEW_FOV_RANGE.min, value));
+}
+
 type TeslaDriverViewTuningKey = keyof TeslaDriverViewTuning;
 
 interface TeslaDriverViewGuiControl {
@@ -36,7 +45,7 @@ export const DEFAULT_TESLA_DRIVER_VIEW_TUNING: TeslaDriverViewTuning = {
   cameraOffsetX: 0.05,
   cameraOffsetY: 0.3,
   cameraOffsetZ: 0.18,
-  fov: 40,
+  fov: clampTeslaDriverViewFov(40),
   glyphDepthOffset: 0.01,
   glyphHeightScale: 0.74,
   glyphWidthScale: 0.78,
@@ -55,13 +64,19 @@ export const TESLA_DRIVER_VIEW_GUI_FOLDERS: TeslaDriverViewGuiFolder[] = [
   {
     title: "Camera",
     controls: [
-      { key: "fov", label: "FOV", min: 24, max: 72, step: 1 },
-      { key: "cameraOffsetX", label: "Offset X", min: -0.3, max: 0.3, step: 0.01 },
-      { key: "cameraOffsetY", label: "Offset Y", min: 0.1, max: 0.5, step: 0.01 },
-      { key: "cameraOffsetZ", label: "Offset Z", min: 0.05, max: 0.45, step: 0.01 },
-      { key: "lookAtOffsetX", label: "Target X", min: -0.4, max: 0.2, step: 0.01 },
-      { key: "lookAtOffsetY", label: "Target Y", min: -0.15, max: 0.15, step: 0.01 },
-      { key: "lookAtOffsetZ", label: "Target Z", min: -0.2, max: 0.05, step: 0.01 },
+      {
+        key: "fov",
+        label: "FOV",
+        min: TESLA_DRIVER_VIEW_FOV_RANGE.min,
+        max: TESLA_DRIVER_VIEW_FOV_RANGE.max,
+        step: 1,
+      },
+      { key: "cameraOffsetX", label: "Offset X", min: -0.6, max: 0.6, step: 0.01 },
+      { key: "cameraOffsetY", label: "Offset Y", min: -0.1, max: 0.9, step: 0.01 },
+      { key: "cameraOffsetZ", label: "Offset Z", min: -0.2, max: 1.1, step: 0.01 },
+      { key: "lookAtOffsetX", label: "Target X", min: -0.9, max: 0.9, step: 0.01 },
+      { key: "lookAtOffsetY", label: "Target Y", min: -0.6, max: 0.6, step: 0.01 },
+      { key: "lookAtOffsetZ", label: "Target Z", min: -0.6, max: 0.6, step: 0.01 },
     ],
   },
   {
@@ -70,36 +85,36 @@ export const TESLA_DRIVER_VIEW_GUI_FOLDERS: TeslaDriverViewGuiFolder[] = [
       {
         key: "windscreenWidthScale",
         label: "Width",
-        min: 0.35,
-        max: 0.9,
+        min: 0.15,
+        max: 1.4,
         step: 0.01,
       },
       {
         key: "windscreenHeightScale",
         label: "Height",
-        min: 0.35,
-        max: 0.9,
+        min: 0.15,
+        max: 1.4,
         step: 0.01,
       },
       {
         key: "windscreenCenterOffsetX",
         label: "Center X",
-        min: -0.3,
-        max: 0.2,
+        min: -0.6,
+        max: 0.6,
         step: 0.01,
       },
       {
         key: "windscreenCenterOffsetY",
         label: "Center Y",
-        min: -0.2,
-        max: 0.2,
+        min: -0.6,
+        max: 0.6,
         step: 0.01,
       },
       {
         key: "windscreenCenterOffsetNormal",
         label: "Center Z",
-        min: -0.08,
-        max: 0.08,
+        min: -0.3,
+        max: 0.3,
         step: 0.002,
       },
     ],
@@ -110,29 +125,29 @@ export const TESLA_DRIVER_VIEW_GUI_FOLDERS: TeslaDriverViewGuiFolder[] = [
       {
         key: "glyphWidthScale",
         label: "Width",
-        min: 0.3,
-        max: 1,
+        min: 0.1,
+        max: 1.4,
         step: 0.01,
       },
       {
         key: "glyphHeightScale",
         label: "Height",
-        min: 0.3,
-        max: 1,
+        min: 0.1,
+        max: 1.4,
         step: 0.01,
       },
       {
         key: "glyphYBias",
         label: "Y Bias",
-        min: 0.1,
-        max: 0.8,
+        min: -0.2,
+        max: 1.2,
         step: 0.01,
       },
       {
         key: "glyphDepthOffset",
         label: "Depth",
-        min: -0.03,
-        max: 0.05,
+        min: -0.12,
+        max: 0.12,
         step: 0.002,
       },
     ],
