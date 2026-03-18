@@ -30,6 +30,7 @@ describe("projects reference embeds", () => {
     expect(project?.interactiveDemo).toBe("bw-circle");
     expect(project?.referencePreview).toEqual(
       expect.objectContaining({
+        embed: "official",
         platform: "threads",
         url: "https://www.threads.com/@byunsabum/post/DTkg4CWkyVS",
       }),

@@ -13,6 +13,7 @@ export interface Project {
 }
 
 export interface ProjectReferencePreview {
+  embed?: "official";
   platform: "threads";
   url: string;
   image: string;
@@ -101,6 +102,7 @@ export const projects: Project[] = [
     interactive: true,
     interactiveDemo: "bw-circle",
     referencePreview: {
+      embed: "official",
       platform: "threads",
       url: "https://www.threads.com/@byunsabum/post/DTkg4CWkyVS",
       image: "/images/threads-black-white-circle-reference.jpg",
