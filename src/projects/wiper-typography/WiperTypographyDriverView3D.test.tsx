@@ -11,6 +11,7 @@ import {
   vi,
 } from "vitest";
 import WiperTypographyDriverView3D from "./WiperTypographyDriverView3D";
+import { DEFAULT_TESLA_DRIVER_VIEW_TUNING } from "./wiperTeslaDriverTuning";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -138,6 +139,7 @@ describe("WiperTypographyDriverView3D", () => {
       method: "HEAD",
     });
     expect(container.textContent).toContain("mock-tesla-model");
+    expect(container.textContent).not.toContain("Autoplay driver view");
   });
 
   it("enables the dev-only tuning gui when the 3d driver view is active", async () => {
@@ -150,7 +152,8 @@ describe("WiperTypographyDriverView3D", () => {
     expect(mockedUseTeslaDriverViewGui.mock.calls[0]?.[0]).toMatchObject({
       enabled: true,
       tuning: expect.objectContaining({
-        fov: 40,
+        fov: DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov,
+        lookAtOffsetX: DEFAULT_TESLA_DRIVER_VIEW_TUNING.lookAtOffsetX,
       }),
     });
   });

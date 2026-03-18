@@ -48,7 +48,20 @@ vi.mock("./useWiperSceneSimulation3D", () => ({
     projectY: (value: number) => value,
     scale: 0.01,
     simulation: {
-      bars: [],
+      bars: [
+        {
+          height: 8,
+          index: 0,
+          kind: "bar",
+          radius: 25,
+          rotation: 0.15,
+          vx: 0,
+          vy: 0,
+          width: 50,
+          x: 35,
+          y: 55,
+        },
+      ],
       glyphs: [
         {
           index: 0,
@@ -99,14 +112,15 @@ describe("WiperTypographyScene3DGlyphWiring", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("composes the tesla model and shared glyph meshes in the driver view", async () => {
+  it("composes the tesla model and one windshield overlay in the driver view", async () => {
     await act(async () => {
       root.render(<WiperTypographyDriverView3D projectId="wiper-typography" />);
       await Promise.resolve();
     });
 
     expect(mockedTeslaModel).toHaveBeenCalled();
-    expect(mockedExtrudedGlyph).toHaveBeenCalled();
+    expect(mockedExtrudedGlyph).not.toHaveBeenCalled();
     expect(container.querySelector('[data-driver-view-part="tesla-model"]')).not.toBeNull();
+    expect(container.querySelector('[data-driver-view-part="windshield-overlay"]')).not.toBeNull();
   });
 });

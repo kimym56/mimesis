@@ -2,46 +2,16 @@
 
 import { useEffect, useRef } from "react";
 import type { InteractiveProjectProps } from "../types";
-import {
-  WIPER_BACKGROUND_COLOR,
-  WIPER_BAR_COLOR,
-  WIPER_GLYPH_COLOR,
-  WIPER_GLYPH_FONT_SIZE,
-  WIPER_GLYPH_TEXT_OFFSET_Y,
-} from "./wiperConfig";
+import { WIPER_BACKGROUND_COLOR } from "./wiperConfig";
+import { drawWiperScene } from "./wiperSceneRenderer";
 import {
   createWiperSimulationState,
   detectWiperParticleCount,
   stepWiperSimulationState,
-  type WiperBarState,
-  type WiperGlyphState,
   type WiperSimulationState,
 } from "./wiperSimulation";
 import styles from "./WiperTypographyProject.module.css";
 import { useWiperInteraction } from "./useWiperInteraction";
-
-function drawGlyph(
-  context: CanvasRenderingContext2D,
-  glyph: WiperGlyphState
-) {
-  context.save();
-  context.translate(glyph.x, glyph.y);
-  context.rotate(glyph.rotation * Math.PI);
-  context.textAlign = "center";
-  context.font = `bold ${WIPER_GLYPH_FONT_SIZE}px Helvetica`;
-  context.fillStyle = WIPER_GLYPH_COLOR;
-  context.fillText(glyph.text, 0, WIPER_GLYPH_TEXT_OFFSET_Y);
-  context.restore();
-}
-
-function drawBar(context: CanvasRenderingContext2D, bar: WiperBarState) {
-  context.save();
-  context.fillStyle = WIPER_BAR_COLOR;
-  context.translate(bar.x, bar.y);
-  context.rotate(bar.rotation);
-  context.fillRect(-bar.radius, -bar.height * 0.5, bar.width, bar.height);
-  context.restore();
-}
 
 export default function WiperTypographyCanvas2D({
   projectId,
@@ -110,16 +80,7 @@ export default function WiperTypographyCanvas2D({
 
       stepWiperSimulationState(scene, phase);
 
-      context.fillStyle = WIPER_BACKGROUND_COLOR;
-      context.fillRect(0, 0, width, height);
-
-      for (const glyph of scene.glyphs) {
-        drawGlyph(context, glyph);
-      }
-
-      for (const bar of scene.bars) {
-        drawBar(context, bar);
-      }
+      drawWiperScene(context, scene, { backgroundColor: WIPER_BACKGROUND_COLOR });
 
       frame = window.requestAnimationFrame(tickFrame);
     };

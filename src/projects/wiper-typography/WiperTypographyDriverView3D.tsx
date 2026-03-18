@@ -1,6 +1,5 @@
 "use client";
 
-import { Html } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useReducedMotion } from "framer-motion";
 import {
@@ -10,6 +9,7 @@ import {
   startTransition,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type MutableRefObject,
@@ -17,33 +17,32 @@ import {
 import {
   Box3,
   type BufferGeometry,
+  CanvasTexture,
+  DoubleSide,
+  LinearFilter,
   type Object3D,
   type PerspectiveCamera,
+  SRGBColorSpace,
   Vector3,
 } from "three";
 import type { InteractiveProjectProps } from "../types";
-import WiperTypographyExtrudedGlyph3D from "./WiperTypographyExtrudedGlyph3D";
 import WiperTypographyTeslaModel, {
   TESLA_DRIVER_VIEW_MODEL_PATH,
 } from "./WiperTypographyTeslaModel";
-import { WIPER_BACKGROUND_COLOR } from "./wiperConfig";
+import { WIPER_DRIVER_VIEW_OUTSIDE_COLOR } from "./wiperConfig";
 import styles from "./WiperTypographyProject.module.css";
 import { useWiperSceneSimulation3D } from "./useWiperSceneSimulation3D";
 import {
   computeDriverViewPhase,
   getDriverViewCycleDuration,
 } from "./wiperDriverView";
+import { drawWiperScene } from "./wiperSceneRenderer";
+import { stepWiperSimulationState } from "./wiperSimulation";
 import {
-  stepWiperSimulationState,
-  type WiperGlyphState,
-} from "./wiperSimulation";
-import {
-  createTeslaDriverGlyphProjectionInsets,
   createTeslaDriverGlyphQuaternion,
   createTeslaDriverViewLayout,
   createTeslaDriverViewPlaneFromPoints,
   getTeslaDriverWiperRotation,
-  projectTeslaDriverGlyphPosition,
   type TeslaDriverViewLayout,
 } from "./wiperTeslaDriverLayout";
 import {
@@ -53,18 +52,89 @@ import {
 } from "./wiperTeslaDriverTuning";
 import { useTeslaDriverViewGui } from "./useTeslaDriverViewGui";
 
-type GlyphMesh = Object3D;
+type WindshieldOverlayMesh = Object3D;
 type DriverViewAssetState = "checking" | "available" | "missing";
-const DRIVER_GLYPH_PLACEHOLDER: [number, number, number] = [0, -10, 0];
+interface DriverViewOverlayAssets {
+  canvas: HTMLCanvasElement;
+  texture: CanvasTexture;
+}
+
+const DRIVER_WINDSHIELD_OVERLAY_PLACEHOLDER: [number, number, number] = [0, -10, 0];
 const DRIVER_VIEW_INITIAL_CAMERA_POSITION: [number, number, number] = [
   -0.41,
   0.47,
   -0.43,
 ];
 const DRIVER_VIEW_INITIAL_LOOK_AT: [number, number, number] = [-0.23, 0.56, -0.82];
+const DRIVER_VIEW_TEXTURE_MAX_SIZE = 2048;
+const DRIVER_VIEW_TEXTURE_SCALE = 2;
 const DRIVER_VIEW_INITIAL_FOV = clampTeslaDriverViewFov(
   DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov
 );
+
+function addVector3(
+  [ax, ay, az]: [number, number, number],
+  [bx, by, bz]: [number, number, number]
+): [number, number, number] {
+  return [ax + bx, ay + by, az + bz];
+}
+
+function scaleVector3(
+  [x, y, z]: [number, number, number],
+  scalar: number
+): [number, number, number] {
+  return [x * scalar, y * scalar, z * scalar];
+}
+
+function createDriverViewOverlayCenter(
+  layout: TeslaDriverViewLayout
+): [number, number, number] {
+  return addVector3(
+    layout.windscreenCenter,
+    addVector3(
+      scaleVector3(
+        layout.verticalAxis,
+        (layout.glyphYBias - 0.5) * layout.glyphVisibleHeight
+      ),
+      scaleVector3(layout.normalAxis, layout.glyphDepthOffset)
+    )
+  );
+}
+
+function syncDriverViewOverlayCanvas(
+  canvas: HTMLCanvasElement,
+  context: CanvasRenderingContext2D,
+  pixelWidth: number,
+  pixelHeight: number
+) {
+  const safePixelWidth = Math.max(pixelWidth, 1);
+  const safePixelHeight = Math.max(pixelHeight, 1);
+  const textureScale = Math.max(
+    1,
+    Math.min(
+      DRIVER_VIEW_TEXTURE_SCALE,
+      DRIVER_VIEW_TEXTURE_MAX_SIZE / safePixelWidth,
+      DRIVER_VIEW_TEXTURE_MAX_SIZE / safePixelHeight
+    )
+  );
+  const textureWidth = Math.max(1, Math.round(safePixelWidth * textureScale));
+  const textureHeight = Math.max(1, Math.round(safePixelHeight * textureScale));
+
+  if (canvas.width !== textureWidth || canvas.height !== textureHeight) {
+    canvas.width = textureWidth;
+    canvas.height = textureHeight;
+  }
+
+  context.setTransform(
+    textureWidth / safePixelWidth,
+    0,
+    0,
+    textureHeight / safePixelHeight,
+    0,
+    0
+  );
+  context.imageSmoothingEnabled = true;
+}
 
 function DriverViewGuiController({
   setTuning,
@@ -93,7 +163,10 @@ function DriverViewGlyphField({
   reducedMotion: boolean;
   tuning: TeslaDriverViewTuning;
 }) {
-  const glyphRefs = useRef<Array<GlyphMesh | null>>([]);
+  const overlayMeshRef = useRef<WindshieldOverlayMesh | null>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const overlayContextRef = useRef<CanvasRenderingContext2D | null>(null);
+  const overlayTextureRef = useRef<CanvasTexture | null>(null);
   const teslaSceneRef = useRef<Object3D | null>(null);
   const wiperDummyRef = useRef<Object3D | null>(null);
   const layoutRef = useRef<TeslaDriverViewLayout | null>(null);
@@ -108,10 +181,37 @@ function DriverViewGlyphField({
   const scratchPlanePointRef = useRef(new Vector3());
   const scratchSizeRef = useRef(new Vector3());
   const scratchSteeringPositionRef = useRef(new Vector3());
+  const overlayAssets = useMemo<DriverViewOverlayAssets | null>(() => {
+    if (typeof document === "undefined") {
+      return null;
+    }
+
+    const canvas = document.createElement("canvas");
+    const texture = new CanvasTexture(canvas);
+
+    texture.colorSpace = SRGBColorSpace;
+    texture.generateMipmaps = false;
+    texture.magFilter = LinearFilter;
+    texture.minFilter = LinearFilter;
+
+    return { canvas, texture };
+  }, []);
 
   useEffect(() => {
     layoutRef.current = null;
   }, [tuning]);
+
+  useEffect(() => {
+    overlayCanvasRef.current = overlayAssets?.canvas ?? null;
+    overlayTextureRef.current = overlayAssets?.texture ?? null;
+
+    return () => {
+      overlayCanvasRef.current = null;
+      overlayContextRef.current = null;
+      overlayTextureRef.current = null;
+      overlayAssets?.texture.dispose();
+    };
+  }, [overlayAssets]);
 
   const syncLayoutFromScene = useCallback(() => {
     const scene = teslaSceneRef.current;
@@ -206,35 +306,45 @@ function DriverViewGlyphField({
 
     stepWiperSimulationState(simulation, phase);
 
-    const glyphScale =
-      Math.min(
-        layout.windscreenWidth / Math.max(pixelWidth, 1),
-        layout.windscreenHeight / Math.max(pixelHeight, 1)
-      ) * 0.92;
-
-    for (const glyph of simulation.glyphs) {
-      const mesh = glyphRefs.current[glyph.index];
-      if (!mesh) {
-        continue;
-      }
-
-      const position = projectTeslaDriverGlyphPosition(
-        layout,
-        glyph.x / Math.max(pixelWidth, 1),
-        glyph.y / Math.max(pixelHeight, 1),
-        createTeslaDriverGlyphProjectionInsets({
-          glyphRadius: glyph.radius,
-          pixelHeight,
-          pixelWidth,
-        })
+    if (overlayMeshRef.current) {
+      overlayMeshRef.current.position.set(...createDriverViewOverlayCenter(layout));
+      overlayMeshRef.current.quaternion.copy(
+        createTeslaDriverGlyphQuaternion(layout, 0)
       );
-
-      mesh.position.set(...position);
-      mesh.quaternion.copy(
-        createTeslaDriverGlyphQuaternion(layout, -glyph.rotation * Math.PI)
+      overlayMeshRef.current.scale.set(
+        layout.glyphVisibleWidth,
+        layout.glyphVisibleHeight,
+        1
       );
-      mesh.scale.set(glyphScale, glyphScale, glyphScale);
     }
+
+    const overlayCanvas = overlayCanvasRef.current;
+    const overlayTexture = overlayTextureRef.current;
+
+    if (!overlayCanvas || !overlayTexture) {
+      return;
+    }
+
+    let overlayContext = overlayContextRef.current;
+
+    if (!overlayContext) {
+      overlayContext = overlayCanvas.getContext("2d");
+      overlayContextRef.current = overlayContext;
+    }
+
+    if (!overlayContext) {
+      return;
+    }
+
+    syncDriverViewOverlayCanvas(
+      overlayCanvas,
+      overlayContext,
+      pixelWidth,
+      pixelHeight
+    );
+    overlayTexture.anisotropy = state.gl.capabilities.getMaxAnisotropy();
+    drawWiperScene(overlayContext, simulation);
+    overlayTexture.needsUpdate = true;
   });
 
   return (
@@ -246,19 +356,27 @@ function DriverViewGlyphField({
           onSceneReady();
         }}
       />
-
-      {simulation.glyphs.map((glyph: WiperGlyphState) => (
-        <WiperTypographyExtrudedGlyph3D
-          glyph={glyph.text}
-          key={glyph.index}
-          position={DRIVER_GLYPH_PLACEHOLDER}
-          ref={(node) => {
-            glyphRefs.current[glyph.index] = node;
-          }}
-          rotationZ={-glyph.rotation * Math.PI}
-          scale={0.001}
+      <mesh
+        data-driver-view-part="windshield-overlay"
+        position={DRIVER_WINDSHIELD_OVERLAY_PLACEHOLDER}
+        ref={(node) => {
+          overlayMeshRef.current = node;
+        }}
+        renderOrder={2}
+        scale={[0.001, 0.001, 1]}
+      >
+        <planeGeometry args={[1, 1]} />
+        <meshBasicMaterial
+          depthWrite={false}
+          map={overlayAssets?.texture ?? undefined}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-1}
+          side={DoubleSide}
+          toneMapped={false}
+          transparent
         />
-      ))}
+      </mesh>
     </>
   );
 }
@@ -315,19 +433,17 @@ function DriverViewLoadingOverlay() {
 function DriverViewScene({
   onSceneReady,
   reducedMotion,
-  showLabel,
   tuning,
 }: {
   onSceneReady: () => void;
   reducedMotion: boolean;
-  showLabel: boolean;
   tuning: TeslaDriverViewTuning;
 }) {
   const phaseRef = useRef(0);
 
   return (
     <>
-      <color attach="background" args={[WIPER_BACKGROUND_COLOR]} />
+      <color attach="background" args={[WIPER_DRIVER_VIEW_OUTSIDE_COLOR]} />
       <ambientLight intensity={reducedMotion ? 0.95 : 0.8} />
       <directionalLight castShadow intensity={1.1} position={[4, 6, 5]} />
       <Suspense fallback={null}>
@@ -338,11 +454,6 @@ function DriverViewScene({
           tuning={tuning}
         />
       </Suspense>
-      {showLabel ? (
-        <Html center>
-          <div className={styles.driverViewLabel}>Autoplay driver view</div>
-        </Html>
-      ) : null}
     </>
   );
 }
@@ -437,7 +548,6 @@ export default function WiperTypographyDriverView3D({
         <DriverViewScene
           onSceneReady={handleSceneReady}
           reducedMotion={reducedMotion}
-          showLabel={sceneReady}
           tuning={tuning}
         />
       </Canvas>

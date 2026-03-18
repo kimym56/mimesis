@@ -42,22 +42,22 @@ interface TeslaDriverViewGuiFolder {
 }
 
 export const DEFAULT_TESLA_DRIVER_VIEW_TUNING: TeslaDriverViewTuning = {
-  cameraOffsetX: 0.05,
-  cameraOffsetY: 0.3,
-  cameraOffsetZ: 0.18,
-  fov: clampTeslaDriverViewFov(40),
-  glyphDepthOffset: 0.01,
-  glyphHeightScale: 0.74,
-  glyphWidthScale: 0.78,
-  glyphYBias: 0.4,
-  lookAtOffsetX: -0.06,
-  lookAtOffsetY: -0.01,
-  lookAtOffsetZ: -0.05,
-  windscreenCenterOffsetNormal: 0.014,
-  windscreenCenterOffsetX: -0.11,
-  windscreenCenterOffsetY: 0.02,
-  windscreenHeightScale: 0.6,
-  windscreenWidthScale: 0.62,
+  cameraOffsetX: 0.19,
+  cameraOffsetY: 0.26,
+  cameraOffsetZ: 0.57,
+  fov: clampTeslaDriverViewFov(64),
+  glyphDepthOffset: 0.004,
+  glyphHeightScale: 0.82,
+  glyphWidthScale: 1.37,
+  glyphYBias: 0.53,
+  lookAtOffsetX: 0.12,
+  lookAtOffsetY: -0.0599,
+  lookAtOffsetZ: 0.03,
+  windscreenCenterOffsetNormal: 0,
+  windscreenCenterOffsetX: -0.0599,
+  windscreenCenterOffsetY: 0,
+  windscreenHeightScale: 0.68,
+  windscreenWidthScale: 0.72,
 };
 
 export const TESLA_DRIVER_VIEW_GUI_FOLDERS: TeslaDriverViewGuiFolder[] = [

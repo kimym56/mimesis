@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Vector3 } from "three";
+import { PerspectiveCamera, Vector3 } from "three";
 import {
   createTeslaDriverGlyphQuaternion,
   createTeslaDriverViewPlane,
@@ -22,6 +22,11 @@ const DRIVER_VIEW_LAYOUT_INPUT = {
   windscreenCenter: [0, 0.573, -0.729] as Vec3,
   windscreenSize: [1.48, 0.62, 0.84] as Vec3,
 };
+const TESLA_DRIVER_WIPER_BOUNDS_CENTER = new Vector3(
+  0.0521460548043251,
+  0.18905576508527283,
+  -1.451226122521269
+);
 
 function subtract([ax, ay, az]: Vec3, [bx, by, bz]: Vec3): Vec3 {
   return [ax - bx, ay - by, az - bz];
@@ -82,16 +87,38 @@ function createPlanePointCloud({
 }
 
 describe("wiperTeslaDriverLayout", () => {
-  it("positions the camera near the steering anchor and aims mostly forward through the windshield", () => {
+  it("positions the camera using the approved preset and aims through the main windshield opening", () => {
     const layout = createTeslaDriverViewLayout(DRIVER_VIEW_LAYOUT_INPUT);
 
-    expect(layout.cameraPosition[0]).toBeGreaterThan(-0.46);
+    expect(layout.cameraPosition[0]).toBeGreaterThan(-0.35);
     expect(layout.cameraPosition[1]).toBeGreaterThan(0.35);
-    expect(layout.cameraPosition[2]).toBeGreaterThan(-0.5);
-    expect(layout.lookAt[0]).toBeLessThan(0);
-    expect(layout.lookAt[0] - layout.cameraPosition[0]).toBeLessThan(0.45);
-    expect(layout.lookAt[2]).toBeLessThan(layout.windscreenCenter[2]);
-    expect(layout.lookAt[2]).toBeGreaterThan(layout.windscreenCenter[2] - 0.2);
+    expect(layout.cameraPosition[2]).toBeGreaterThan(-0.1);
+    expect(layout.lookAt[0]).toBeGreaterThan(0.1);
+    expect(layout.lookAt[0] - layout.cameraPosition[0]).toBeGreaterThan(0.35);
+    expect(layout.lookAt[2]).toBeLessThan(layout.cameraPosition[2]);
+    expect(layout.lookAt[2]).toBeGreaterThan(-0.8);
+  });
+
+  it("keeps the animated wiper sweep inside the driver-view frame instead of pinning it to the edge", () => {
+    const layout = createTeslaDriverViewLayout(DRIVER_VIEW_LAYOUT_INPUT);
+    const camera = new PerspectiveCamera(
+      DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov,
+      1,
+      0.01,
+      30
+    );
+
+    camera.position.set(...layout.cameraPosition);
+    camera.lookAt(...layout.lookAt);
+    camera.updateMatrixWorld(true);
+    camera.updateProjectionMatrix();
+
+    const projectedCenter = TESLA_DRIVER_WIPER_BOUNDS_CENTER
+      .clone()
+      .project(camera);
+
+    expect(projectedCenter.x).toBeGreaterThan(-0.7);
+    expect(projectedCenter.y).toBeGreaterThan(-0.62);
   });
 
   it("projects glyphs onto a windshield plane that rises and deepens toward the top", () => {

@@ -10,6 +10,7 @@ export function computeDriverViewPhase(
   const elapsedWithinCycle =
     ((elapsedSeconds % safeCycleDuration) + safeCycleDuration) %
     safeCycleDuration;
+  const normalizedElapsed = elapsedWithinCycle / safeCycleDuration;
 
-  return elapsedWithinCycle / safeCycleDuration;
+  return 1 - Math.abs(normalizedElapsed * 2 - 1);
 }

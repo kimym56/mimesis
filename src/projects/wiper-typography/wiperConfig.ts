@@ -1,5 +1,6 @@
 export const WIPER_GLYPHS = "TYPOGRH".split("");
 export const WIPER_BACKGROUND_COLOR = "#1171b2";
+export const WIPER_DRIVER_VIEW_OUTSIDE_COLOR = "#d8dee3";
 export const WIPER_GLYPH_COLOR = "rgb(255, 255, 255)";
 export const WIPER_BAR_COLOR = "rgb(0, 0, 0)";
 
