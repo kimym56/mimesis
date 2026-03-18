@@ -100,7 +100,9 @@ describe("BwCircleProject", () => {
     ).not.toContain("B");
     expect(container.textContent).not.toContain("Tap the scene to arm bounce audio");
     expect(
-      container.querySelector('input[placeholder="Paste a YouTube link"]'),
+      container.querySelector(
+        'input[placeholder="https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C"]',
+      ),
     ).toBeNull();
 
     const syncButton = container.querySelector(
@@ -114,8 +116,11 @@ describe("BwCircleProject", () => {
     });
 
     expect(
-      container.querySelector('input[placeholder="Paste a YouTube link"]'),
+      container.querySelector(
+        'input[placeholder="https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C"]',
+      ),
     ).not.toBeNull();
-    expect(container.textContent).toContain("Load");
+    expect(container.textContent).toContain("Play");
+    expect(container.textContent).not.toContain("Load");
   });
 });

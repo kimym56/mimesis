@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useReducedMotion } from "framer-motion";
 import type { BwCirclePlaybackState } from "./BwCircleProject";
 import {
@@ -281,9 +281,11 @@ function updateBall({
 export default function BwCircleScene({
   mode,
   playback,
+  syncOverlay,
 }: {
   mode: "mimesis" | "sync";
   playback: BwCirclePlaybackState;
+  syncOverlay?: ReactNode;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const playbackRef = useRef(playback);
@@ -495,6 +497,7 @@ export default function BwCircleScene({
       data-scene-mode={mode}
       onPointerDown={handleActivateAudio}
     >
+      {syncOverlay ? syncOverlay : null}
       <div className={styles.cameraToggle}>
         <button
           className={`${styles.cameraButton} ${styles.cameraButtonActive}`}

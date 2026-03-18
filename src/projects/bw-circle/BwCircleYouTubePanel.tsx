@@ -6,19 +6,26 @@ import { parseYouTubeVideoId } from "./bwCircleYouTube";
 import styles from "./BwCircleProject.module.css";
 
 interface YouTubePlayerInstance {
+  cueVideoById: (videoId: string) => void;
   destroy: () => void;
   getCurrentTime: () => number;
   getPlayerState: () => number;
+  playVideo: () => void;
+  stopVideo: () => void;
 }
 
-interface YouTubePlayerEvent {
+interface YouTubePlayerReadyEvent {
+  target: YouTubePlayerInstance;
+}
+
+interface YouTubePlayerStateChangeEvent extends YouTubePlayerReadyEvent {
   data: number;
 }
 
 interface YouTubePlayerOptions {
   events?: {
-    onReady?: () => void;
-    onStateChange?: (event: YouTubePlayerEvent) => void;
+    onReady?: (event: YouTubePlayerReadyEvent) => void;
+    onStateChange?: (event: YouTubePlayerStateChangeEvent) => void;
   };
   height?: string;
   playerVars?: Record<string, number | string>;
@@ -44,8 +51,29 @@ const IDLE_PLAYBACK_STATE: BwCirclePlaybackState = {
   currentTime: 0,
   isPlaying: false,
 };
+const PLACEHOLDER_URL = "https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C";
 
 let youTubeApiPromise: Promise<void> | null = null;
+
+function hasQueryablePlaybackState(
+  player: YouTubePlayerInstance | null,
+): player is YouTubePlayerInstance {
+  return (
+    typeof player?.getCurrentTime === "function" &&
+    typeof player.getPlayerState === "function"
+  );
+}
+
+function hasPlaybackControls(
+  player: YouTubePlayerInstance | null,
+): player is YouTubePlayerInstance {
+  return (
+    hasQueryablePlaybackState(player) &&
+    typeof player.cueVideoById === "function" &&
+    typeof player.playVideo === "function" &&
+    typeof player.stopVideo === "function"
+  );
+}
 
 function ensureYouTubeIframeApi() {
   if (window.YT?.Player) {
@@ -92,26 +120,67 @@ export default function BwCircleYouTubePanel({
 }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const playerHostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
   const pollRef = useRef<number | null>(null);
   const playbackCallbackRef = useRef(onPlaybackChange);
+  const pendingPlayRef = useRef(false);
 
   useEffect(() => {
     playbackCallbackRef.current = onPlaybackChange;
   }, [onPlaybackChange]);
 
-  const handleLoad = () => {
-    const nextVideoId = parseYouTubeVideoId(input);
+  const commitInputVideo = (candidateInput = input) => {
+    const trimmedInput = candidateInput.trim();
+
+    if (!trimmedInput) {
+      return videoId;
+    }
+
+    const nextVideoId = parseYouTubeVideoId(trimmedInput);
 
     if (!nextVideoId) {
       setError("Enter a valid YouTube link.");
-      onLoad(null);
-      return;
+      return null;
+    }
+
+    if (nextVideoId !== videoId) {
+      setIsPlaying(false);
+      onLoad(nextVideoId);
     }
 
     setError(null);
-    onLoad(nextVideoId);
+    return nextVideoId;
+  };
+
+  const handlePlaybackToggle = () => {
+    const player = playerRef.current;
+
+    if (isPlaying) {
+      pendingPlayRef.current = false;
+
+      if (hasPlaybackControls(player)) {
+        player.stopVideo();
+      }
+
+      setIsPlaying(false);
+      playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
+      return;
+    }
+
+    const nextVideoId = commitInputVideo();
+
+    if (!nextVideoId) {
+      return;
+    }
+
+    pendingPlayRef.current = true;
+
+    if (hasPlaybackControls(player) && nextVideoId === videoId) {
+      player.playVideo();
+      pendingPlayRef.current = false;
+    }
   };
 
   useEffect(() => {
@@ -119,6 +188,7 @@ export default function BwCircleYouTubePanel({
       playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
       playerRef.current?.destroy();
       playerRef.current = null;
+      pendingPlayRef.current = false;
 
       if (pollRef.current) {
         window.clearInterval(pollRef.current);
@@ -130,16 +200,23 @@ export default function BwCircleYouTubePanel({
 
     let cancelled = false;
 
-    const updatePlayback = () => {
-      const player = playerRef.current;
+    const updatePlayback = (
+      event?: YouTubePlayerReadyEvent | YouTubePlayerStateChangeEvent,
+    ) => {
+      const player = event?.target ?? playerRef.current;
 
-      if (!player) {
+      if (!hasQueryablePlaybackState(player)) {
         return;
       }
 
+      playerRef.current = player;
+      const nextIsPlaying =
+        event && "data" in event ? event.data === 1 : player.getPlayerState() === 1;
+      setIsPlaying(nextIsPlaying);
+
       playbackCallbackRef.current({
         currentTime: player.getCurrentTime() || 0,
-        isPlaying: player.getPlayerState() === 1,
+        isPlaying: nextIsPlaying,
       });
     };
 
@@ -153,21 +230,42 @@ export default function BwCircleYouTubePanel({
 
       playerRef.current = new window.YT.Player(playerHostRef.current, {
         videoId,
-        width: "100%",
-        height: "100%",
+        width: "1",
+        height: "1",
         playerVars: {
           playsinline: 1,
           rel: 0,
         },
         events: {
-          onReady: updatePlayback,
+          onReady: (event) => {
+            const player = event.target;
+
+            playerRef.current = player;
+
+            if (hasPlaybackControls(player)) {
+              player.cueVideoById(videoId);
+
+              if (pendingPlayRef.current) {
+                player.playVideo();
+                pendingPlayRef.current = false;
+              }
+            }
+
+            updatePlayback(event);
+          },
           onStateChange: (event) => {
             if (event.data === 0) {
+              setIsPlaying(false);
+              pendingPlayRef.current = false;
               playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
               return;
             }
 
-            updatePlayback();
+            if (event.data === 1) {
+              pendingPlayRef.current = false;
+            }
+
+            updatePlayback(event);
           },
         },
       });
@@ -194,25 +292,35 @@ export default function BwCircleYouTubePanel({
       <div className={styles.inputRow}>
         <input
           className={styles.linkInput}
+          onBlur={(event) => {
+            commitInputVideo(event.currentTarget.value);
+          }}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Paste a YouTube link"
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              commitInputVideo(event.currentTarget.value);
+            }
+          }}
+          placeholder={PLACEHOLDER_URL}
           type="url"
           value={input}
         />
         <button
-          className={styles.loadButton}
-          onClick={handleLoad}
+          className={styles.playbackButton}
+          onClick={handlePlaybackToggle}
           type="button"
         >
-          Load
+          {isPlaying ? "Stop" : "Play"}
         </button>
       </div>
       {error ? <p className={styles.errorText}>{error}</p> : null}
-      {videoId ? (
-        <div className={styles.playerFrame}>
-          <div className={styles.playerHost} ref={playerHostRef} />
-        </div>
-      ) : null}
+      <div
+        aria-hidden="true"
+        className={styles.hiddenPlayerHost}
+        data-youtube-player-host="true"
+        ref={playerHostRef}
+      />
     </div>
   );
 }

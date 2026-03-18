@@ -60,14 +60,19 @@ export default function BwCircleProject({
           Sync
         </button>
       </div>
-      {mode === "sync" ? (
-        <BwCircleYouTubePanel
-          onLoad={handleVideoLoad}
-          onPlaybackChange={setPlayback}
-          videoId={videoId}
-        />
-      ) : null}
-      <BwCircleScene mode={mode} playback={playback} />
+      <BwCircleScene
+        mode={mode}
+        playback={playback}
+        syncOverlay={
+          mode === "sync" ? (
+            <BwCircleYouTubePanel
+              onLoad={handleVideoLoad}
+              onPlaybackChange={setPlayback}
+              videoId={videoId}
+            />
+          ) : null
+        }
+      />
     </div>
   );
 }
