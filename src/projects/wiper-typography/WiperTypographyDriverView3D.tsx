@@ -29,6 +29,10 @@ import type { InteractiveProjectProps } from "../types";
 import WiperTypographyTeslaModel, {
   TESLA_DRIVER_VIEW_MODEL_PATH,
 } from "./WiperTypographyTeslaModel";
+import {
+  useWiperInteraction,
+  type WiperViewRefValue,
+} from "./useWiperInteraction";
 import { WIPER_DRIVER_VIEW_OUTSIDE_COLOR } from "./wiperConfig";
 import styles from "./WiperTypographyProject.module.css";
 import { useWiperSceneSimulation3D } from "./useWiperSceneSimulation3D";
@@ -51,6 +55,11 @@ import {
   type TeslaDriverViewTuning,
 } from "./wiperTeslaDriverTuning";
 import { useTeslaDriverViewGui } from "./useTeslaDriverViewGui";
+import {
+  applyDriverViewCameraOffset,
+  stepViewAngleToward,
+  type WiperViewAngle,
+} from "./wiperView";
 
 type WindshieldOverlayMesh = Object3D;
 type DriverViewAssetState = "checking" | "available" | "missing";
@@ -71,6 +80,7 @@ const DRIVER_VIEW_TEXTURE_SCALE = 2;
 const DRIVER_VIEW_INITIAL_FOV = clampTeslaDriverViewFov(
   DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov
 );
+const DRIVER_VIEW_DRAG_SMOOTHING = 0.2;
 
 function addVector3(
   [ax, ay, az]: [number, number, number],
@@ -153,15 +163,19 @@ function DriverViewGuiController({
 }
 
 function DriverViewGlyphField({
+  fovRef,
   onSceneReady,
   phaseRef,
   reducedMotion,
   tuning,
+  viewRef,
 }: {
+  fovRef: MutableRefObject<number | null>;
   onSceneReady: () => void;
   phaseRef: MutableRefObject<number>;
   reducedMotion: boolean;
   tuning: TeslaDriverViewTuning;
+  viewRef: MutableRefObject<WiperViewRefValue>;
 }) {
   const overlayMeshRef = useRef<WindshieldOverlayMesh | null>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -170,6 +184,7 @@ function DriverViewGlyphField({
   const teslaSceneRef = useRef<Object3D | null>(null);
   const wiperDummyRef = useRef<Object3D | null>(null);
   const layoutRef = useRef<TeslaDriverViewLayout | null>(null);
+  const smoothedViewRef = useRef<WiperViewAngle>({ yaw: 0, pitch: 0 });
   const { pixelHeight, pixelWidth, simulation } =
     useWiperSceneSimulation3D({
       widthRatio: 0.74,
@@ -286,7 +301,7 @@ function DriverViewGlyphField({
     const phase = computeDriverViewPhase(state.clock.getElapsedTime(), cycleDuration);
     phaseRef.current = phase;
     const perspectiveCamera = state.camera as PerspectiveCamera;
-    const clampedFov = clampTeslaDriverViewFov(tuning.fov);
+    const clampedFov = clampTeslaDriverViewFov(fovRef.current ?? tuning.fov);
 
     if (perspectiveCamera.fov !== clampedFov) {
       perspectiveCamera.fov = clampedFov;
@@ -297,8 +312,15 @@ function DriverViewGlyphField({
       return;
     }
 
-    state.camera.position.set(...layout.cameraPosition);
-    state.camera.lookAt(...layout.lookAt);
+    smoothedViewRef.current = stepViewAngleToward(
+      smoothedViewRef.current,
+      viewRef.current,
+      DRIVER_VIEW_DRAG_SMOOTHING
+    );
+    const pose = applyDriverViewCameraOffset(layout, smoothedViewRef.current);
+
+    state.camera.position.set(...pose.position);
+    state.camera.lookAt(...pose.lookAt);
 
     if (wiperDummyRef.current) {
       wiperDummyRef.current.rotation.x = getTeslaDriverWiperRotation(phase);
@@ -431,13 +453,17 @@ function DriverViewLoadingOverlay() {
 }
 
 function DriverViewScene({
+  fovRef,
   onSceneReady,
   reducedMotion,
   tuning,
+  viewRef,
 }: {
+  fovRef: MutableRefObject<number | null>;
   onSceneReady: () => void;
   reducedMotion: boolean;
   tuning: TeslaDriverViewTuning;
+  viewRef: MutableRefObject<WiperViewRefValue>;
 }) {
   const phaseRef = useRef(0);
 
@@ -448,10 +474,12 @@ function DriverViewScene({
       <directionalLight castShadow intensity={1.1} position={[4, 6, 5]} />
       <Suspense fallback={null}>
         <DriverViewGlyphField
+          fovRef={fovRef}
           onSceneReady={onSceneReady}
           phaseRef={phaseRef}
           reducedMotion={reducedMotion}
           tuning={tuning}
+          viewRef={viewRef}
         />
       </Suspense>
     </>
@@ -467,6 +495,12 @@ export default function WiperTypographyDriverView3D({
   const [tuning, setTuning] = useState<TeslaDriverViewTuning>(() => ({
     ...DEFAULT_TESLA_DRIVER_VIEW_TUNING,
   }));
+  const { containerRef, dragLayerRef, dragLayerProps, fovRef, viewRef } =
+    useWiperInteraction({
+      interactionMode: "driver-view-camera",
+      initialFov: tuning.fov,
+      margin: 0,
+    });
 
   const handleSceneReady = useCallback(() => {
     startTransition(() => {
@@ -524,6 +558,7 @@ export default function WiperTypographyDriverView3D({
     <div
       className={styles.wrapper}
       data-project-id={projectId}
+      ref={containerRef}
       role="img"
       aria-label="Tesla driver view wiper typography simulation"
     >
@@ -546,11 +581,19 @@ export default function WiperTypographyDriverView3D({
         style={{ inset: 0, position: "absolute" }}
       >
         <DriverViewScene
+          fovRef={fovRef}
           onSceneReady={handleSceneReady}
           reducedMotion={reducedMotion}
           tuning={tuning}
+          viewRef={viewRef}
         />
       </Canvas>
+      <div
+        className={`${styles.dragLayer} ${styles.driverViewDragLayer}`}
+        data-driver-view-part="interaction-layer"
+        ref={dragLayerRef}
+        {...dragLayerProps}
+      />
     </div>
   );
 }

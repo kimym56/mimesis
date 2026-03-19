@@ -44,6 +44,28 @@ const { mockedUseTeslaDriverViewGui } = vi.hoisted(() => ({
   mockedUseTeslaDriverViewGui: vi.fn(),
 }));
 
+const { mockedUseWiperInteraction } = vi.hoisted(() => ({
+  mockedUseWiperInteraction: vi.fn(() => ({
+    containerRef: { current: null },
+    dragLayerRef: { current: null },
+    phaseRef: { current: 0 },
+    sizeRef: { current: { width: 1, height: 1 } },
+    viewRef: { current: { yaw: 0, pitch: 0, isDraggingView: false } },
+    fovRef: { current: DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov },
+    reducedMotion: false,
+    tick: () => 0,
+    dragLayerProps: {
+      onPointerEnter: vi.fn(),
+      onPointerMove: vi.fn(),
+      onPointerDown: vi.fn(),
+      onPointerUp: vi.fn(),
+      onPointerLeave: vi.fn(),
+      onPointerCancel: vi.fn(),
+      onWheel: vi.fn(),
+    },
+  })),
+}));
+
 vi.mock("@react-three/fiber", () => ({
   Canvas: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="mock-canvas">{children}</div>
@@ -66,6 +88,10 @@ vi.mock("./WiperTypographyExtrudedGlyph3D", () => ({
 
 vi.mock("./useTeslaDriverViewGui", () => ({
   useTeslaDriverViewGui: mockedUseTeslaDriverViewGui,
+}));
+
+vi.mock("./useWiperInteraction", () => ({
+  useWiperInteraction: mockedUseWiperInteraction,
 }));
 
 vi.mock("./WiperTypographyCockpitWipers3D", () => ({
@@ -111,6 +137,7 @@ describe("WiperTypographyDriverView3D", () => {
     teslaModelState.shouldThrow = false;
     mockedTeslaModel.mockClear();
     mockedUseTeslaDriverViewGui.mockClear();
+    mockedUseWiperInteraction.mockClear();
     mockedFetch.mockReset();
     mockedFetch.mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", mockedFetch);
@@ -156,6 +183,24 @@ describe("WiperTypographyDriverView3D", () => {
         lookAtOffsetX: DEFAULT_TESLA_DRIVER_VIEW_TUNING.lookAtOffsetX,
       }),
     });
+  });
+
+  it("wires the driver view to the shared camera-control interaction hook", async () => {
+    await act(async () => {
+      root.render(<WiperTypographyDriverView3D projectId="wiper-typography" />);
+      await Promise.resolve();
+    });
+
+    expect(mockedUseWiperInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interactionMode: "driver-view-camera",
+        initialFov: DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov,
+        margin: 0,
+      })
+    );
+    expect(
+      container.querySelector('[data-driver-view-part="interaction-layer"]')
+    ).not.toBeNull();
   });
 
   it("keeps showing a loading state until the tesla scene signals ready", async () => {

@@ -4,10 +4,12 @@ import {
 } from "./wiperMath";
 import {
   mapDragDeltaToViewAngle,
+  mapWheelDeltaToDriverViewFov,
   type WiperViewAngle,
 } from "./wiperView";
 
 export interface WiperInteractionState {
+  fov: number | null;
   pointerTargetPhase: number;
   frozenPhase: number | null;
   isDraggingView: boolean;
@@ -20,8 +22,11 @@ export interface WiperInteractionState {
   touchDragStartPhase: number;
 }
 
-export function createWiperInteractionState(): WiperInteractionState {
+export function createWiperInteractionState(
+  initialFov: number | null = null
+): WiperInteractionState {
   return {
+    fov: initialFov,
     pointerTargetPhase: 0,
     frozenPhase: null,
     isDraggingView: false,
@@ -43,6 +48,20 @@ export function handleDesktopHoverMove(
     ...state,
     frozenPhase: null,
     pointerTargetPhase: mapPointerXToPhase(input.pointerX, input.width, input.margin),
+  };
+}
+
+export function beginDesktopCameraControlDrag(
+  state: WiperInteractionState,
+  input: { pointerX: number; pointerY: number }
+): WiperInteractionState {
+  return {
+    ...state,
+    frozenPhase: null,
+    isDraggingView: true,
+    dragStartX: input.pointerX,
+    dragStartY: input.pointerY,
+    dragStartView: state.view,
   };
 }
 
@@ -88,6 +107,16 @@ export function endDesktopViewDrag(
     ...state,
     frozenPhase: null,
     isDraggingView: false,
+  };
+}
+
+export function updateDesktopWheelZoom(
+  state: WiperInteractionState,
+  input: { deltaY: number; fov: number }
+): WiperInteractionState {
+  return {
+    ...state,
+    fov: mapWheelDeltaToDriverViewFov(input.fov, input.deltaY),
   };
 }
 

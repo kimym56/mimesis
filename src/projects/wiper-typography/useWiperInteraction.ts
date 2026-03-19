@@ -7,6 +7,7 @@ import {
   type MutableRefObject,
   type PointerEventHandler,
   type RefObject,
+  type WheelEventHandler,
 } from "react";
 import {
   WIPER_AUTOPLAY_SPEED,
@@ -18,11 +19,13 @@ import {
   mapPointerDragToPhase,
 } from "./wiperMath";
 import {
+  beginDesktopCameraControlDrag,
   beginDesktopViewDrag,
   createWiperInteractionState,
   endDesktopViewDrag,
   handleDesktopHoverMove,
   primeTouchPhaseDrag,
+  updateDesktopWheelZoom,
   updateDesktopViewDrag,
   updateTouchPhaseDrag,
 } from "./wiperInteractionState";
@@ -37,7 +40,10 @@ interface WiperSize {
   height: number;
 }
 
-export type WiperInteractionMode = "legacy-phase" | "desktop-view-drag";
+export type WiperInteractionMode =
+  | "legacy-phase"
+  | "desktop-view-drag"
+  | "driver-view-camera";
 
 export interface WiperViewRefValue {
   yaw: number;
@@ -50,11 +56,13 @@ interface UseWiperInteractionOptions {
   autoplaySpeed?: number;
   maxDelta?: number;
   interactionMode?: WiperInteractionMode;
+  initialFov?: number;
 }
 
 export interface WiperInteractionModel {
   containerRef: RefObject<HTMLDivElement | null>;
   dragLayerRef: RefObject<HTMLDivElement | null>;
+  fovRef: MutableRefObject<number | null>;
   phaseRef: MutableRefObject<number>;
   sizeRef: MutableRefObject<WiperSize>;
   viewRef: MutableRefObject<WiperViewRefValue>;
@@ -67,6 +75,7 @@ export interface WiperInteractionModel {
     onPointerUp: PointerEventHandler<HTMLDivElement>;
     onPointerLeave: PointerEventHandler<HTMLDivElement>;
     onPointerCancel: PointerEventHandler<HTMLDivElement>;
+    onWheel: WheelEventHandler<HTMLDivElement>;
   };
 }
 
@@ -78,12 +87,14 @@ export function useWiperInteraction(
     autoplaySpeed = WIPER_AUTOPLAY_SPEED,
     maxDelta = WIPER_POINTER_PHASE_MAX_DELTA,
     interactionMode = "legacy-phase",
+    initialFov,
   } = options;
 
   const prefersReducedMotion = useReducedMotion() ?? false;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dragLayerRef = useRef<HTMLDivElement>(null);
+  const fovRef = useRef<number | null>(initialFov ?? null);
   const phaseRef = useRef(0);
   const sizeRef = useRef<WiperSize>({ width: 1, height: 1 });
   const viewRef = useRef<WiperViewRefValue>({
@@ -97,7 +108,9 @@ export function useWiperInteraction(
   const pointerDragStartXRef = useRef(0);
   const pointerDragStartPhaseRef = useRef(0);
   const pointerDragPrimedRef = useRef(false);
-  const interactionStateRef = useRef(createWiperInteractionState());
+  const interactionStateRef = useRef(
+    createWiperInteractionState(initialFov ?? null)
+  );
 
   useEffect(() => {
     const element = containerRef.current;
@@ -128,6 +141,7 @@ export function useWiperInteraction(
   ) => {
     interactionStateRef.current = nextState;
     pointerTargetPhaseRef.current = nextState.pointerTargetPhase;
+    fovRef.current = nextState.fov;
     viewRef.current = {
       yaw: nextState.view.yaw,
       pitch: nextState.view.pitch,
@@ -159,6 +173,20 @@ export function useWiperInteraction(
   const onPointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
     const pointerX = getPointerX(event.clientX);
     const width = sizeRef.current.width;
+
+    if (interactionMode === "driver-view-camera") {
+      if (viewRef.current.isDraggingView) {
+        syncInteractionState(
+          updateDesktopViewDrag(interactionStateRef.current, {
+            pointerX,
+            pointerY: event.clientY,
+            width,
+            height: sizeRef.current.height,
+          })
+        );
+      }
+      return;
+    }
 
     if (interactionMode === "desktop-view-drag") {
       if (event.pointerType === "touch") {
@@ -234,6 +262,21 @@ export function useWiperInteraction(
   };
 
   const onPointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode === "driver-view-camera") {
+      if (event.pointerType === "touch") {
+        return;
+      }
+
+      syncInteractionState(
+        beginDesktopCameraControlDrag(interactionStateRef.current, {
+          pointerX: getPointerX(event.clientX),
+          pointerY: event.clientY,
+        })
+      );
+      event.currentTarget.setPointerCapture(event.pointerId);
+      return;
+    }
+
     if (interactionMode !== "desktop-view-drag") {
       return;
     }
@@ -269,6 +312,17 @@ export function useWiperInteraction(
   };
 
   const onPointerUp: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode === "driver-view-camera") {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+
+      if (viewRef.current.isDraggingView) {
+        syncInteractionState(endDesktopViewDrag(interactionStateRef.current));
+      }
+      return;
+    }
+
     if (interactionMode !== "desktop-view-drag") {
       leavePointerMode();
       return;
@@ -293,6 +347,10 @@ export function useWiperInteraction(
   };
 
   const onPointerLeave: PointerEventHandler<HTMLDivElement> = () => {
+    if (interactionMode === "driver-view-camera") {
+      return;
+    }
+
     if (interactionMode === "desktop-view-drag" && viewRef.current.isDraggingView) {
       return;
     }
@@ -301,6 +359,17 @@ export function useWiperInteraction(
   };
 
   const onPointerCancel: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode === "driver-view-camera") {
+      if (viewRef.current.isDraggingView) {
+        syncInteractionState(endDesktopViewDrag(interactionStateRef.current));
+      }
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+      return;
+    }
+
     if (interactionMode === "desktop-view-drag" && viewRef.current.isDraggingView) {
       syncInteractionState(endDesktopViewDrag(interactionStateRef.current));
     }
@@ -317,6 +386,20 @@ export function useWiperInteraction(
       isTouchDraggingPhase: false,
     };
     leavePointerMode();
+  };
+
+  const onWheel: WheelEventHandler<HTMLDivElement> = (event) => {
+    if (interactionMode !== "driver-view-camera") {
+      return;
+    }
+
+    event.preventDefault();
+    syncInteractionState(
+      updateDesktopWheelZoom(interactionStateRef.current, {
+        deltaY: event.deltaY,
+        fov: fovRef.current ?? initialFov ?? 0,
+      })
+    );
   };
 
   const tick = (): number => {
@@ -352,6 +435,7 @@ export function useWiperInteraction(
   return {
     containerRef,
     dragLayerRef,
+    fovRef,
     phaseRef,
     sizeRef,
     viewRef,
@@ -364,6 +448,7 @@ export function useWiperInteraction(
       onPointerUp,
       onPointerLeave,
       onPointerCancel,
+      onWheel,
     },
   };
 }

@@ -104,3 +104,11 @@
   backdrop-filter: blur(4px);
   pointer-events: none;
 }
+
+.driverViewDragLayer {
+  cursor: grab;
+}
+
+.driverViewDragLayer:active {
+  cursor: grabbing;
+}
