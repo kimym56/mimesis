@@ -24,6 +24,28 @@ export interface BwCircleParticle {
   radius: number;
 }
 
+export interface BwCirclePlaybackSample {
+  currentTime: number;
+  isPlaying: boolean;
+  sampledAtMs: number;
+}
+
+export interface BwCirclePlaybackPredictionInput
+  extends BwCirclePlaybackSample {
+  nowMs: number;
+}
+
+export interface BwCircleBeatAccentCueInput {
+  currentTime: number;
+  bpm: number;
+  isPlaying: boolean;
+}
+
+export interface BwCircleBeatAccentCue {
+  accentStrength: number;
+  beatPhase: number;
+}
+
 export interface BwCircleSyncCueInput {
   currentTime: number;
   isPlaying: boolean;
@@ -35,6 +57,22 @@ export interface BwCircleSyncCue {
   pulseStrength: number;
   energy: number;
   cameraMode: BwCircleCameraMode;
+}
+
+export interface BwCircleSyncMotionProfileInput
+  extends BwCirclePlaybackPredictionInput {
+  bpm: number;
+  baseCameraMode: BwCircleCameraMode;
+  shouldReduceMotion: boolean;
+}
+
+export interface BwCircleSyncMotionProfile {
+  predictedCurrentTime: number;
+  syncCue: BwCircleSyncCue;
+  beatAccent: BwCircleBeatAccentCue;
+  ballKick: number;
+  ballSquash: number;
+  particleAccent: number;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -114,6 +152,45 @@ function getCircleRadius(width: number) {
 }
 
 const CAMERA_SEQUENCE: BwCircleCameraMode[] = ["normal", "white", "black"];
+
+export function predictPlaybackTime({
+  currentTime,
+  isPlaying,
+  sampledAtMs,
+  nowMs,
+}: BwCirclePlaybackPredictionInput) {
+  if (!isPlaying) {
+    return currentTime;
+  }
+
+  const elapsedSeconds = Math.max(0, nowMs - sampledAtMs) / 1000;
+
+  return currentTime + elapsedSeconds;
+}
+
+export function createBeatAccentCue({
+  currentTime,
+  bpm,
+  isPlaying,
+}: BwCircleBeatAccentCueInput): BwCircleBeatAccentCue {
+  if (!isPlaying) {
+    return {
+      accentStrength: 0,
+      beatPhase: 0,
+    };
+  }
+
+  const secondsPerBeat = 60 / Math.max(bpm, 1);
+  const phaseSeconds =
+    ((currentTime % secondsPerBeat) + secondsPerBeat) % secondsPerBeat;
+  const beatPhase = phaseSeconds / secondsPerBeat;
+  const accentStrength = clamp(1 - beatPhase / 0.18, 0, 1);
+
+  return {
+    accentStrength,
+    beatPhase,
+  };
+}
 
 export function createMimesisCue({
   secondsWithinMinute,
@@ -230,5 +307,47 @@ export function createSyncCue({
     pulseStrength,
     energy,
     cameraMode,
+  };
+}
+
+export function createSyncMotionProfile({
+  currentTime,
+  isPlaying,
+  sampledAtMs,
+  nowMs,
+  bpm,
+  baseCameraMode,
+  shouldReduceMotion,
+}: BwCircleSyncMotionProfileInput): BwCircleSyncMotionProfile {
+  const predictedCurrentTime = predictPlaybackTime({
+    currentTime,
+    isPlaying,
+    sampledAtMs,
+    nowMs,
+  });
+  const syncCue = createSyncCue({
+    currentTime: predictedCurrentTime,
+    isPlaying,
+    baseCameraMode,
+  });
+  const rawBeatAccent = createBeatAccentCue({
+    currentTime: predictedCurrentTime,
+    bpm,
+    isPlaying,
+  });
+  const accentStrength = shouldReduceMotion
+    ? rawBeatAccent.accentStrength * 0.45
+    : rawBeatAccent.accentStrength;
+
+  return {
+    predictedCurrentTime,
+    syncCue,
+    beatAccent: {
+      ...rawBeatAccent,
+      accentStrength,
+    },
+    ballKick: 1 + accentStrength * (shouldReduceMotion ? 0.08 : 0.18),
+    ballSquash: accentStrength * (shouldReduceMotion ? 0.05 : 0.12),
+    particleAccent: 1 + accentStrength * (shouldReduceMotion ? 0.03 : 0.08),
   };
 }

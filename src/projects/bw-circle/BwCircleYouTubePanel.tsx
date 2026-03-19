@@ -10,6 +10,7 @@ interface YouTubePlayerInstance {
   destroy: () => void;
   getCurrentTime: () => number;
   getPlayerState: () => number;
+  loadVideoById: (videoId: string) => void;
   playVideo: () => void;
   stopVideo: () => void;
 }
@@ -22,14 +23,19 @@ interface YouTubePlayerStateChangeEvent extends YouTubePlayerReadyEvent {
   data: number;
 }
 
+interface YouTubePlayerErrorEvent extends YouTubePlayerReadyEvent {
+  data: number;
+}
+
 interface YouTubePlayerOptions {
   events?: {
+    onError?: (event: YouTubePlayerErrorEvent) => void;
     onReady?: (event: YouTubePlayerReadyEvent) => void;
     onStateChange?: (event: YouTubePlayerStateChangeEvent) => void;
   };
   height?: string;
   playerVars?: Record<string, number | string>;
-  videoId: string;
+  videoId?: string;
   width?: string;
 }
 
@@ -50,8 +56,14 @@ declare global {
 const IDLE_PLAYBACK_STATE: BwCirclePlaybackState = {
   currentTime: 0,
   isPlaying: false,
+  sampledAtMs: 0,
 };
+const DEFAULT_BPM = 120;
+const MIN_BPM = 48;
 const PLACEHOLDER_URL = "https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C";
+const MAX_BPM = 220;
+const TAP_HISTORY_LIMIT = 4;
+const TAP_RESET_WINDOW_MS = 2_000;
 
 let youTubeApiPromise: Promise<void> | null = null;
 
@@ -73,6 +85,48 @@ function hasPlaybackControls(
     typeof player.playVideo === "function" &&
     typeof player.stopVideo === "function"
   );
+}
+
+function getYouTubeErrorMessage(code: number) {
+  switch (code) {
+    case 2:
+      return "This YouTube link is invalid.";
+    case 100:
+      return "This video is unavailable.";
+    case 101:
+    case 150:
+      return "This video can't be played in an embedded player.";
+    default:
+      return "This video can't be played right now.";
+  }
+}
+
+function clampBpm(value: number) {
+  return Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(value)));
+}
+
+function deriveTappedBpm(tapTimesMs: number[]) {
+  if (tapTimesMs.length < 2) {
+    return null;
+  }
+
+  const intervals = tapTimesMs
+    .slice(1)
+    .map((tapTimeMs, index) => tapTimeMs - tapTimesMs[index])
+    .filter((intervalMs) => intervalMs > 0);
+
+  if (intervals.length === 0) {
+    return null;
+  }
+
+  const averageIntervalMs =
+    intervals.reduce((sum, intervalMs) => sum + intervalMs, 0) / intervals.length;
+
+  if (averageIntervalMs <= 0) {
+    return null;
+  }
+
+  return clampBpm(60_000 / averageIntervalMs);
 }
 
 function ensureYouTubeIframeApi() {
@@ -110,10 +164,14 @@ function ensureYouTubeIframeApi() {
 }
 
 export default function BwCircleYouTubePanel({
+  bpm = DEFAULT_BPM,
+  onBpmChange = () => {},
   onLoad,
   onPlaybackChange,
   videoId,
 }: {
+  bpm?: number;
+  onBpmChange?: (bpm: number) => void;
   onLoad: (videoId: string | null) => void;
   onPlaybackChange: (playback: BwCirclePlaybackState) => void;
   videoId: string | null;
@@ -121,15 +179,26 @@ export default function BwCircleYouTubePanel({
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const playerHostRef = useRef<HTMLDivElement | null>(null);
+  const playerMountNodeRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
+  const playerReadyRef = useRef(false);
   const pollRef = useRef<number | null>(null);
   const playbackCallbackRef = useRef(onPlaybackChange);
+  const latestVideoIdRef = useRef(videoId);
   const pendingPlayRef = useRef(false);
+  const playerCreationInFlightRef = useRef(false);
+  const skipCueVideoIdRef = useRef<string | null>(null);
+  const tapTimesRef = useRef<number[]>([]);
 
   useEffect(() => {
     playbackCallbackRef.current = onPlaybackChange;
   }, [onPlaybackChange]);
+
+  useEffect(() => {
+    latestVideoIdRef.current = videoId;
+  }, [videoId]);
 
   const commitInputVideo = (candidateInput = input) => {
     const trimmedInput = candidateInput.trim();
@@ -169,7 +238,7 @@ export default function BwCircleYouTubePanel({
       return;
     }
 
-    const nextVideoId = commitInputVideo();
+    const nextVideoId = commitInputVideo(inputRef.current?.value ?? input);
 
     if (!nextVideoId) {
       return;
@@ -177,28 +246,89 @@ export default function BwCircleYouTubePanel({
 
     pendingPlayRef.current = true;
 
-    if (hasPlaybackControls(player) && nextVideoId === videoId) {
+    if (hasPlaybackControls(player) && playerReadyRef.current) {
+      if (nextVideoId !== videoId) {
+        skipCueVideoIdRef.current = nextVideoId;
+        player.loadVideoById(nextVideoId);
+        pendingPlayRef.current = false;
+        return;
+      }
+
       player.playVideo();
       pendingPlayRef.current = false;
+      return;
+    }
+  };
+
+  const handleBpmInputChange = (nextValue: string) => {
+    const parsedValue = Number(nextValue);
+
+    if (!Number.isFinite(parsedValue)) {
+      return;
+    }
+
+    onBpmChange(clampBpm(parsedValue));
+  };
+
+  const handleTapTempo = () => {
+    const nowMs = performance.now();
+    const lastTapMs = tapTimesRef.current.at(-1) ?? null;
+    const nextTapTimesMs =
+      lastTapMs !== null && nowMs - lastTapMs > TAP_RESET_WINDOW_MS
+        ? [nowMs]
+        : [...tapTimesRef.current, nowMs].slice(-TAP_HISTORY_LIMIT);
+
+    tapTimesRef.current = nextTapTimesMs;
+
+    const nextBpm = deriveTappedBpm(nextTapTimesMs);
+
+    if (nextBpm !== null) {
+      onBpmChange(nextBpm);
     }
   };
 
   useEffect(() => {
-    if (!videoId) {
-      playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
-      playerRef.current?.destroy();
-      playerRef.current = null;
-      pendingPlayRef.current = false;
+    const player = playerRef.current;
 
-      if (pollRef.current) {
-        window.clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
+    if (!videoId || !hasPlaybackControls(player) || !playerReadyRef.current) {
+      return;
+    }
 
+    if (skipCueVideoIdRef.current === videoId) {
+      skipCueVideoIdRef.current = null;
+      return;
+    }
+
+    player.cueVideoById(videoId);
+    playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
+  }, [videoId]);
+
+  useEffect(() => {
+    if (!videoId || !playerHostRef.current) {
+      return;
+    }
+
+    if (playerRef.current || playerCreationInFlightRef.current) {
       return;
     }
 
     let cancelled = false;
+    playerCreationInFlightRef.current = true;
+
+    const stopPolling = () => {
+      if (pollRef.current) {
+        window.clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    };
+
+    const startPolling = () => {
+      if (pollRef.current) {
+        return;
+      }
+
+      pollRef.current = window.setInterval(updatePlayback, 180);
+    };
 
     const updatePlayback = (
       event?: YouTubePlayerReadyEvent | YouTubePlayerStateChangeEvent,
@@ -212,49 +342,69 @@ export default function BwCircleYouTubePanel({
       playerRef.current = player;
       const nextIsPlaying =
         event && "data" in event ? event.data === 1 : player.getPlayerState() === 1;
+      const sampledAtMs = performance.now();
       setIsPlaying(nextIsPlaying);
 
       playbackCallbackRef.current({
         currentTime: player.getCurrentTime() || 0,
         isPlaying: nextIsPlaying,
+        sampledAtMs,
       });
     };
 
     ensureYouTubeIframeApi().then(() => {
       if (cancelled || !playerHostRef.current || !window.YT?.Player) {
+        playerCreationInFlightRef.current = false;
         return;
       }
 
       playerRef.current?.destroy();
-      playerHostRef.current.innerHTML = "";
+      playerHostRef.current.replaceChildren();
+      playerMountNodeRef.current = document.createElement("div");
+      playerHostRef.current.appendChild(playerMountNodeRef.current);
 
-      playerRef.current = new window.YT.Player(playerHostRef.current, {
-        videoId,
-        width: "1",
-        height: "1",
+      playerRef.current = new window.YT.Player(playerMountNodeRef.current, {
+        width: "200",
+        height: "200",
         playerVars: {
+          origin: window.location.origin,
           playsinline: 1,
           rel: 0,
         },
+        ...(latestVideoIdRef.current ? { videoId: latestVideoIdRef.current } : {}),
         events: {
           onReady: (event) => {
             const player = event.target;
 
             playerRef.current = player;
+            playerReadyRef.current = true;
 
             if (hasPlaybackControls(player)) {
-              player.cueVideoById(videoId);
-
-              if (pendingPlayRef.current) {
-                player.playVideo();
+              if (pendingPlayRef.current && latestVideoIdRef.current) {
+                skipCueVideoIdRef.current = latestVideoIdRef.current;
+                player.loadVideoById(latestVideoIdRef.current);
                 pendingPlayRef.current = false;
+              } else if (latestVideoIdRef.current) {
+                player.cueVideoById(latestVideoIdRef.current);
               }
             }
 
             updatePlayback(event);
+
+            if (player.getPlayerState() === 1) {
+              startPolling();
+            }
+          },
+          onError: (event) => {
+            stopPolling();
+            setError(getYouTubeErrorMessage(event.data));
+            setIsPlaying(false);
+            pendingPlayRef.current = false;
+            playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
           },
           onStateChange: (event) => {
             if (event.data === 0) {
+              stopPolling();
               setIsPlaying(false);
               pendingPlayRef.current = false;
               playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
@@ -262,6 +412,8 @@ export default function BwCircleYouTubePanel({
             }
 
             if (event.data === 1) {
+              setError(null);
+              startPolling();
               pendingPlayRef.current = false;
             }
 
@@ -270,28 +422,42 @@ export default function BwCircleYouTubePanel({
         },
       });
 
-      pollRef.current = window.setInterval(updatePlayback, 180);
+      playerCreationInFlightRef.current = false;
+
     });
 
     return () => {
       cancelled = true;
+      playerCreationInFlightRef.current = false;
+    };
+  }, [videoId]);
 
+  useEffect(() => {
+    const playerHost = playerHostRef.current;
+
+    return () => {
       if (pollRef.current) {
         window.clearInterval(pollRef.current);
         pollRef.current = null;
       }
 
+      playerReadyRef.current = false;
+      playerCreationInFlightRef.current = false;
       playerRef.current?.destroy();
       playerRef.current = null;
+      playerMountNodeRef.current = null;
+      playerHost?.replaceChildren();
+      pendingPlayRef.current = false;
       playbackCallbackRef.current(IDLE_PLAYBACK_STATE);
     };
-  }, [videoId]);
+  }, []);
 
   return (
     <div className={styles.syncPanel}>
       <div className={styles.inputRow}>
         <input
           className={styles.linkInput}
+          ref={inputRef}
           onBlur={(event) => {
             commitInputVideo(event.currentTarget.value);
           }}
@@ -306,6 +472,29 @@ export default function BwCircleYouTubePanel({
           type="url"
           value={input}
         />
+        <input
+          aria-label="BPM"
+          className={styles.bpmInput}
+          inputMode="numeric"
+          max={MAX_BPM}
+          min={MIN_BPM}
+          onInput={(event) => {
+            handleBpmInputChange(event.currentTarget.value);
+          }}
+          onChange={(event) => {
+            handleBpmInputChange(event.currentTarget.value);
+          }}
+          step={1}
+          type="number"
+          value={bpm}
+        />
+        <button
+          className={styles.tapButton}
+          onClick={handleTapTempo}
+          type="button"
+        >
+          Tap
+        </button>
         <button
           className={styles.playbackButton}
           onClick={handlePlaybackToggle}

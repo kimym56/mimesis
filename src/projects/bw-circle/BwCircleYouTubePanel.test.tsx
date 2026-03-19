@@ -2,6 +2,7 @@
 
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { useState } from "react";
 import {
   afterEach,
   beforeEach,
@@ -19,6 +20,7 @@ interface MockPlayerInstance {
   destroy: () => void;
   getCurrentTime: () => number;
   getPlayerState: () => number;
+  loadVideoById: (videoId: string) => void;
   playVideo: () => void;
   stopVideo: () => void;
 }
@@ -29,15 +31,19 @@ declare global {
       Player: new (
         element: HTMLElement,
         options: {
-          events?: {
-            onReady?: (event: { target: MockPlayerInstance }) => void;
-            onStateChange?: (event: {
-              data: number;
-              target: MockPlayerInstance;
-            }) => void;
-          };
-          videoId: string;
-        },
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
       ) => Partial<MockPlayerInstance>;
     };
   }
@@ -53,6 +59,7 @@ describe("BwCircleYouTubePanel", () => {
       destroy: vi.fn(),
       getCurrentTime: vi.fn(() => 42),
       getPlayerState: vi.fn(() => playerState),
+      loadVideoById: vi.fn(),
       playVideo: vi.fn(),
       stopVideo: vi.fn(),
     } satisfies MockPlayerInstance;
@@ -83,13 +90,17 @@ describe("BwCircleYouTubePanel", () => {
       _element: HTMLElement,
       options: {
         events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
           onReady?: (event: { target: MockPlayerInstance }) => void;
           onStateChange?: (event: {
             data: number;
             target: MockPlayerInstance;
           }) => void;
         };
-        videoId: string;
+        videoId?: string;
       },
     ) {
       window.setTimeout(() => {
@@ -125,6 +136,7 @@ describe("BwCircleYouTubePanel", () => {
     expect(onPlaybackChange).toHaveBeenLastCalledWith({
       currentTime: 42,
       isPlaying: true,
+      sampledAtMs: expect.any(Number),
     });
   });
 
@@ -176,13 +188,17 @@ describe("BwCircleYouTubePanel", () => {
       _element: HTMLElement,
       options: {
         events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
           onReady?: (event: { target: MockPlayerInstance }) => void;
           onStateChange?: (event: {
             data: number;
             target: MockPlayerInstance;
           }) => void;
         };
-        videoId: string;
+        videoId?: string;
       },
     ) {
       onStateChange = options.events?.onStateChange;
@@ -240,5 +256,464 @@ describe("BwCircleYouTubePanel", () => {
     });
 
     expect(readyPlayer.stopVideo).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates the hidden youtube player with a valid minimum viewport", async () => {
+    const readyPlayer = createMockPlayer(2);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: readyPlayer });
+      }, 0);
+
+      return readyPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId="97qr0BOdHkc"
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    expect(MockPlayer).toHaveBeenCalledWith(
+      expect.any(HTMLDivElement),
+      expect.objectContaining({
+        height: "200",
+        playerVars: expect.objectContaining({
+          origin: window.location.origin,
+        }),
+        width: "200",
+      }),
+    );
+  });
+
+  it("does not cue a placeholder video before the user commits a link", async () => {
+    const readyPlayer = createMockPlayer(2);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: readyPlayer });
+      }, 0);
+
+      return readyPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(readyPlayer.cueVideoById).not.toHaveBeenCalled();
+  });
+
+  it("does not create a youtube player before the user commits a link", async () => {
+    const readyPlayer = createMockPlayer(2);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: readyPlayer });
+      }, 0);
+
+      return readyPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(MockPlayer).not.toHaveBeenCalled();
+  });
+
+  it("updates the bpm field through the compact sync controls", async () => {
+    const onBpmChange = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          bpm={120}
+          onBpmChange={onBpmChange}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    const bpmInput = container.querySelector(
+      'input[type="number"]',
+    ) as HTMLInputElement | null;
+
+    expect(bpmInput).not.toBeNull();
+
+    act(() => {
+      if (bpmInput) {
+        bpmInput.value = "132";
+      }
+      bpmInput?.dispatchEvent(new Event("input", { bubbles: true }));
+      bpmInput?.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(onBpmChange).toHaveBeenCalledWith(132);
+  });
+
+  it("derives bpm from recent tap intervals", async () => {
+    const onBpmChange = vi.fn();
+    const nowSpy = vi.spyOn(performance, "now");
+    nowSpy
+      .mockReturnValueOnce(1_000)
+      .mockReturnValueOnce(1_500)
+      .mockReturnValueOnce(2_000);
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          bpm={120}
+          onBpmChange={onBpmChange}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    const tapButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Tap",
+    );
+
+    expect(tapButton).not.toBeUndefined();
+
+    act(() => {
+      tapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      tapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      tapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onBpmChange).toHaveBeenLastCalledWith(120);
+
+    nowSpy.mockRestore();
+  });
+
+  it("loads and plays a newly entered link once the lazily created player becomes ready", async () => {
+    const firstPlayer = createMockPlayer(2);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: firstPlayer });
+      }, 0);
+
+      return firstPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    function Harness() {
+      const [videoId, setVideoId] = useState<string | null>(null);
+
+      return (
+        <BwCircleYouTubePanel
+          onLoad={setVideoId}
+          onPlaybackChange={vi.fn()}
+          videoId={videoId}
+        />
+      );
+    }
+
+    await act(async () => {
+      root.render(<Harness />);
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    const input = container.querySelector("input");
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
+    );
+
+    act(() => {
+      if (input instanceof HTMLInputElement) {
+        input.value = "https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C";
+      }
+      input?.dispatchEvent(new Event("input", { bubbles: true }));
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(MockPlayer).toHaveBeenCalledTimes(1);
+    expect(firstPlayer.loadVideoById).toHaveBeenCalledWith("97qr0BOdHkc");
+  });
+
+  it("surfaces a helpful message when YouTube reports that a video is unavailable", async () => {
+    const firstPlayer = createMockPlayer(2);
+    let onError:
+      | ((event: { data: number; target: MockPlayerInstance }) => void)
+      | undefined;
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      onError = options.events?.onError;
+
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: firstPlayer });
+      }, 0);
+
+      return firstPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    function Harness() {
+      const [videoId, setVideoId] = useState<string | null>(null);
+
+      return (
+        <BwCircleYouTubePanel
+          onLoad={setVideoId}
+          onPlaybackChange={vi.fn()}
+          videoId={videoId}
+        />
+      );
+    }
+
+    await act(async () => {
+      root.render(<Harness />);
+      await Promise.resolve();
+    });
+
+    const input = container.querySelector("input");
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
+    );
+
+    act(() => {
+      if (input instanceof HTMLInputElement) {
+        input.value = "https://youtu.be/abc123XYZ09?t=30";
+      }
+      input?.dispatchEvent(new Event("input", { bubbles: true }));
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+      onError?.({ data: 100, target: firstPlayer });
+    });
+
+    expect(container.textContent).toContain("This video is unavailable.");
+  });
+
+  it("does not crash when YouTube replaces its mount node before an error rerender", async () => {
+    const player = createMockPlayer(2);
+    let onError:
+      | ((event: { data: number; target: MockPlayerInstance }) => void)
+      | undefined;
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      onError = options.events?.onError;
+
+      const iframe = document.createElement("iframe");
+      element.replaceWith(iframe);
+
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: player });
+      }, 0);
+
+      return player;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    function Harness() {
+      const [videoId, setVideoId] = useState<string | null>(null);
+
+      return (
+        <BwCircleYouTubePanel
+          onLoad={setVideoId}
+          onPlaybackChange={vi.fn()}
+          videoId={videoId}
+        />
+      );
+    }
+
+    await act(async () => {
+      root.render(<Harness />);
+      await Promise.resolve();
+    });
+
+    const input = container.querySelector("input");
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
+    );
+
+    act(() => {
+      if (input instanceof HTMLInputElement) {
+        input.value = "https://youtu.be/abc123XYZ09?t=30";
+      }
+      input?.dispatchEvent(new Event("input", { bubbles: true }));
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(() => {
+      act(() => {
+        vi.advanceTimersByTime(1);
+        onError?.({ data: 100, target: player });
+      });
+    }).not.toThrow();
+
+    expect(container.textContent).toContain("This video is unavailable.");
   });
 });

@@ -7,7 +7,7 @@ import {
   createBwCircleParticles,
   createMimesisCue,
   createMimesisLayout,
-  createSyncCue,
+  createSyncMotionProfile,
   type BwCircleParticle,
 } from "./bwCircleSimulation";
 import styles from "./BwCircleProject.module.css";
@@ -108,12 +108,14 @@ function updateParticles({
   ball,
   circleRadius,
   isRightHalf,
+  particleAccent,
   particles,
 }: {
   angle: number;
   ball: BallState;
   circleRadius: number;
   isRightHalf: boolean;
+  particleAccent: number;
   particles: BwCircleParticle[];
 }) {
   const repelRadius = 60;
@@ -139,6 +141,21 @@ function updateParticles({
     particle.y += particle.vy;
     particle.vx *= damping;
     particle.vy *= damping;
+
+    const accentImpulse = (particleAccent - 1) * 0.35;
+
+    if (accentImpulse > 0) {
+      const speed = Math.hypot(particle.vx, particle.vy);
+
+      if (speed > 0.0001) {
+        particle.vx += (particle.vx / speed) * accentImpulse;
+        particle.vy += (particle.vy / speed) * accentImpulse;
+      } else {
+        const accentAngle = Math.random() * Math.PI * 2;
+        particle.vx += Math.cos(accentAngle) * accentImpulse;
+        particle.vy += Math.sin(accentAngle) * accentImpulse;
+      }
+    }
 
     const speed = Math.hypot(particle.vx, particle.vy);
     if (speed < minSpeed) {
@@ -189,6 +206,8 @@ function updateBall({
   angle,
   ball,
   ballRadius,
+  beatKick,
+  beatSquash,
   bounce,
   circleRadius,
   gravity,
@@ -198,12 +217,30 @@ function updateBall({
   angle: number;
   ball: BallState;
   ballRadius: number;
+  beatKick: number;
+  beatSquash: number;
   bounce: number;
   circleRadius: number;
   gravity: number;
   isLeftSide: boolean;
   speedBoost: number;
 }) {
+  const beatImpulse = (beatKick - 1) * (circleRadius < 180 ? 0.9 : 1.2);
+
+  if (beatImpulse > 0) {
+    const speed = Math.hypot(ball.vx, ball.vy);
+
+    if (speed > 0.0001) {
+      ball.vx += (ball.vx / speed) * beatImpulse;
+      ball.vy += (ball.vy / speed) * beatImpulse * 0.9;
+    } else {
+      ball.vx += (isLeftSide ? 1 : -1) * beatImpulse;
+      ball.vy -= beatImpulse * 0.6;
+    }
+
+    ball.squashAmount = Math.max(ball.squashAmount, beatSquash);
+  }
+
   ball.vy += gravity;
   ball.vx *= FRICTION;
   ball.vy *= FRICTION;
@@ -279,15 +316,18 @@ function updateBall({
 }
 
 export default function BwCircleScene({
+  bpm,
   mode,
   playback,
   syncOverlay,
 }: {
+  bpm: number;
   mode: "mimesis" | "sync";
   playback: BwCirclePlaybackState;
   syncOverlay?: ReactNode;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const bpmRef = useRef(bpm);
   const playbackRef = useRef(playback);
   const modeRef = useRef(mode);
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -297,6 +337,10 @@ export default function BwCircleScene({
   useEffect(() => {
     playbackRef.current = playback;
   }, [playback]);
+
+  useEffect(() => {
+    bpmRef.current = bpm;
+  }, [bpm]);
 
   useEffect(() => {
     modeRef.current = mode;
@@ -348,16 +392,22 @@ export default function BwCircleScene({
       const mimesisCue = createMimesisCue({ secondsWithinMinute });
       const playbackValue = playbackRef.current;
       const modeValue = modeRef.current;
-      const syncCue =
+      const syncMotion =
         modeValue === "sync"
-          ? createSyncCue({
+          ? createSyncMotionProfile({
               currentTime: playbackValue.currentTime,
               isPlaying: playbackValue.isPlaying,
+              sampledAtMs: playbackValue.sampledAtMs,
+              nowMs: performance.now(),
+              bpm: bpmRef.current,
               baseCameraMode: "normal",
+              shouldReduceMotion,
             })
           : null;
+      const syncCue = syncMotion?.syncCue ?? null;
       const syncSeconds =
-        ((playbackValue.currentTime % 60) + 60) % 60;
+        (((syncMotion?.predictedCurrentTime ?? playbackValue.currentTime) % 60) + 60) %
+        60;
       const syncAngle =
         createMimesisCue({ secondsWithinMinute: syncSeconds }).angle +
         (syncCue ? (syncCue.pulseStrength - 0.5) * 0.1 : 0);
@@ -379,12 +429,20 @@ export default function BwCircleScene({
         modeValue === "sync" && syncCue && !shouldReduceMotion
           ? 0.92 + syncCue.energy * 0.16
           : 1;
+      const ballKick =
+        modeValue === "sync" && syncMotion ? syncMotion.ballKick : 1;
+      const ballSquash =
+        modeValue === "sync" && syncMotion ? syncMotion.ballSquash : 0;
+      const particleAccent =
+        modeValue === "sync" && syncMotion ? syncMotion.particleAccent : 1;
       const diagonal = Math.hypot(width, height);
 
       updateBall({
         angle,
         ball: sceneState.leftBall,
         ballRadius,
+        beatKick: ballKick,
+        beatSquash: ballSquash,
         bounce,
         circleRadius: layout.circleRadius,
         gravity,
@@ -395,6 +453,8 @@ export default function BwCircleScene({
         angle,
         ball: sceneState.rightBall,
         ballRadius,
+        beatKick: ballKick,
+        beatSquash: ballSquash,
         bounce,
         circleRadius: layout.circleRadius,
         gravity,
@@ -406,6 +466,7 @@ export default function BwCircleScene({
         ball: sceneState.leftBall,
         circleRadius: layout.circleRadius,
         isRightHalf: false,
+        particleAccent,
         particles: sceneState.leftParticles,
       });
       updateParticles({
@@ -413,6 +474,7 @@ export default function BwCircleScene({
         ball: sceneState.rightBall,
         circleRadius: layout.circleRadius,
         isRightHalf: true,
+        particleAccent,
         particles: sceneState.rightParticles,
       });
 

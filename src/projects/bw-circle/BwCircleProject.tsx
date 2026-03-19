@@ -11,11 +11,13 @@ type BwCircleProjectMode = "mimesis" | "sync";
 export interface BwCirclePlaybackState {
   currentTime: number;
   isPlaying: boolean;
+  sampledAtMs: number;
 }
 
 const IDLE_PLAYBACK_STATE: BwCirclePlaybackState = {
   currentTime: 0,
   isPlaying: false,
+  sampledAtMs: 0,
 };
 
 export default function BwCircleProject({
@@ -23,6 +25,7 @@ export default function BwCircleProject({
 }: InteractiveProjectProps) {
   const [mode, setMode] = useState<BwCircleProjectMode>("mimesis");
   const [videoId, setVideoId] = useState<string | null>(null);
+  const [syncBpm, setSyncBpm] = useState(120);
   const [playback, setPlayback] = useState<BwCirclePlaybackState>(
     IDLE_PLAYBACK_STATE,
   );
@@ -61,11 +64,14 @@ export default function BwCircleProject({
         </button>
       </div>
       <BwCircleScene
+        bpm={syncBpm}
         mode={mode}
         playback={playback}
         syncOverlay={
           mode === "sync" ? (
             <BwCircleYouTubePanel
+              bpm={syncBpm}
+              onBpmChange={setSyncBpm}
               onLoad={handleVideoLoad}
               onPlaybackChange={setPlayback}
               videoId={videoId}

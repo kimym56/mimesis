@@ -120,7 +120,9 @@ describe("BwCircleProject", () => {
         'input[placeholder="https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C"]',
       ),
     ).not.toBeNull();
+    expect(container.querySelector('input[type="number"]')).not.toBeNull();
     expect(container.textContent).toContain("Play");
+    expect(container.textContent).toContain("Tap");
     expect(container.textContent).not.toContain("Load");
   });
 });
