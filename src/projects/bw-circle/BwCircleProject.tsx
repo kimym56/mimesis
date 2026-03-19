@@ -14,10 +14,27 @@ export interface BwCirclePlaybackState {
   sampledAtMs: number;
 }
 
+export type BwCircleAudioSyncStatus =
+  | "idle"
+  | "prompting"
+  | "active"
+  | "denied"
+  | "unsupported";
+
+export interface BwCircleAudioSyncState {
+  status: BwCircleAudioSyncStatus;
+  stream: MediaStream | null;
+}
+
 const IDLE_PLAYBACK_STATE: BwCirclePlaybackState = {
   currentTime: 0,
   isPlaying: false,
   sampledAtMs: 0,
+};
+
+const IDLE_AUDIO_SYNC_STATE: BwCircleAudioSyncState = {
+  status: "idle",
+  stream: null,
 };
 
 export default function BwCircleProject({
@@ -25,10 +42,13 @@ export default function BwCircleProject({
 }: InteractiveProjectProps) {
   const [mode, setMode] = useState<BwCircleProjectMode>("mimesis");
   const [videoId, setVideoId] = useState<string | null>(null);
-  const [syncBpm, setSyncBpm] = useState(120);
+  const [audioSync, setAudioSync] = useState<BwCircleAudioSyncState>(
+    IDLE_AUDIO_SYNC_STATE,
+  );
   const [playback, setPlayback] = useState<BwCirclePlaybackState>(
     IDLE_PLAYBACK_STATE,
   );
+  const syncBpm = 120;
 
   const handleModeChange = (nextMode: BwCircleProjectMode) => {
     setMode(nextMode);
@@ -64,14 +84,15 @@ export default function BwCircleProject({
         </button>
       </div>
       <BwCircleScene
+        audioSync={audioSync}
         bpm={syncBpm}
         mode={mode}
         playback={playback}
         syncOverlay={
           mode === "sync" ? (
             <BwCircleYouTubePanel
-              bpm={syncBpm}
-              onBpmChange={setSyncBpm}
+              audioSyncStatus={audioSync.status}
+              onAudioSyncChange={setAudioSync}
               onLoad={handleVideoLoad}
               onPlaybackChange={setPlayback}
               videoId={videoId}

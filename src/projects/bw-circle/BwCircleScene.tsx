@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { useReducedMotion } from "framer-motion";
-import type { BwCirclePlaybackState } from "./BwCircleProject";
+import type {
+  BwCircleAudioSyncState,
+  BwCirclePlaybackState,
+} from "./BwCircleProject";
+import {
+  createBwCircleAudioCue,
+  measureBwCircleFrequencyLevels,
+} from "./bwCircleAudioSync";
 import {
   createBwCircleParticles,
   createMimesisCue,
@@ -14,6 +21,18 @@ import styles from "./BwCircleProject.module.css";
 
 const FRICTION = 0.995;
 const SQUASH_RECOVERY = 0.15;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getAudioContextConstructor() {
+  return (
+    window.AudioContext ??
+    ((window as Window & { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext as typeof AudioContext | undefined)
+  );
+}
 
 interface BallState {
   color: string;
@@ -316,11 +335,13 @@ function updateBall({
 }
 
 export default function BwCircleScene({
+  audioSync,
   bpm,
   mode,
   playback,
   syncOverlay,
 }: {
+  audioSync: BwCircleAudioSyncState;
   bpm: number;
   mode: "mimesis" | "sync";
   playback: BwCirclePlaybackState;
@@ -332,7 +353,11 @@ export default function BwCircleScene({
   const modeRef = useRef(mode);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const audioContextRef = useRef<AudioContext | null>(null);
-  const audioEnabledRef = useRef(false);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioSyncRef = useRef(audioSync);
+  const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const mediaSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const previousAudioEnergyRef = useRef(0);
 
   useEffect(() => {
     playbackRef.current = playback;
@@ -345,6 +370,72 @@ export default function BwCircleScene({
   useEffect(() => {
     modeRef.current = mode;
   }, [mode]);
+
+  useEffect(() => {
+    audioSyncRef.current = audioSync;
+  }, [audioSync]);
+
+  useEffect(() => {
+    const disconnectAudioGraph = () => {
+      mediaSourceRef.current?.disconnect();
+      analyserRef.current?.disconnect();
+      mediaSourceRef.current = null;
+      analyserRef.current = null;
+      frequencyDataRef.current = null;
+      previousAudioEnergyRef.current = 0;
+    };
+
+    if (mode !== "sync" || audioSync.status !== "active" || !audioSync.stream) {
+      disconnectAudioGraph();
+      return;
+    }
+
+    const AudioContextConstructor = getAudioContextConstructor();
+
+    if (!AudioContextConstructor) {
+      disconnectAudioGraph();
+      return;
+    }
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContextConstructor();
+    }
+
+    const audioContext = audioContextRef.current;
+    const mediaSource = audioContext.createMediaStreamSource(audioSync.stream);
+    const analyser = audioContext.createAnalyser();
+
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = shouldReduceMotion ? 0.84 : 0.72;
+    mediaSource.connect(analyser);
+
+    mediaSourceRef.current = mediaSource;
+    analyserRef.current = analyser;
+    frequencyDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+    previousAudioEnergyRef.current = 0;
+
+    void audioContext.resume?.();
+
+    return () => {
+      disconnectAudioGraph();
+    };
+  }, [audioSync.status, audioSync.stream, mode, shouldReduceMotion]);
+
+  useEffect(() => {
+    return () => {
+      mediaSourceRef.current?.disconnect();
+      analyserRef.current?.disconnect();
+      mediaSourceRef.current = null;
+      analyserRef.current = null;
+      frequencyDataRef.current = null;
+      previousAudioEnergyRef.current = 0;
+
+      const audioContext = audioContextRef.current;
+      audioContextRef.current = null;
+
+      void audioContext?.close?.();
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -392,6 +483,8 @@ export default function BwCircleScene({
       const mimesisCue = createMimesisCue({ secondsWithinMinute });
       const playbackValue = playbackRef.current;
       const modeValue = modeRef.current;
+      const analyser = analyserRef.current;
+      const frequencyData = frequencyDataRef.current;
       const syncMotion =
         modeValue === "sync"
           ? createSyncMotionProfile({
@@ -405,36 +498,83 @@ export default function BwCircleScene({
             })
           : null;
       const syncCue = syncMotion?.syncCue ?? null;
+      const audioCue =
+        modeValue === "sync" &&
+        playbackValue.isPlaying &&
+        analyser &&
+        frequencyData &&
+        audioSyncRef.current.status === "active"
+          ? (() => {
+              analyser.getByteFrequencyData(frequencyData);
+
+              const levels = measureBwCircleFrequencyLevels(frequencyData);
+              const nextCue = createBwCircleAudioCue({
+                energy: levels.energy,
+                bassEnergy: levels.bassEnergy,
+                previousEnergy: previousAudioEnergyRef.current,
+                shouldReduceMotion,
+              });
+
+              previousAudioEnergyRef.current = levels.energy;
+
+              return nextCue;
+            })()
+          : null;
+      const syncEnergy =
+        audioCue !== null
+          ? clamp(audioCue.energy * 0.68 + audioCue.bassEnergy * 0.32, 0, 1)
+          : (syncCue?.energy ?? 0.28);
+      const syncPulse =
+        audioCue !== null
+          ? clamp(audioCue.onsetStrength * 0.72 + audioCue.bassEnergy * 0.28, 0, 1)
+          : (syncCue?.pulseStrength ?? 0);
       const syncSeconds =
         (((syncMotion?.predictedCurrentTime ?? playbackValue.currentTime) % 60) + 60) %
         60;
       const syncAngle =
         createMimesisCue({ secondsWithinMinute: syncSeconds }).angle +
-        (syncCue ? (syncCue.pulseStrength - 0.5) * 0.1 : 0);
+        (modeValue === "sync" ? (syncPulse - 0.5) * 0.1 : 0);
       const angle =
         modeValue === "sync" && playbackValue.isPlaying ? syncAngle : mimesisCue.angle;
       const gravity =
         layout.gravity *
-        (modeValue === "sync" && syncCue
+        (modeValue === "sync" && playbackValue.isPlaying
           ? shouldReduceMotion
             ? 1
-            : 0.9 + syncCue.energy * 0.25
+            : 0.9 + syncEnergy * 0.25
           : 1);
       const bounce =
         layout.bounce +
-        (modeValue === "sync" && syncCue && !shouldReduceMotion
-          ? (syncCue.energy - 0.35) * 0.05
+        (modeValue === "sync" && playbackValue.isPlaying && !shouldReduceMotion
+          ? (syncEnergy - 0.35) * 0.05
           : 0);
       const speedBoost =
-        modeValue === "sync" && syncCue && !shouldReduceMotion
-          ? 0.92 + syncCue.energy * 0.16
+        modeValue === "sync" && playbackValue.isPlaying && !shouldReduceMotion
+          ? 0.92 + syncEnergy * 0.16
           : 1;
       const ballKick =
-        modeValue === "sync" && syncMotion ? syncMotion.ballKick : 1;
+        modeValue === "sync"
+          ? audioCue
+            ? 1 +
+              audioCue.bassEnergy * (shouldReduceMotion ? 0.12 : 0.24) +
+              audioCue.onsetStrength * (shouldReduceMotion ? 0.08 : 0.18)
+            : (syncMotion?.ballKick ?? 1)
+          : 1;
       const ballSquash =
-        modeValue === "sync" && syncMotion ? syncMotion.ballSquash : 0;
+        modeValue === "sync"
+          ? audioCue
+            ? audioCue.bassEnergy * (shouldReduceMotion ? 0.03 : 0.05) +
+              audioCue.onsetStrength * (shouldReduceMotion ? 0.05 : 0.13)
+            : (syncMotion?.ballSquash ?? 0)
+          : 0;
       const particleAccent =
-        modeValue === "sync" && syncMotion ? syncMotion.particleAccent : 1;
+        modeValue === "sync"
+          ? audioCue
+            ? 1 +
+              audioCue.energy * (shouldReduceMotion ? 0.02 : 0.05) +
+              audioCue.onsetStrength * (shouldReduceMotion ? 0.04 : 0.1)
+            : (syncMotion?.particleAccent ?? 1)
+          : 1;
       const diagonal = Math.hypot(width, height);
 
       updateBall({
@@ -537,28 +677,8 @@ export default function BwCircleScene({
     };
   }, [shouldReduceMotion]);
 
-  const handleActivateAudio = () => {
-    if (!audioContextRef.current) {
-      const AudioContextConstructor =
-        window.AudioContext ??
-        ((window as Window & { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext as typeof AudioContext | undefined);
-
-      if (AudioContextConstructor) {
-        audioContextRef.current = new AudioContextConstructor();
-      }
-    }
-
-    audioEnabledRef.current = true;
-    void audioContextRef.current?.resume?.();
-  };
-
   return (
-    <div
-      className={styles.sceneShell}
-      data-scene-mode={mode}
-      onPointerDown={handleActivateAudio}
-    >
+    <div className={styles.sceneShell} data-scene-mode={mode}>
       {syncOverlay ? syncOverlay : null}
       <div className={styles.cameraToggle}>
         <button

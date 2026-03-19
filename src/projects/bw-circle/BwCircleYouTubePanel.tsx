@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { BwCirclePlaybackState } from "./BwCircleProject";
+import type {
+  BwCircleAudioSyncState,
+  BwCircleAudioSyncStatus,
+  BwCirclePlaybackState,
+} from "./BwCircleProject";
 import { parseYouTubeVideoId } from "./bwCircleYouTube";
 import styles from "./BwCircleProject.module.css";
 
@@ -46,6 +50,12 @@ interface YouTubeNamespace {
   ) => YouTubePlayerInstance;
 }
 
+interface ChromeDisplayMediaOptions extends DisplayMediaStreamOptions {
+  preferCurrentTab?: boolean;
+  selfBrowserSurface?: "exclude" | "include";
+  surfaceSwitching?: "exclude" | "include";
+}
+
 declare global {
   interface Window {
     YT?: YouTubeNamespace;
@@ -58,12 +68,9 @@ const IDLE_PLAYBACK_STATE: BwCirclePlaybackState = {
   isPlaying: false,
   sampledAtMs: 0,
 };
-const DEFAULT_BPM = 120;
-const MIN_BPM = 48;
+const AUDIO_SYNC_PERMISSION_COPY =
+  "Allow permission to use audio sync for this feature.";
 const PLACEHOLDER_URL = "https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C";
-const MAX_BPM = 220;
-const TAP_HISTORY_LIMIT = 4;
-const TAP_RESET_WINDOW_MS = 2_000;
 
 let youTubeApiPromise: Promise<void> | null = null;
 
@@ -101,34 +108,6 @@ function getYouTubeErrorMessage(code: number) {
   }
 }
 
-function clampBpm(value: number) {
-  return Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(value)));
-}
-
-function deriveTappedBpm(tapTimesMs: number[]) {
-  if (tapTimesMs.length < 2) {
-    return null;
-  }
-
-  const intervals = tapTimesMs
-    .slice(1)
-    .map((tapTimeMs, index) => tapTimeMs - tapTimesMs[index])
-    .filter((intervalMs) => intervalMs > 0);
-
-  if (intervals.length === 0) {
-    return null;
-  }
-
-  const averageIntervalMs =
-    intervals.reduce((sum, intervalMs) => sum + intervalMs, 0) / intervals.length;
-
-  if (averageIntervalMs <= 0) {
-    return null;
-  }
-
-  return clampBpm(60_000 / averageIntervalMs);
-}
-
 function ensureYouTubeIframeApi() {
   if (window.YT?.Player) {
     return Promise.resolve();
@@ -164,14 +143,14 @@ function ensureYouTubeIframeApi() {
 }
 
 export default function BwCircleYouTubePanel({
-  bpm = DEFAULT_BPM,
-  onBpmChange = () => {},
+  audioSyncStatus = "idle",
+  onAudioSyncChange = () => {},
   onLoad,
   onPlaybackChange,
   videoId,
 }: {
-  bpm?: number;
-  onBpmChange?: (bpm: number) => void;
+  audioSyncStatus?: BwCircleAudioSyncStatus;
+  onAudioSyncChange?: (audioSync: BwCircleAudioSyncState) => void;
   onLoad: (videoId: string | null) => void;
   onPlaybackChange: (playback: BwCirclePlaybackState) => void;
   videoId: string | null;
@@ -190,7 +169,6 @@ export default function BwCircleYouTubePanel({
   const pendingPlayRef = useRef(false);
   const playerCreationInFlightRef = useRef(false);
   const skipCueVideoIdRef = useRef<string | null>(null);
-  const tapTimesRef = useRef<number[]>([]);
 
   useEffect(() => {
     playbackCallbackRef.current = onPlaybackChange;
@@ -223,6 +201,53 @@ export default function BwCircleYouTubePanel({
     return nextVideoId;
   };
 
+  const requestAudioSync = async () => {
+    if (audioSyncStatus === "active" || audioSyncStatus === "prompting") {
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getDisplayMedia) {
+      onAudioSyncChange({
+        status: "unsupported",
+        stream: null,
+      });
+      return;
+    }
+
+    onAudioSyncChange({
+      status: "prompting",
+      stream: null,
+    });
+
+    try {
+      const displayMediaOptions: ChromeDisplayMediaOptions = {
+        video: true,
+        audio: true,
+        preferCurrentTab: true,
+        selfBrowserSurface: "include",
+        surfaceSwitching: "include",
+      };
+      const stream =
+        await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+
+      onAudioSyncChange({
+        status: "active",
+        stream,
+      });
+    } catch (captureError) {
+      const status =
+        captureError instanceof DOMException &&
+        captureError.name === "NotAllowedError"
+          ? "denied"
+          : "unsupported";
+
+      onAudioSyncChange({
+        status,
+        stream: null,
+      });
+    }
+  };
+
   const handlePlaybackToggle = () => {
     const player = playerRef.current;
 
@@ -246,6 +271,10 @@ export default function BwCircleYouTubePanel({
 
     pendingPlayRef.current = true;
 
+    if (audioSyncStatus !== "active" && audioSyncStatus !== "prompting") {
+      void requestAudioSync();
+    }
+
     if (hasPlaybackControls(player) && playerReadyRef.current) {
       if (nextVideoId !== videoId) {
         skipCueVideoIdRef.current = nextVideoId;
@@ -257,33 +286,6 @@ export default function BwCircleYouTubePanel({
       player.playVideo();
       pendingPlayRef.current = false;
       return;
-    }
-  };
-
-  const handleBpmInputChange = (nextValue: string) => {
-    const parsedValue = Number(nextValue);
-
-    if (!Number.isFinite(parsedValue)) {
-      return;
-    }
-
-    onBpmChange(clampBpm(parsedValue));
-  };
-
-  const handleTapTempo = () => {
-    const nowMs = performance.now();
-    const lastTapMs = tapTimesRef.current.at(-1) ?? null;
-    const nextTapTimesMs =
-      lastTapMs !== null && nowMs - lastTapMs > TAP_RESET_WINDOW_MS
-        ? [nowMs]
-        : [...tapTimesRef.current, nowMs].slice(-TAP_HISTORY_LIMIT);
-
-    tapTimesRef.current = nextTapTimesMs;
-
-    const nextBpm = deriveTappedBpm(nextTapTimesMs);
-
-    if (nextBpm !== null) {
-      onBpmChange(nextBpm);
     }
   };
 
@@ -472,29 +474,6 @@ export default function BwCircleYouTubePanel({
           type="url"
           value={input}
         />
-        <input
-          aria-label="BPM"
-          className={styles.bpmInput}
-          inputMode="numeric"
-          max={MAX_BPM}
-          min={MIN_BPM}
-          onInput={(event) => {
-            handleBpmInputChange(event.currentTarget.value);
-          }}
-          onChange={(event) => {
-            handleBpmInputChange(event.currentTarget.value);
-          }}
-          step={1}
-          type="number"
-          value={bpm}
-        />
-        <button
-          className={styles.tapButton}
-          onClick={handleTapTempo}
-          type="button"
-        >
-          Tap
-        </button>
         <button
           className={styles.playbackButton}
           onClick={handlePlaybackToggle}
@@ -503,6 +482,9 @@ export default function BwCircleYouTubePanel({
           {isPlaying ? "Stop" : "Play"}
         </button>
       </div>
+      {audioSyncStatus !== "active" ? (
+        <p className={styles.permissionText}>{AUDIO_SYNC_PERMISSION_COPY}</p>
+      ) : null}
       {error ? <p className={styles.errorText}>{error}</p> : null}
       <div
         aria-hidden="true"

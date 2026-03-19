@@ -51,6 +51,8 @@ declare global {
 
 describe("BwCircleYouTubePanel", () => {
   let container: HTMLDivElement;
+  let originalMediaDevices: MediaDevices | undefined;
+  let getDisplayMediaMock: ReturnType<typeof vi.fn>;
   let root: Root;
 
   function createMockPlayer(playerState = 1) {
@@ -65,8 +67,24 @@ describe("BwCircleYouTubePanel", () => {
     } satisfies MockPlayerInstance;
   }
 
+  function createMockStream() {
+    return {
+      getAudioTracks: vi.fn(() => []),
+      getTracks: vi.fn(() => []),
+      getVideoTracks: vi.fn(() => []),
+    } as unknown as MediaStream;
+  }
+
   beforeEach(() => {
     vi.useFakeTimers();
+    originalMediaDevices = navigator.mediaDevices;
+    getDisplayMediaMock = vi.fn(async () => createMockStream());
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getDisplayMedia: getDisplayMediaMock,
+      },
+    });
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -79,6 +97,10 @@ describe("BwCircleYouTubePanel", () => {
     container.remove();
     delete window.YT;
     delete window.onYouTubeIframeAPIReady;
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: originalMediaDevices,
+    });
     vi.useRealTimers();
   });
 
@@ -410,73 +432,202 @@ describe("BwCircleYouTubePanel", () => {
     expect(MockPlayer).not.toHaveBeenCalled();
   });
 
-  it("updates the bpm field through the compact sync controls", async () => {
-    const onBpmChange = vi.fn();
+  it("requests current-tab audio capture when Play is pressed", async () => {
+    const readyPlayer = createMockPlayer(2);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: readyPlayer });
+      }, 0);
+
+      return readyPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
 
     await act(async () => {
       root.render(
         <BwCircleYouTubePanel
-          bpm={120}
-          onBpmChange={onBpmChange}
+          audioSyncStatus="idle"
+          onAudioSyncChange={vi.fn()}
           onLoad={vi.fn()}
           onPlaybackChange={vi.fn()}
-          videoId={null}
+          videoId="97qr0BOdHkc"
         />,
       );
+      await Promise.resolve();
     });
-
-    const bpmInput = container.querySelector(
-      'input[type="number"]',
-    ) as HTMLInputElement | null;
-
-    expect(bpmInput).not.toBeNull();
 
     act(() => {
-      if (bpmInput) {
-        bpmInput.value = "132";
-      }
-      bpmInput?.dispatchEvent(new Event("input", { bubbles: true }));
-      bpmInput?.dispatchEvent(new Event("change", { bubbles: true }));
+      vi.advanceTimersByTime(1);
     });
 
-    expect(onBpmChange).toHaveBeenCalledWith(132);
-  });
-
-  it("derives bpm from recent tap intervals", async () => {
-    const onBpmChange = vi.fn();
-    const nowSpy = vi.spyOn(performance, "now");
-    nowSpy
-      .mockReturnValueOnce(1_000)
-      .mockReturnValueOnce(1_500)
-      .mockReturnValueOnce(2_000);
-
-    await act(async () => {
-      root.render(
-        <BwCircleYouTubePanel
-          bpm={120}
-          onBpmChange={onBpmChange}
-          onLoad={vi.fn()}
-          onPlaybackChange={vi.fn()}
-          videoId={null}
-        />,
-      );
-    });
-
-    const tapButton = [...container.querySelectorAll("button")].find(
-      (candidate) => candidate.textContent?.trim() === "Tap",
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
     );
 
-    expect(tapButton).not.toBeUndefined();
-
     act(() => {
-      tapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      tapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      tapButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(onBpmChange).toHaveBeenLastCalledWith(120);
+    expect(getDisplayMediaMock).toHaveBeenCalledWith({
+      audio: true,
+      preferCurrentTab: true,
+      selfBrowserSurface: "include",
+      surfaceSwitching: "include",
+      video: true,
+    });
+  });
 
-    nowSpy.mockRestore();
+  it("reports an active audio-sync stream after capture permission succeeds", async () => {
+    const onAudioSyncChange = vi.fn();
+    const readyPlayer = createMockPlayer(2);
+    const stream = createMockStream();
+
+    getDisplayMediaMock.mockResolvedValueOnce(stream);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: readyPlayer });
+      }, 0);
+
+      return readyPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          audioSyncStatus="idle"
+          onAudioSyncChange={onAudioSyncChange}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId="97qr0BOdHkc"
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
+    );
+
+    await act(async () => {
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(onAudioSyncChange).toHaveBeenCalledWith({
+      status: "active",
+      stream,
+    });
+  });
+
+  it("keeps the permission message visible when audio capture is denied", async () => {
+    const readyPlayer = createMockPlayer(2);
+
+    getDisplayMediaMock.mockRejectedValueOnce(
+      new DOMException("Denied", "NotAllowedError"),
+    );
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: readyPlayer });
+      }, 0);
+
+      return readyPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          audioSyncStatus="idle"
+          onAudioSyncChange={vi.fn()}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId="97qr0BOdHkc"
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
+    );
+
+    await act(async () => {
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(container.textContent).toContain(
+      "Allow permission to use audio sync for this feature.",
+    );
   });
 
   it("loads and plays a newly entered link once the lazily created player becomes ready", async () => {

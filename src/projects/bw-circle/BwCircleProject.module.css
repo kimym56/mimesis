@@ -78,38 +78,6 @@
   color: rgba(255, 255, 255, 0.56);
 }
 
-.bpmInput {
-  width: 76px;
-  min-height: 42px;
-  padding: 0 12px;
-  color: rgba(255, 255, 255, 0.92);
-  text-align: center;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  outline: none;
-}
-
-.bpmInput::-webkit-inner-spin-button,
-.bpmInput::-webkit-outer-spin-button {
-  margin: 0;
-}
-
-.tapButton {
-  min-height: 42px;
-  padding: 0 14px;
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
 .playbackButton {
   min-height: 42px;
   padding: 0 18px;
@@ -123,6 +91,13 @@
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.permissionText {
+  padding-left: 14px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .errorText {
@@ -213,8 +188,6 @@
     width: 100%;
   }
 
-  .bpmInput,
-  .tapButton,
   .playbackButton {
     min-height: 44px;
   }

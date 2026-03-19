@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { createBwCircleAudioCue } from "./bwCircleAudioSync";
+import {
+  createBwCircleAudioCue,
+  measureBwCircleFrequencyLevels,
+} from "./bwCircleAudioSync";
+
+describe("measureBwCircleFrequencyLevels", () => {
+  it("derives bounded overall and bass-weighted energy from analyser bins", () => {
+    const levels = measureBwCircleFrequencyLevels(
+      Uint8Array.from([255, 192, 96, 32, 0]),
+    );
+
+    expect(levels.energy).toBeCloseTo(0.451, 3);
+    expect(levels.bassEnergy).toBeCloseTo(0.8765, 3);
+    expect(levels.bassEnergy).toBeGreaterThan(levels.energy);
+  });
+
+  it("returns zeroed levels for an empty analyser frame", () => {
+    expect(measureBwCircleFrequencyLevels(new Uint8Array())).toEqual({
+      energy: 0,
+      bassEnergy: 0,
+    });
+  });
+});
 
 describe("createBwCircleAudioCue", () => {
   it("returns bounded cue values", () => {
