@@ -12,9 +12,14 @@ import {
   it,
   vi,
 } from "vitest";
-import WiperTypographyProject from "./WiperTypographyProject";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+const { moduleLoadState } = vi.hoisted(() => ({
+  moduleLoadState: {
+    driverViewLoads: 0,
+  },
+}));
 
 vi.mock(
   "./WiperTypographyCanvas2D",
@@ -26,9 +31,13 @@ vi.mock(
 
 vi.mock(
   "./WiperTypographyDriverView3D",
-  () => ({
-    default: () => <div>mock-3d-driver-view</div>,
-  }),
+  () => {
+    moduleLoadState.driverViewLoads += 1;
+
+    return {
+      default: () => <div>mock-3d-driver-view</div>,
+    };
+  },
   { virtual: true }
 );
 
@@ -59,15 +68,25 @@ describe("WiperTypographyProject", () => {
     container.remove();
   });
 
-  it("renders 2d canvas by default and switches to 3d driver view", () => {
-    act(() => {
+  it("renders 2d canvas by default and only loads the 3d driver view after selection", async () => {
+    moduleLoadState.driverViewLoads = 0;
+    vi.resetModules();
+    const { default: WiperTypographyProject } = await import(
+      "./WiperTypographyProject"
+    );
+
+    expect(moduleLoadState.driverViewLoads).toBe(0);
+
+    await act(async () => {
       root.render(<WiperTypographyProject projectId="wiper-typography" />);
+      await Promise.resolve();
     });
 
     expect(container.textContent).toContain("mock-2d-canvas");
     expect(container.textContent).toContain("2D Canvas");
     expect(container.textContent).toContain("3D Driver View");
     expect(container.textContent).not.toContain("mock-3d-driver-view");
+    expect(moduleLoadState.driverViewLoads).toBe(0);
 
     const button = container.querySelector(
       '[data-mode="3d-driver"]'
@@ -75,10 +94,13 @@ describe("WiperTypographyProject", () => {
 
     expect(button).not.toBeNull();
 
-    act(() => {
+    await act(async () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await vi.dynamicImportSettled();
+      await Promise.resolve();
     });
 
+    expect(moduleLoadState.driverViewLoads).toBe(1);
     expect(container.textContent).toContain("mock-3d-driver-view");
   });
 });

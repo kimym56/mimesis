@@ -2,6 +2,7 @@
 
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { PCFShadowMap } from "three";
 import {
   afterEach,
   beforeEach,
@@ -66,10 +67,30 @@ const { mockedUseWiperInteraction } = vi.hoisted(() => ({
   })),
 }));
 
+const { mockedCanvasState } = vi.hoisted(() => ({
+  mockedCanvasState: {
+    emitClockWarning: false,
+    propsHistory: [] as Array<Record<string, unknown>>,
+  },
+}));
+
 vi.mock("@react-three/fiber", () => ({
-  Canvas: ({ children }: { children?: React.ReactNode }) => (
-    <div data-testid="mock-canvas">{children}</div>
-  ),
+  Canvas: ({
+    children,
+    ...props
+  }: {
+    children?: React.ReactNode;
+  } & Record<string, unknown>) => {
+    mockedCanvasState.propsHistory.push(props);
+
+    if (mockedCanvasState.emitClockWarning) {
+      console.warn(
+        "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."
+      );
+    }
+
+    return <div data-testid="mock-canvas">{children}</div>;
+  },
   useFrame: () => undefined,
 }));
 
@@ -135,6 +156,8 @@ describe("WiperTypographyDriverView3D", () => {
   beforeEach(() => {
     teslaModelState.shouldSignalReady = true;
     teslaModelState.shouldThrow = false;
+    mockedCanvasState.emitClockWarning = false;
+    mockedCanvasState.propsHistory = [];
     mockedTeslaModel.mockClear();
     mockedUseTeslaDriverViewGui.mockClear();
     mockedUseWiperInteraction.mockClear();
@@ -167,6 +190,17 @@ describe("WiperTypographyDriverView3D", () => {
     });
     expect(container.textContent).toContain("mock-tesla-model");
     expect(container.textContent).not.toContain("Autoplay driver view");
+  });
+
+  it("configures the canvas shadow map without using the deprecated soft preset", async () => {
+    await act(async () => {
+      root.render(<WiperTypographyDriverView3D projectId="wiper-typography" />);
+      await Promise.resolve();
+    });
+
+    expect(mockedCanvasState.propsHistory[0]).toMatchObject({
+      shadows: { type: PCFShadowMap },
+    });
   });
 
   it("enables the dev-only tuning gui when the 3d driver view is active", async () => {
@@ -226,5 +260,20 @@ describe("WiperTypographyDriverView3D", () => {
     expect(mockedTeslaModel).not.toHaveBeenCalled();
     expect(container.textContent).toContain("3D driver view unavailable");
     expect(container.textContent).toContain("/public/models/tesla_2018_model_3.glb");
+  });
+
+  it("suppresses the upstream three clock deprecation warning when mounting the canvas", async () => {
+    mockedCanvasState.emitClockWarning = true;
+    const originalWarn = console.warn;
+    const forwardedWarn = vi.fn();
+    console.warn = forwardedWarn;
+
+    await act(async () => {
+      root.render(<WiperTypographyDriverView3D projectId="wiper-typography" />);
+      await Promise.resolve();
+    });
+
+    expect(forwardedWarn).not.toHaveBeenCalled();
+    console.warn = originalWarn;
   });
 });
