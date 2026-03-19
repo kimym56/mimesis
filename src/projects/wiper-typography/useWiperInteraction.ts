@@ -168,6 +168,33 @@ export function useWiperInteraction(
     };
   };
 
+  useEffect(() => {
+    if (interactionMode !== "driver-view-camera") {
+      return;
+    }
+
+    const target = dragLayerRef.current ?? containerRef.current;
+    if (!target) {
+      return;
+    }
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      syncInteractionState(
+        updateDesktopWheelZoom(interactionStateRef.current, {
+          deltaY: event.deltaY,
+          fov: fovRef.current ?? initialFov ?? 0,
+        }),
+      );
+    };
+
+    target.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      target.removeEventListener("wheel", handleWheel);
+    };
+  }, [initialFov, interactionMode]);
+
   const getPointerX = (clientX: number): number => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) {
@@ -416,19 +443,7 @@ export function useWiperInteraction(
     leavePointerMode();
   };
 
-  const onWheel: WheelEventHandler<HTMLDivElement> = (event) => {
-    if (interactionMode !== "driver-view-camera") {
-      return;
-    }
-
-    event.preventDefault();
-    syncInteractionState(
-      updateDesktopWheelZoom(interactionStateRef.current, {
-        deltaY: event.deltaY,
-        fov: fovRef.current ?? initialFov ?? 0,
-      }),
-    );
-  };
+  const onWheel: WheelEventHandler<HTMLDivElement> = () => {};
 
   const tick = (): number => {
     if (interactionMode === "desktop-view-drag") {

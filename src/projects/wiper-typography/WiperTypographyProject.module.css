@@ -99,8 +99,11 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    linear-gradient(180deg, rgba(8, 30, 48, 0.34), rgba(8, 30, 48, 0.18));
+  background: linear-gradient(
+    180deg,
+    rgba(8, 30, 48, 0.34),
+    rgba(8, 30, 48, 0.18)
+  );
   backdrop-filter: blur(4px);
   pointer-events: none;
 }

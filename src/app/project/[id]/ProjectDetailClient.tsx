@@ -1,19 +1,24 @@
 "use client";
 
 import { Project } from "@/data/projects";
+import { interactiveProjectRegistry } from "@/projects/registry";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { interactiveProjectRegistry } from "@/projects/registry";
-import ProjectReferenceContent from "./ProjectReferenceContent";
+import { useState } from "react";
 import styles from "./ProjectDetail.module.css";
+import ProjectReferenceContent from "./ProjectReferenceContent";
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
   const shouldReduceMotion = useReducedMotion();
+  const [interactiveRenderMode, setInteractiveRenderMode] =
+    useState<string>("2d");
   const InteractiveProject = project.interactiveDemo
     ? interactiveProjectRegistry[project.interactiveDemo]
     : undefined;
+  const showWiperModelSource =
+    project.id === "wiper-typography" && interactiveRenderMode === "3d-driver";
 
   const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -45,7 +50,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
           </div>
           {project.interactive ? (
             InteractiveProject ? (
-              <InteractiveProject projectId={project.id} />
+              <InteractiveProject
+                projectId={project.id}
+                onViewStateChange={(state) => {
+                  if (typeof state.renderMode === "string") {
+                    setInteractiveRenderMode(state.renderMode);
+                  }
+                }}
+              />
             ) : (
               <div className={styles.imageContainer}>
                 <Image
@@ -97,6 +109,21 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                   </>
                 )}
               </p>
+              {showWiperModelSource ? (
+                <p className={styles.referenceMeta}>
+                  Model source{" "}
+                  <a
+                    href="https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.referenceLink}
+                    style={{ textDecoration: "underline", color: "inherit" }}
+                  >
+                    Tesla 2018 Model 3 (Sketchfab)
+                  </a>
+                  .
+                </p>
+              ) : null}
             </div>
           </div>
           <ProjectReferenceContent project={project} />

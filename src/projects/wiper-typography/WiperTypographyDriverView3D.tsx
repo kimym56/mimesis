@@ -88,10 +88,7 @@ const DRIVER_VIEW_CANVAS_SHADOWS = { type: PCFShadowMap } as const;
 const THREE_CLOCK_WARNING_FILTER_FLAG = "__mimesisThreeClockWarningFilter";
 
 function suppressThreeClockDeprecationWarning() {
-  if (
-    process.env.NODE_ENV === "production" ||
-    typeof console === "undefined"
-  ) {
+  if (process.env.NODE_ENV === "production" || typeof console === "undefined") {
     return;
   }
 

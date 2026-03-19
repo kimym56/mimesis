@@ -99,6 +99,18 @@
   max-width: 480px;
 }
 
+.referenceMeta {
+  margin-top: var(--space-xs);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--foreground-muted);
+  max-width: 480px;
+}
+
+.referenceLink {
+  color: inherit;
+}
+
 .imageContainer {
   position: relative;
   flex: 1;
