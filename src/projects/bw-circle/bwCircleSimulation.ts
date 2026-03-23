@@ -78,6 +78,10 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+const BIASED_PARTICLE_RATIO = 0.16;
+const BIASED_PARTICLE_ACROSS_SIGMA_FACTOR = 0.105;
+const BIASED_PARTICLE_ALONG_SIGMA_FACTOR = 0.225;
+
 function createSeededRandom(seed: number) {
   let state = seed >>> 0 || 1;
 
@@ -127,8 +131,8 @@ function sampleBoundaryCenterBiasedPoint({
   random: () => number;
 }) {
   const maxDistance = Math.max(circleRadius - padding, 0);
-  const acrossSigma = maxDistance * 0.09;
-  const alongSigma = maxDistance * 0.2;
+  const acrossSigma = maxDistance * BIASED_PARTICLE_ACROSS_SIGMA_FACTOR;
+  const alongSigma = maxDistance * BIASED_PARTICLE_ALONG_SIGMA_FACTOR;
 
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const across = sampleNormal(random) * acrossSigma;
@@ -261,7 +265,7 @@ export function createBwCircleParticles({
 }): BwCircleParticle[] {
   const random = createSeededRandom(seed);
   const particles: BwCircleParticle[] = [];
-  const biasedParticleCount = Math.round(count * 0.18);
+  const biasedParticleCount = Math.round(count * BIASED_PARTICLE_RATIO);
 
   for (let index = 0; index < count; index += 1) {
     const radius = 1 + random() * 1.5;

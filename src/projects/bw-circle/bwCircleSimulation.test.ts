@@ -295,12 +295,20 @@ describe("createBwCircleParticles", () => {
     const centerBandParticles = particles.filter(
       (particle) => Math.abs(particle.x) <= 12 && Math.abs(particle.y) <= 24,
     );
+    const tighterCenterBandParticles = particles.filter(
+      (particle) => Math.abs(particle.x) <= 10 && Math.abs(particle.y) <= 20,
+    );
+    const widerCenterBandParticles = particles.filter(
+      (particle) => Math.abs(particle.x) <= 14 && Math.abs(particle.y) <= 28,
+    );
     const outerCoverageParticles = particles.filter(
       (particle) => Math.hypot(particle.x, particle.y) >= 55,
     );
 
-    expect(centerBandParticles.length).toBeGreaterThanOrEqual(20);
-    expect(outerCoverageParticles.length).toBeGreaterThanOrEqual(120);
+    expect(tighterCenterBandParticles).toHaveLength(27);
+    expect(centerBandParticles).toHaveLength(37);
+    expect(widerCenterBandParticles).toHaveLength(48);
+    expect(outerCoverageParticles).toHaveLength(226);
 
     for (const particle of particles) {
       expect(Math.hypot(particle.x, particle.y) + particle.radius).toBeLessThanOrEqual(
