@@ -258,6 +258,17 @@ describe("createMimesisLayout", () => {
     expect(layout.particleCountPerSet).toBe(5000);
     expect(layout.speedScale).toBeCloseTo(0.6);
   });
+
+  it("reduces particle density during active sync capture", () => {
+    const createLayout = createMimesisLayout as (
+      sceneWidth: number,
+      viewportWidth?: number,
+      performanceMode?: "default" | "sync-capture",
+    ) => ReturnType<typeof createMimesisLayout>;
+    const layout = createLayout(1440, 1440, "sync-capture");
+
+    expect(layout.particleCountPerSet).toBe(1200);
+  });
 });
 
 describe("createBwCircleParticles", () => {

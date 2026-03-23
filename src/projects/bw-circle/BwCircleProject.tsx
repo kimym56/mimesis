@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { InteractiveProjectProps } from "../types";
 import BwCircleScene from "./BwCircleScene";
 import BwCircleYouTubePanel from "./BwCircleYouTubePanel";
@@ -45,22 +45,35 @@ export default function BwCircleProject({
   const [audioSync, setAudioSync] = useState<BwCircleAudioSyncState>(
     IDLE_AUDIO_SYNC_STATE,
   );
-  const [playback, setPlayback] = useState<BwCirclePlaybackState>(
-    IDLE_PLAYBACK_STATE,
-  );
+  const [estimatedBpm, setEstimatedBpm] = useState<number | null>(null);
+  const playbackRef = useRef<BwCirclePlaybackState>(IDLE_PLAYBACK_STATE);
   const syncBpm = 120;
 
   const handleModeChange = (nextMode: BwCircleProjectMode) => {
     setMode(nextMode);
 
     if (nextMode === "mimesis") {
-      setPlayback(IDLE_PLAYBACK_STATE);
+      playbackRef.current = IDLE_PLAYBACK_STATE;
+      setEstimatedBpm(null);
     }
   };
 
   const handleVideoLoad = (nextVideoId: string | null) => {
     setVideoId(nextVideoId);
-    setPlayback(IDLE_PLAYBACK_STATE);
+    playbackRef.current = IDLE_PLAYBACK_STATE;
+    setEstimatedBpm(null);
+  };
+
+  const handlePlaybackChange = (nextPlayback: BwCirclePlaybackState) => {
+    playbackRef.current = nextPlayback;
+  };
+
+  const handleAudioSyncChange = (nextAudioSync: BwCircleAudioSyncState) => {
+    setAudioSync(nextAudioSync);
+
+    if (nextAudioSync.status !== "active") {
+      setEstimatedBpm(null);
+    }
   };
 
   return (
@@ -87,14 +100,16 @@ export default function BwCircleProject({
         audioSync={audioSync}
         bpm={syncBpm}
         mode={mode}
-        playback={playback}
+        onEstimatedBpmChange={setEstimatedBpm}
+        playbackRef={playbackRef}
         syncOverlay={
           mode === "sync" ? (
             <BwCircleYouTubePanel
               audioSyncStatus={audioSync.status}
-              onAudioSyncChange={setAudioSync}
+              estimatedBpm={estimatedBpm}
+              onAudioSyncChange={handleAudioSyncChange}
               onLoad={handleVideoLoad}
-              onPlaybackChange={setPlayback}
+              onPlaybackChange={handlePlaybackChange}
               videoId={videoId}
             />
           ) : null

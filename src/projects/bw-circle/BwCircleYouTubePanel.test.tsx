@@ -52,6 +52,7 @@ declare global {
 describe("BwCircleYouTubePanel", () => {
   let container: HTMLDivElement;
   let originalMediaDevices: MediaDevices | undefined;
+  let originalMediaStream: typeof MediaStream | undefined;
   let getDisplayMediaMock: ReturnType<typeof vi.fn>;
   let root: Root;
 
@@ -67,23 +68,40 @@ describe("BwCircleYouTubePanel", () => {
     } satisfies MockPlayerInstance;
   }
 
-  function createMockStream() {
+  function createMockStream({
+    audioTracks = [],
+    videoTracks = [],
+  }: {
+    audioTracks?: MediaStreamTrack[];
+    videoTracks?: MediaStreamTrack[];
+  } = {}) {
+    const tracks = [...audioTracks, ...videoTracks];
+
     return {
-      getAudioTracks: vi.fn(() => []),
-      getTracks: vi.fn(() => []),
-      getVideoTracks: vi.fn(() => []),
+      getAudioTracks: vi.fn(() => audioTracks),
+      getTracks: vi.fn(() => tracks),
+      getVideoTracks: vi.fn(() => videoTracks),
     } as unknown as MediaStream;
   }
 
   beforeEach(() => {
     vi.useFakeTimers();
     originalMediaDevices = navigator.mediaDevices;
+    originalMediaStream = globalThis.MediaStream;
     getDisplayMediaMock = vi.fn(async () => createMockStream());
     Object.defineProperty(navigator, "mediaDevices", {
       configurable: true,
       value: {
         getDisplayMedia: getDisplayMediaMock,
       },
+    });
+    Object.defineProperty(globalThis, "MediaStream", {
+      configurable: true,
+      value: vi.fn(function MockMediaStream(tracks?: MediaStreamTrack[]) {
+        return createMockStream({
+          audioTracks: tracks ?? [],
+        });
+      }),
     });
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -101,7 +119,41 @@ describe("BwCircleYouTubePanel", () => {
       configurable: true,
       value: originalMediaDevices,
     });
+    Object.defineProperty(globalThis, "MediaStream", {
+      configurable: true,
+      value: originalMediaStream,
+    });
     vi.useRealTimers();
+  });
+
+  it("shows a placeholder BPM badge until an estimate is available", async () => {
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          estimatedBpm={null}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    expect(container.textContent).toContain("-- BPM");
+  });
+
+  it("shows the estimated BPM beside the input row when available", async () => {
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          estimatedBpm={128}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    expect(container.textContent).toContain("128 BPM");
   });
 
   it("uses the ready event target when the constructor return value is not yet queryable", async () => {
@@ -432,6 +484,74 @@ describe("BwCircleYouTubePanel", () => {
     expect(MockPlayer).not.toHaveBeenCalled();
   });
 
+  it("loads and plays the placeholder video when Play is pressed before any link is entered", async () => {
+    const firstPlayer = createMockPlayer(2);
+
+    const MockPlayer = vi.fn(function MockPlayer(
+      _element: HTMLElement,
+      options: {
+        events?: {
+          onError?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+          onReady?: (event: { target: MockPlayerInstance }) => void;
+          onStateChange?: (event: {
+            data: number;
+            target: MockPlayerInstance;
+          }) => void;
+        };
+        videoId?: string;
+      },
+    ) {
+      window.setTimeout(() => {
+        options.events?.onReady?.({ target: firstPlayer });
+      }, 0);
+
+      return firstPlayer;
+    });
+
+    window.YT = {
+      Player: MockPlayer as unknown as Window["YT"]["Player"],
+    };
+
+    function Harness() {
+      const [videoId, setVideoId] = useState<string | null>(null);
+
+      return (
+        <BwCircleYouTubePanel
+          onLoad={setVideoId}
+          onPlaybackChange={vi.fn()}
+          videoId={videoId}
+        />
+      );
+    }
+
+    await act(async () => {
+      root.render(<Harness />);
+      await Promise.resolve();
+    });
+
+    const playButton = [...container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent?.trim() === "Play",
+    );
+
+    act(() => {
+      playButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(MockPlayer).toHaveBeenCalledTimes(1);
+    expect(firstPlayer.loadVideoById).toHaveBeenCalledWith("97qr0BOdHkc");
+  });
+
   it("requests current-tab audio capture when Play is pressed", async () => {
     const readyPlayer = createMockPlayer(2);
 
@@ -500,7 +620,18 @@ describe("BwCircleYouTubePanel", () => {
   it("reports an active audio-sync stream after capture permission succeeds", async () => {
     const onAudioSyncChange = vi.fn();
     const readyPlayer = createMockPlayer(2);
-    const stream = createMockStream();
+    const audioTrack = {
+      kind: "audio",
+      stop: vi.fn(),
+    } as unknown as MediaStreamTrack;
+    const videoTrack = {
+      kind: "video",
+      stop: vi.fn(),
+    } as unknown as MediaStreamTrack;
+    const stream = createMockStream({
+      audioTracks: [audioTrack],
+      videoTracks: [videoTrack],
+    });
 
     getDisplayMediaMock.mockResolvedValueOnce(stream);
 
@@ -558,10 +689,16 @@ describe("BwCircleYouTubePanel", () => {
       await Promise.resolve();
     });
 
-    expect(onAudioSyncChange).toHaveBeenCalledWith({
+    expect(videoTrack.stop).toHaveBeenCalledTimes(1);
+
+    const latestAudioSync = onAudioSyncChange.mock.calls.at(-1)?.[0];
+
+    expect(latestAudioSync).toMatchObject({
       status: "active",
-      stream,
     });
+    expect(latestAudioSync?.stream).not.toBe(stream);
+    expect(latestAudioSync?.stream?.getAudioTracks()).toEqual([audioTrack]);
+    expect(latestAudioSync?.stream?.getVideoTracks()).toEqual([]);
   });
 
   it("keeps the permission message visible when audio capture is denied", async () => {

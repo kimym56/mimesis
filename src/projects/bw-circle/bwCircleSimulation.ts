@@ -1,4 +1,5 @@
 export type BwCircleCameraMode = "normal" | "white" | "black";
+export type BwCirclePerformanceMode = "default" | "sync-capture";
 
 export interface BwCircleMimesisCue {
   angle: number;
@@ -30,8 +31,7 @@ export interface BwCirclePlaybackSample {
   sampledAtMs: number;
 }
 
-export interface BwCirclePlaybackPredictionInput
-  extends BwCirclePlaybackSample {
+export interface BwCirclePlaybackPredictionInput extends BwCirclePlaybackSample {
   nowMs: number;
 }
 
@@ -59,8 +59,7 @@ export interface BwCircleSyncCue {
   cameraMode: BwCircleCameraMode;
 }
 
-export interface BwCircleSyncMotionProfileInput
-  extends BwCirclePlaybackPredictionInput {
+export interface BwCircleSyncMotionProfileInput extends BwCirclePlaybackPredictionInput {
   bpm: number;
   baseCameraMode: BwCircleCameraMode;
   shouldReduceMotion: boolean;
@@ -152,6 +151,19 @@ function getCircleRadius(width: number) {
 }
 
 const CAMERA_SEQUENCE: BwCircleCameraMode[] = ["normal", "white", "black"];
+const SYNC_CAPTURE_MAX_PIXEL_RATIO = 1;
+const SYNC_CAPTURE_PARTICLE_DENSITY_MULTIPLIER = 0.24;
+
+export function getBwCircleRenderPixelRatio(
+  devicePixelRatio: number | undefined,
+  performanceMode: BwCirclePerformanceMode = "default",
+) {
+  const safeDevicePixelRatio = Math.max(1, devicePixelRatio || 1);
+
+  return performanceMode === "sync-capture"
+    ? Math.min(safeDevicePixelRatio, SYNC_CAPTURE_MAX_PIXEL_RATIO)
+    : safeDevicePixelRatio;
+}
 
 export function predictPlaybackTime({
   currentTime,
@@ -206,6 +218,7 @@ export function createMimesisCue({
 export function createMimesisLayout(
   sceneWidth: number,
   viewportWidth = sceneWidth,
+  performanceMode: BwCirclePerformanceMode = "default",
 ): BwCircleMimesisLayout {
   const isMobile = sceneWidth < 768;
   const physicsScale = clamp(sceneWidth / 1440, 0.4, 1.2);
@@ -213,12 +226,14 @@ export function createMimesisLayout(
   const ballRadius = Math.max(6, circleRadius * 0.056);
   const referenceCircleRadius = getCircleRadius(viewportWidth);
   const particleDensityRatio =
-    referenceCircleRadius > 0
-      ? (circleRadius / referenceCircleRadius) ** 2
+    referenceCircleRadius > 0 ? (circleRadius / referenceCircleRadius) ** 2 : 1;
+  const particleDensityMultiplier =
+    performanceMode === "sync-capture"
+      ? SYNC_CAPTURE_PARTICLE_DENSITY_MULTIPLIER
       : 1;
   const particleCountPerSet = Math.max(
     1,
-    Math.round(5000 * particleDensityRatio),
+    Math.round(5000 * particleDensityRatio * particleDensityMultiplier),
   );
 
   return {

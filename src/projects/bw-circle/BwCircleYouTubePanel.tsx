@@ -74,6 +74,16 @@ const PLACEHOLDER_URL = "https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C";
 
 let youTubeApiPromise: Promise<void> | null = null;
 
+function createAudioOnlySyncStream(stream: MediaStream) {
+  const audioTracks = stream.getAudioTracks();
+
+  for (const videoTrack of stream.getVideoTracks()) {
+    videoTrack.stop();
+  }
+
+  return new MediaStream(audioTracks);
+}
+
 function hasQueryablePlaybackState(
   player: YouTubePlayerInstance | null,
 ): player is YouTubePlayerInstance {
@@ -144,12 +154,14 @@ function ensureYouTubeIframeApi() {
 
 export default function BwCircleYouTubePanel({
   audioSyncStatus = "idle",
+  estimatedBpm = null,
   onAudioSyncChange = () => {},
   onLoad,
   onPlaybackChange,
   videoId,
 }: {
   audioSyncStatus?: BwCircleAudioSyncStatus;
+  estimatedBpm?: number | null;
   onAudioSyncChange?: (audioSync: BwCircleAudioSyncState) => void;
   onLoad: (videoId: string | null) => void;
   onPlaybackChange: (playback: BwCirclePlaybackState) => void;
@@ -178,14 +190,20 @@ export default function BwCircleYouTubePanel({
     latestVideoIdRef.current = videoId;
   }, [videoId]);
 
-  const commitInputVideo = (candidateInput = input) => {
+  const commitInputVideo = (
+    candidateInput = input,
+    { usePlaceholderWhenEmpty = false }: { usePlaceholderWhenEmpty?: boolean } = {},
+  ) => {
     const trimmedInput = candidateInput.trim();
+    const resolvedInput =
+      trimmedInput ||
+      (usePlaceholderWhenEmpty && !videoId ? PLACEHOLDER_URL : "");
 
-    if (!trimmedInput) {
+    if (!resolvedInput) {
       return videoId;
     }
 
-    const nextVideoId = parseYouTubeVideoId(trimmedInput);
+    const nextVideoId = parseYouTubeVideoId(resolvedInput);
 
     if (!nextVideoId) {
       setError("Enter a valid YouTube link.");
@@ -229,10 +247,11 @@ export default function BwCircleYouTubePanel({
       };
       const stream =
         await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+      const audioOnlyStream = createAudioOnlySyncStream(stream);
 
       onAudioSyncChange({
         status: "active",
-        stream,
+        stream: audioOnlyStream,
       });
     } catch (captureError) {
       const status =
@@ -263,7 +282,9 @@ export default function BwCircleYouTubePanel({
       return;
     }
 
-    const nextVideoId = commitInputVideo(inputRef.current?.value ?? input);
+    const nextVideoId = commitInputVideo(inputRef.current?.value ?? input, {
+      usePlaceholderWhenEmpty: true,
+    });
 
     if (!nextVideoId) {
       return;
@@ -474,6 +495,9 @@ export default function BwCircleYouTubePanel({
           type="url"
           value={input}
         />
+        <span aria-live="polite" className={styles.tempoBadge}>
+          {estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}
+        </span>
         <button
           className={styles.playbackButton}
           onClick={handlePlaybackToggle}
