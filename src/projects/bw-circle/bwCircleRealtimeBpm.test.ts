@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createRealtimeBpmAnalyzer,
-  getBiquadFilter,
 } from "./bwCircleRealtimeBpmVendor";
 import { createBwCircleRealtimeBpmBridge } from "./bwCircleRealtimeBpm";
 
@@ -40,7 +39,6 @@ class MockRealtimeBpmAnalyzer extends EventTarget {
 describe("createBwCircleRealtimeBpmBridge", () => {
   let analyzer: MockRealtimeBpmAnalyzer;
   let audioContext: AudioContext;
-  let filterNode: BiquadFilterNode;
   let mutedSinkNode: GainNode;
   let signalGainNode: GainNode;
   let onBpm: ReturnType<typeof vi.fn>;
@@ -69,10 +67,6 @@ describe("createBwCircleRealtimeBpmBridge", () => {
         .mockReturnValueOnce(mutedSinkNode),
       destination: { kind: "destination" } as AudioNode,
     } as unknown as AudioContext;
-    filterNode = {
-      connect: vi.fn(),
-      disconnect: vi.fn(),
-    } as unknown as BiquadFilterNode;
     onBpm = vi.fn();
     sourceNode = {
       connect: vi.fn(),
@@ -82,20 +76,15 @@ describe("createBwCircleRealtimeBpmBridge", () => {
     vi.mocked(createRealtimeBpmAnalyzer).mockResolvedValue(
       analyzer as unknown as Awaited<ReturnType<typeof createRealtimeBpmAnalyzer>>,
     );
-    vi.mocked(getBiquadFilter).mockReturnValue(filterNode);
   });
 
-  it("connects the source through a low-pass filter into the realtime analyzer", async () => {
+  it("connects the source directly into the realtime analyzer without a low-pass filter", async () => {
     const bridge = await createBwCircleRealtimeBpmBridge({
       audioContext,
       onBpm,
       sourceNode,
     });
 
-    expect(getBiquadFilter).toHaveBeenCalledWith(audioContext, {
-      frequencyValue: 200,
-      qualityValue: 1,
-    });
     expect(createRealtimeBpmAnalyzer).toHaveBeenCalledWith(audioContext, {
       continuousAnalysis: true,
       debug: false,
@@ -105,8 +94,7 @@ describe("createBwCircleRealtimeBpmBridge", () => {
     expect(signalGainNode.gain.value).toBe(6);
     expect(mutedSinkNode.gain.value).toBe(0);
     expect(sourceNode.connect).toHaveBeenCalledWith(signalGainNode);
-    expect(signalGainNode.connect).toHaveBeenCalledWith(filterNode);
-    expect(filterNode.connect).toHaveBeenCalledWith(analyzer.node);
+    expect(signalGainNode.connect).toHaveBeenCalledWith(analyzer.node);
     expect(analyzer.connect).toHaveBeenCalledWith(mutedSinkNode);
     expect(mutedSinkNode.connect).toHaveBeenCalledWith(audioContext.destination);
     expect(
@@ -117,7 +105,6 @@ describe("createBwCircleRealtimeBpmBridge", () => {
 
     expect(sourceNode.disconnect).toHaveBeenCalledWith(signalGainNode);
     expect(signalGainNode.disconnect).toHaveBeenCalledTimes(1);
-    expect(filterNode.disconnect).toHaveBeenCalledTimes(1);
     expect(mutedSinkNode.disconnect).toHaveBeenCalledTimes(1);
     expect(analyzer.stop).toHaveBeenCalledTimes(1);
     expect(analyzer.disconnect).toHaveBeenCalledTimes(1);
@@ -180,5 +167,26 @@ describe("createBwCircleRealtimeBpmBridge", () => {
     );
 
     expect(onBpm).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not require a diagnostic callback to publish bpm events", async () => {
+    await createBwCircleRealtimeBpmBridge({
+      audioContext,
+      onBpm,
+      sourceNode,
+    });
+
+    analyzer.dispatchEvent(
+      new CustomEvent("bpm", {
+        detail: {
+          bpm: [
+            { confidence: 0.7, count: 12, tempo: 92.4 },
+          ],
+          threshold: 0.35,
+        },
+      }),
+    );
+
+    expect(onBpm).toHaveBeenCalledWith(92);
   });
 });

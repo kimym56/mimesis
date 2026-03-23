@@ -57,12 +57,30 @@ interface BallState {
   y: number;
 }
 
+interface SplashParticle extends BwCircleParticle {
+  color: string;
+  life: number;
+}
+
 interface SceneState {
   leftBall: BallState;
   rightBall: BallState;
   leftParticles: BwCircleParticle[];
   rightParticles: BwCircleParticle[];
+  splashParticles: SplashParticle[];
+  leftDividerLeakCooldown: number;
+  rightDividerLeakCooldown: number;
 }
+
+interface BallImpactEvent {
+  normalX: number;
+  normalY: number;
+  speed: number;
+}
+
+const DIVIDER_LEAK_DISTANCE = 72;
+const DIVIDER_LEAK_COOLDOWN_MIN = 20;
+const DIVIDER_LEAK_COOLDOWN_RANGE = 18;
 
 function createBall(
   x: number,
@@ -123,6 +141,9 @@ function createSceneState(
       count: layout.particleCountPerSet,
       seed: seedBase * 17 + 2,
     }),
+    splashParticles: [],
+    leftDividerLeakCooldown: 0,
+    rightDividerLeakCooldown: 0,
   };
 }
 
@@ -151,20 +172,226 @@ function drawBall(
   context.restore();
 }
 
+function pushSplashParticle(
+  splashParticles: SplashParticle[],
+  particle: SplashParticle,
+) {
+  splashParticles.push(particle);
+}
+
+function moveParticleOutsideCircle({
+  circleRadius,
+  color,
+  normalX,
+  normalY,
+  particles,
+  removeSource = true,
+  sourceIndex,
+  speedMultiplier = 1,
+  splashParticles,
+}: {
+  circleRadius: number;
+  color: string;
+  normalX: number;
+  normalY: number;
+  particles: BwCircleParticle[];
+  removeSource?: boolean;
+  sourceIndex: number;
+  speedMultiplier?: number;
+  splashParticles: SplashParticle[];
+}) {
+  const sourceParticle = removeSource
+    ? particles.splice(sourceIndex, 1)[0]
+    : particles[sourceIndex];
+
+  if (!sourceParticle) {
+    return false;
+  }
+
+  let outwardX = normalX;
+  let outwardY = normalY;
+  const normalLength = Math.hypot(outwardX, outwardY);
+
+  if (normalLength > 0.0001) {
+    outwardX /= normalLength;
+    outwardY /= normalLength;
+  } else {
+    const radialDistance = Math.hypot(sourceParticle.x, sourceParticle.y);
+
+    if (radialDistance > 0.0001) {
+      outwardX = sourceParticle.x / radialDistance;
+      outwardY = sourceParticle.y / radialDistance;
+    } else {
+      const randomAngle = Math.random() * Math.PI * 2;
+      outwardX = Math.cos(randomAngle);
+      outwardY = Math.sin(randomAngle);
+    }
+  }
+
+  const tangentX = -outwardY;
+  const tangentY = outwardX;
+  const tangentialOffset =
+    (sourceParticle.x * tangentX + sourceParticle.y * tangentY) * 0.18 +
+    (Math.random() - 0.5) * 6;
+  const outwardSpeed = (0.24 + Math.random() * 0.42) * speedMultiplier;
+  const tangentialSpeed =
+    ((Math.random() - 0.5) * 0.28 +
+      (sourceParticle.vx * tangentX + sourceParticle.vy * tangentY) * 0.08) *
+    speedMultiplier;
+  const spawnRadius =
+    circleRadius + sourceParticle.radius + 3 + Math.random() * 2.5;
+
+  pushSplashParticle(splashParticles, {
+    x: outwardX * spawnRadius + tangentX * tangentialOffset,
+    y: outwardY * spawnRadius + tangentY * tangentialOffset,
+    vx:
+      sourceParticle.vx * 0.24 +
+      outwardX * outwardSpeed +
+      tangentX * tangentialSpeed,
+    vy:
+      sourceParticle.vy * 0.24 +
+      outwardY * outwardSpeed +
+      tangentY * tangentialSpeed,
+    radius: Math.min(3.2, Math.max(1, sourceParticle.radius + Math.random() * 0.4)),
+    color,
+    life: 1,
+  });
+
+  return true;
+}
+
+function releaseImpactParticles({
+  circleRadius,
+  color,
+  impact,
+  particles,
+  splashParticles,
+}: {
+  circleRadius: number;
+  color: string;
+  impact: BallImpactEvent | null;
+  particles: BwCircleParticle[];
+  splashParticles: SplashParticle[];
+}) {
+  if (!impact || particles.length === 0) {
+    return;
+  }
+
+  const impactPointX = impact.normalX * (circleRadius - 6);
+  const impactPointY = impact.normalY * (circleRadius - 6);
+  const sourceRadius = Math.max(30, circleRadius * 0.18);
+  const desiredCount = 3 + Math.floor(Math.random() * 4);
+  const candidates = particles
+    .map((particle, index) => ({
+      distance: Math.hypot(particle.x - impactPointX, particle.y - impactPointY),
+      index,
+    }))
+    .filter((candidate) => candidate.distance <= sourceRadius)
+    .sort((left, right) => left.distance - right.distance)
+    .slice(0, desiredCount)
+    .sort((left, right) => right.index - left.index);
+
+  if (candidates.length === 0) {
+    return;
+  }
+
+  const speedMultiplier = 1 + Math.min(impact.speed / 12, 0.45);
+
+  for (const candidate of candidates) {
+    moveParticleOutsideCircle({
+      circleRadius,
+      color,
+      normalX: impact.normalX,
+      normalY: impact.normalY,
+      particles,
+      removeSource: false,
+      sourceIndex: candidate.index,
+      speedMultiplier,
+      splashParticles,
+    });
+  }
+}
+
+function updateSplashParticles({
+  circleRadius,
+  sceneHeight,
+  sceneWidth,
+  splashParticles,
+}: {
+  circleRadius: number;
+  sceneHeight: number;
+  sceneWidth: number;
+  splashParticles: SplashParticle[];
+}) {
+  const angularVelocity = (Math.PI * 2) / 60;
+  const rotationAmount = angularVelocity / 60;
+  const cosRotation = Math.cos(rotationAmount);
+  const sinRotation = Math.sin(rotationAmount);
+  const maxX = sceneWidth / 2 + 50;
+  const maxY = sceneHeight / 2 + 50;
+
+  for (let index = splashParticles.length - 1; index >= 0; index -= 1) {
+    const particle = splashParticles[index];
+    const rotatedX = particle.x * cosRotation - particle.y * sinRotation;
+    const rotatedY = particle.x * sinRotation + particle.y * cosRotation;
+
+    particle.x = rotatedX;
+    particle.y = rotatedY;
+    particle.vx += (Math.random() - 0.5) * 0.08;
+    particle.vy += (Math.random() - 0.5) * 0.08;
+    particle.vx *= 0.97;
+    particle.vy *= 0.97;
+    particle.x += particle.vx;
+    particle.y += particle.vy;
+
+    const distanceFromCenter = Math.hypot(particle.x, particle.y);
+    const minDistance = circleRadius + particle.radius + 2;
+
+    if (distanceFromCenter < minDistance && distanceFromCenter > 0.0001) {
+      const normalX = particle.x / distanceFromCenter;
+      const normalY = particle.y / distanceFromCenter;
+      const dotProduct = particle.vx * normalX + particle.vy * normalY;
+
+      particle.x = normalX * minDistance;
+      particle.y = normalY * minDistance;
+
+      if (dotProduct < 0) {
+        particle.vx -= dotProduct * normalX;
+        particle.vy -= dotProduct * normalY;
+      }
+    }
+
+    if (
+      particle.x < -maxX ||
+      particle.x > maxX ||
+      particle.y < -maxY ||
+      particle.y > maxY
+    ) {
+      splashParticles.splice(index, 1);
+    }
+  }
+}
+
 function updateParticles({
   angle,
   ball,
   circleRadius,
+  dividerLeakCooldown,
   isRightHalf,
   particleAccent,
   particles,
+  splashColor,
+  splashParticles,
 }: {
   angle: number;
   ball: BallState;
   circleRadius: number;
+  dividerLeakCooldown: number;
   isRightHalf: boolean;
   particleAccent: number;
   particles: BwCircleParticle[];
+  splashColor: string;
+  splashParticles: SplashParticle[];
 }) {
   const repelRadius = 60;
   const gravity = 0.004;
@@ -172,8 +399,10 @@ function updateParticles({
   const minSpeed = 0.3;
   const resetSpeed = 0.5;
   const boundaryBounce = 0.8;
+  let nextDividerLeakCooldown = Math.max(0, dividerLeakCooldown - 1);
 
-  for (const particle of particles) {
+  for (let index = particles.length - 1; index >= 0; index -= 1) {
+    const particle = particles[index];
     const toBallX = particle.x - ball.x;
     const toBallY = particle.y - ball.y;
     const distanceToBall = Math.hypot(toBallX, toBallY);
@@ -234,6 +463,35 @@ function updateParticles({
     const isOutside = isRightHalf ? rotatedX < boundary : rotatedX > boundary;
 
     if (isOutside) {
+      if (
+        nextDividerLeakCooldown <= 0 &&
+        distanceToBall <= DIVIDER_LEAK_DISTANCE
+      ) {
+        const radialDistance = Math.hypot(particle.x, particle.y);
+        const normalX =
+          radialDistance > 0.0001 ? particle.x / radialDistance : Math.cos(angle);
+        const normalY =
+          radialDistance > 0.0001 ? particle.y / radialDistance : Math.sin(angle);
+
+        if (
+          moveParticleOutsideCircle({
+            circleRadius,
+            color: splashColor,
+            normalX,
+            normalY,
+            particles,
+            sourceIndex: index,
+            speedMultiplier: 0.92 + Math.random() * 0.18,
+            splashParticles,
+          })
+        ) {
+          nextDividerLeakCooldown =
+            DIVIDER_LEAK_COOLDOWN_MIN +
+            Math.floor(Math.random() * DIVIDER_LEAK_COOLDOWN_RANGE);
+          continue;
+        }
+      }
+
       const velocityX =
         particle.vx * Math.cos(-angle) - particle.vy * Math.sin(-angle);
       const velocityY =
@@ -248,6 +506,8 @@ function updateParticles({
       particle.y = boundary * Math.sin(angle) + rotatedY * Math.cos(angle);
     }
   }
+
+  return nextDividerLeakCooldown;
 }
 
 function updateBall({
@@ -274,6 +534,7 @@ function updateBall({
   speedBoost: number;
 }) {
   const beatImpulse = (beatKick - 1) * (circleRadius < 180 ? 0.9 : 1.2);
+  let impactEvent: BallImpactEvent | null = null;
 
   if (beatImpulse > 0) {
     const speed = Math.hypot(ball.vx, ball.vy);
@@ -320,6 +581,11 @@ function updateBall({
     }
 
     ball.squashAmount = Math.min(Math.abs(dotProduct) * 0.04, 0.35);
+    impactEvent = {
+      normalX,
+      normalY,
+      speed: collisionSpeed,
+    };
   }
 
   const rotatedX = ball.x * Math.cos(-angle) - ball.y * Math.sin(-angle);
@@ -361,6 +627,8 @@ function updateBall({
     ball.scaleX = 1 - stretchAmount * 0.3;
     ball.scaleY = 1 + stretchAmount * 0.5;
   }
+
+  return impactEvent;
 }
 
 export default function BwCircleScene({
@@ -719,7 +987,7 @@ export default function BwCircleScene({
           : 1;
       const diagonal = Math.hypot(width, height);
 
-      updateBall({
+      const leftBallImpact = updateBall({
         angle,
         ball: sceneState.leftBall,
         ballRadius,
@@ -731,7 +999,7 @@ export default function BwCircleScene({
         isLeftSide: true,
         speedBoost,
       });
-      updateBall({
+      const rightBallImpact = updateBall({
         angle,
         ball: sceneState.rightBall,
         ballRadius,
@@ -743,21 +1011,47 @@ export default function BwCircleScene({
         isLeftSide: false,
         speedBoost,
       });
-      updateParticles({
+      releaseImpactParticles({
+        circleRadius: layout.circleRadius,
+        color: "#ffffff",
+        impact: leftBallImpact,
+        particles: sceneState.leftParticles,
+        splashParticles: sceneState.splashParticles,
+      });
+      releaseImpactParticles({
+        circleRadius: layout.circleRadius,
+        color: "#000000",
+        impact: rightBallImpact,
+        particles: sceneState.rightParticles,
+        splashParticles: sceneState.splashParticles,
+      });
+      sceneState.leftDividerLeakCooldown = updateParticles({
         angle,
         ball: sceneState.leftBall,
         circleRadius: layout.circleRadius,
+        dividerLeakCooldown: sceneState.leftDividerLeakCooldown,
         isRightHalf: false,
         particleAccent,
         particles: sceneState.leftParticles,
+        splashColor: "#ffffff",
+        splashParticles: sceneState.splashParticles,
       });
-      updateParticles({
+      sceneState.rightDividerLeakCooldown = updateParticles({
         angle,
         ball: sceneState.rightBall,
         circleRadius: layout.circleRadius,
+        dividerLeakCooldown: sceneState.rightDividerLeakCooldown,
         isRightHalf: true,
         particleAccent,
         particles: sceneState.rightParticles,
+        splashColor: "#000000",
+        splashParticles: sceneState.splashParticles,
+      });
+      updateSplashParticles({
+        circleRadius: layout.circleRadius,
+        sceneHeight: height,
+        sceneWidth: width,
+        splashParticles: sceneState.splashParticles,
       });
 
       context.clearRect(0, 0, width, height);
@@ -805,6 +1099,21 @@ export default function BwCircleScene({
       drawBall(context, sceneState.leftBall, ballRadius);
       drawBall(context, sceneState.rightBall, ballRadius);
       context.restore();
+
+      for (const particle of sceneState.splashParticles) {
+        context.globalAlpha = particle.life;
+        context.beginPath();
+        context.arc(
+          width / 2 + particle.x,
+          height / 2 + particle.y,
+          particle.radius,
+          0,
+          Math.PI * 2,
+        );
+        context.fillStyle = particle.color;
+        context.fill();
+      }
+      context.globalAlpha = 1;
 
       animationFrame = window.requestAnimationFrame(render);
     };

@@ -66,6 +66,7 @@ describe("BwCircleScene audio sync", () => {
   let originalGetContext: typeof HTMLCanvasElement.prototype.getContext;
   let originalRequestAnimationFrame: typeof window.requestAnimationFrame;
   let performanceNowSpy: ReturnType<typeof vi.spyOn> | null;
+  let consoleInfoSpy: ReturnType<typeof vi.spyOn> | null;
   let rafCallback: FrameRequestCallback | null;
   let root: Root;
 
@@ -112,6 +113,7 @@ describe("BwCircleScene audio sync", () => {
 
   beforeEach(() => {
     performanceNowSpy = null;
+    consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
     rafCallback = null;
     canvasContext.setTransform.mockClear();
     analyser = {
@@ -162,6 +164,7 @@ describe("BwCircleScene audio sync", () => {
 
   afterEach(() => {
     performanceNowSpy?.mockRestore();
+    consoleInfoSpy?.mockRestore();
     act(() => {
       root.unmount();
     });
@@ -220,6 +223,7 @@ describe("BwCircleScene audio sync", () => {
     });
 
     expect(onEstimatedBpmChange).toHaveBeenCalledWith(128);
+    expect(consoleInfoSpy).not.toHaveBeenCalled();
   });
 
   it("disconnects the previous analyser graph when audio sync becomes inactive", () => {
