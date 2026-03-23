@@ -3,9 +3,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type {
-  BwCirclePlaybackState,
-} from "./BwCircleProject";
+import type { BwCirclePlaybackState } from "./BwCircleProject";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -59,7 +57,9 @@ vi.mock("./BwCircleYouTubePanel", () => ({
     latestPanelProps = { estimatedBpm, onLoad, onPlaybackChange };
     panelRenderSpy();
 
-    return <div>{estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}</div>;
+    return (
+      <div>{estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}</div>
+    );
   },
 }));
 
@@ -127,7 +127,9 @@ describe("BwCircleProject playback updates", () => {
       });
     });
 
-    expect(sceneRenderSpy).toHaveBeenCalledTimes(sceneRenderCountAfterModeSwitch);
+    expect(sceneRenderSpy).toHaveBeenCalledTimes(
+      sceneRenderCountAfterModeSwitch,
+    );
   });
 
   it("passes scene-published estimated BPM into the sync panel", () => {
@@ -165,7 +167,7 @@ describe("BwCircleProject playback updates", () => {
 
     expect(syncButton).not.toBeNull();
     expect(modeRow?.textContent).not.toContain(
-      "Allow permission to use audio sync for this feature.",
+      "*Allow permission to use audio sync for this feature.",
     );
 
     act(() => {
@@ -173,7 +175,7 @@ describe("BwCircleProject playback updates", () => {
     });
 
     expect(modeRow?.textContent).toContain(
-      "Allow permission to use audio sync for this feature.",
+      "*Allow permission to use audio sync for this feature.",
     );
   });
 });

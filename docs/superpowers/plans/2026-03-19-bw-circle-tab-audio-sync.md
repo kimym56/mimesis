@@ -34,6 +34,7 @@
 ### Task 1: Add failing tests for normalized audio cue shaping
 
 **Files:**
+
 - Create: `src/projects/bw-circle/bwCircleAudioSync.test.ts`
 
 - [ ] **Step 1: Write the failing tests for cue normalization**
@@ -50,6 +51,7 @@ createBwCircleAudioCue({
 ```
 
 Expected behaviors:
+
 - bounded normalized cue output
 - stronger onset when energy rises sharply
 - damped response under reduced motion
@@ -63,6 +65,7 @@ Expected: FAIL because the helper file does not exist yet.
 ### Task 2: Implement the pure audio cue helper
 
 **Files:**
+
 - Create: `src/projects/bw-circle/bwCircleAudioSync.ts`
 - Modify: `src/projects/bw-circle/bwCircleAudioSync.test.ts`
 
@@ -112,6 +115,7 @@ git commit -m "feat: add bw-circle audio cue helpers"
 ### Task 3: Add failing UI tests for the new Sync overlay contract
 
 **Files:**
+
 - Modify: `src/projects/bw-circle/BwCircleProject.test.tsx`
 - Modify: `src/projects/bw-circle/BwCircleYouTubePanel.test.tsx`
 
@@ -121,7 +125,7 @@ After switching to `Sync`, assert:
 
 ```tsx
 expect(container.textContent).toContain(
-  "Allow permission to use audio sync for this feature.",
+  "*Allow permission to use audio sync for this feature.",
 );
 ```
 
@@ -138,6 +142,7 @@ Return a fake `MediaStream` from `getDisplayMedia` and expect the upward callbac
 - [ ] **Step 4: Add a panel test for denied permission**
 
 Reject `getDisplayMedia` with `NotAllowedError` and expect:
+
 - YouTube playback can still proceed or remain on fallback behavior
 - the permission message remains visible
 - no active stream is reported
@@ -150,6 +155,7 @@ Expected: FAIL because the panel still renders BPM / tap and has no capture flow
 ### Task 4: Implement project-owned audio sync session state
 
 **Files:**
+
 - Modify: `src/projects/bw-circle/BwCircleProject.tsx`
 
 - [ ] **Step 1: Add a small session state shape**
@@ -177,6 +183,7 @@ Delete the `syncBpm` state and replace it with `audioSync`.
 - [ ] **Step 3: Pass audio-sync props into the panel and scene**
 
 Update both children so:
+
 - the panel can initiate and report capture status
 - the scene can analyze the active stream
 
@@ -188,6 +195,7 @@ Expected: FAIL or type errors because the panel and scene props are not updated 
 ### Task 5: Implement the permission-driven panel flow
 
 **Files:**
+
 - Modify: `src/projects/bw-circle/BwCircleYouTubePanel.tsx`
 - Modify: `src/projects/bw-circle/BwCircleProject.module.css`
 
@@ -242,6 +250,7 @@ git commit -m "feat: add bw-circle audio sync permission flow"
 ### Task 6: Wire the scene to a live `MediaStream`
 
 **Files:**
+
 - Modify: `src/projects/bw-circle/BwCircleScene.tsx`
 - Modify: `src/projects/bw-circle/bwCircleAudioSync.ts`
 - Modify: `src/projects/bw-circle/bwCircleAudioSync.test.ts`
@@ -261,6 +270,7 @@ audioSync: BwCircleAudioSyncState;
 - [ ] **Step 3: Set up Web Audio refs for the active stream**
 
 Add refs for:
+
 - `AudioContext`
 - `MediaStreamAudioSourceNode`
 - `AnalyserNode`
@@ -270,11 +280,13 @@ Add refs for:
 - [ ] **Step 4: Initialize and tear down analysis when the stream changes**
 
 When `audioSync.stream` becomes active:
+
 - create/resume `AudioContext`
 - connect the stream source to an `AnalyserNode`
 - allocate reusable buffers
 
 When the stream ends or status leaves `active`:
+
 - disconnect nodes
 - clear buffers
 - fall back to non-audio sync
@@ -282,6 +294,7 @@ When the stream ends or status leaves `active`:
 - [ ] **Step 5: Read analyser data in the render loop**
 
 Each frame:
+
 - sample frequency/time-domain data
 - derive raw energy metrics
 - shape them through `createBwCircleAudioCue(...)`
@@ -295,6 +308,7 @@ Keep predicted YouTube time for rotation continuity.
 - [ ] **Step 6: Respect reduced motion**
 
 Under reduced motion:
+
 - keep the audio transport active
 - damp cue amplitudes before applying them to scene physics
 
@@ -315,6 +329,7 @@ git commit -m "feat: add bw-circle tab audio analysis"
 ### Task 7: Re-run focused verification and build
 
 **Files:**
+
 - Modify: `docs/superpowers/plans/2026-03-19-bw-circle-tab-audio-sync.md`
 
 - [ ] **Step 1: Run the full focused bw-circle test set**

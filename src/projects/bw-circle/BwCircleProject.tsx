@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import type { InteractiveProjectProps } from "../types";
+import styles from "./BwCircleProject.module.css";
 import BwCircleScene from "./BwCircleScene";
 import BwCircleYouTubePanel from "./BwCircleYouTubePanel";
-import styles from "./BwCircleProject.module.css";
 
 type BwCircleProjectMode = "mimesis" | "sync";
 
@@ -37,7 +37,7 @@ const IDLE_AUDIO_SYNC_STATE: BwCircleAudioSyncState = {
   stream: null,
 };
 const AUDIO_SYNC_PERMISSION_COPY =
-  "Allow permission to use audio sync for this feature.";
+  "*Allow permission to use audio sync for this feature.";
 
 export default function BwCircleProject({
   projectId,

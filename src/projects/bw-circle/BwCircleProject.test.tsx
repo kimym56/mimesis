@@ -98,7 +98,9 @@ describe("BwCircleProject", () => {
         button.textContent?.trim(),
       ),
     ).not.toContain("B");
-    expect(container.textContent).not.toContain("Tap the scene to arm bounce audio");
+    expect(container.textContent).not.toContain(
+      "Tap the scene to arm bounce audio",
+    );
     expect(
       container.querySelector(
         'input[placeholder="https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C"]',
@@ -122,7 +124,7 @@ describe("BwCircleProject", () => {
     ).not.toBeNull();
     expect(container.textContent).toContain("Play");
     expect(container.textContent).toContain(
-      "Allow permission to use audio sync for this feature.",
+      "*Allow permission to use audio sync for this feature.",
     );
     expect(container.querySelector('input[type="number"]')).toBeNull();
     expect(container.textContent).not.toContain("Tap");

@@ -47,6 +47,12 @@
   --radius-xl: 12px;
   --radius-full: 9999px;
 
+  /* Semantic radius scale */
+  --radius-subtle: var(--radius-md);
+  --radius-soft: var(--radius-lg);
+  --radius-prominent: var(--radius-xl);
+  --radius-pill: var(--radius-full);
+
   /* ============================================
      SPACING
      ============================================ */

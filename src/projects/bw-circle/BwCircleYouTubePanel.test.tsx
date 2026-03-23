@@ -1,16 +1,8 @@
 // @vitest-environment jsdom
 
-import { act } from "react";
+import { act, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { useState } from "react";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import BwCircleYouTubePanel from "./BwCircleYouTubePanel";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -31,19 +23,19 @@ declare global {
       Player: new (
         element: HTMLElement,
         options: {
-        events?: {
-          onError?: (event: {
-            data: number;
-            target: MockPlayerInstance;
-          }) => void;
-          onReady?: (event: { target: MockPlayerInstance }) => void;
-          onStateChange?: (event: {
-            data: number;
-            target: MockPlayerInstance;
-          }) => void;
-        };
-        videoId?: string;
-      },
+          events?: {
+            onError?: (event: {
+              data: number;
+              target: MockPlayerInstance;
+            }) => void;
+            onReady?: (event: { target: MockPlayerInstance }) => void;
+            onStateChange?: (event: {
+              data: number;
+              target: MockPlayerInstance;
+            }) => void;
+          };
+          videoId?: string;
+        },
       ) => Partial<MockPlayerInstance>;
     };
   }
@@ -278,7 +270,7 @@ describe("BwCircleYouTubePanel", () => {
     });
 
     expect(container.textContent).not.toContain(
-      "Allow permission to use audio sync for this feature.",
+      "*Allow permission to use audio sync for this feature.",
     );
   });
 
@@ -373,7 +365,9 @@ describe("BwCircleYouTubePanel", () => {
     });
 
     expect(onLoad).toHaveBeenCalledWith("97qr0BOdHkc");
-    expect(container.querySelector('[data-youtube-player-host="true"]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-youtube-player-host="true"]'),
+    ).not.toBeNull();
     expect(container.textContent).not.toContain("Load");
   });
 
@@ -889,7 +883,7 @@ describe("BwCircleYouTubePanel", () => {
     });
 
     expect(container.textContent).not.toContain(
-      "Allow permission to use audio sync for this feature.",
+      "*Allow permission to use audio sync for this feature.",
     );
   });
 

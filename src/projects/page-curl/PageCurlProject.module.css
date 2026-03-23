@@ -10,7 +10,7 @@
   gap: 2px;
   align-self: flex-start;
   background: var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-soft);
   padding: 2px;
   margin-bottom: var(--space-md);
 }
@@ -24,7 +24,7 @@
   color: var(--foreground-muted);
   background: transparent;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-soft);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -73,7 +73,7 @@
   align-items: center;
   padding: var(--space-sm) var(--space-md);
   background: var(--surface);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-prominent);
   box-shadow: var(--shadow-md);
   align-self: center;
 }
@@ -98,7 +98,7 @@
   height: 4px;
   appearance: none;
   background: var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   outline: none;
 }
@@ -108,7 +108,7 @@
   width: 16px;
   height: 16px;
   background: var(--foreground);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 
@@ -117,6 +117,6 @@
   height: 16px;
   background: var(--foreground);
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
