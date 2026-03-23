@@ -156,6 +156,132 @@ describe("BwCircleYouTubePanel", () => {
     expect(container.textContent).toContain("128 BPM");
   });
 
+  it("renders the sync row as link then play then bpm", async () => {
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          estimatedBpm={128}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    const input = container.querySelector("input");
+
+    expect(input).not.toBeNull();
+
+    const rowChildren = Array.from(input?.parentElement?.children ?? []);
+
+    expect(rowChildren).toHaveLength(3);
+    expect(rowChildren[0]).toBe(input);
+    expect(rowChildren[1]?.textContent?.trim()).toBe("Play");
+    expect(rowChildren[2]?.textContent).toContain("128 BPM");
+  });
+
+  it("updates the bpm label tone when the sampled canvas background changes", async () => {
+    let sampledPixel = Uint8ClampedArray.from([0, 0, 0, 255]);
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+
+    HTMLCanvasElement.prototype.getContext = vi.fn(
+      () =>
+        ({
+          getImageData: vi.fn(() => ({
+            data: sampledPixel,
+          })),
+        }) as unknown as CanvasRenderingContext2D,
+    );
+
+    try {
+      await act(async () => {
+        root.render(
+          <div data-scene-mode="sync">
+            <BwCircleYouTubePanel
+              estimatedBpm={128}
+              onLoad={vi.fn()}
+              onPlaybackChange={vi.fn()}
+              videoId={null}
+            />
+            <canvas />
+          </div>,
+        );
+      });
+
+      const badge = container.querySelector('[aria-live="polite"]');
+      const canvas = container.querySelector("canvas");
+
+      expect(badge).not.toBeNull();
+      expect(canvas).not.toBeNull();
+
+      if (badge instanceof HTMLSpanElement) {
+        badge.getBoundingClientRect = () =>
+          ({
+            bottom: 34,
+            height: 20,
+            left: 120,
+            right: 184,
+            top: 14,
+            width: 64,
+            x: 120,
+            y: 14,
+            toJSON: () => ({}),
+          }) as DOMRect;
+      }
+
+      if (canvas instanceof HTMLCanvasElement) {
+        canvas.width = 240;
+        canvas.height = 120;
+        canvas.getBoundingClientRect = () =>
+          ({
+            bottom: 120,
+            height: 120,
+            left: 0,
+            right: 240,
+            top: 0,
+            width: 240,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+          }) as DOMRect;
+      }
+
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+
+      expect(badge?.getAttribute("data-contrast-tone")).toBe("light");
+
+      sampledPixel = Uint8ClampedArray.from([255, 255, 255, 255]);
+
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+
+      expect(badge?.getAttribute("data-contrast-tone")).toBe("dark");
+    } finally {
+      HTMLCanvasElement.prototype.getContext = originalGetContext;
+    }
+  });
+
+  it("does not render the permission message inside the sync panel", async () => {
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          audioSyncStatus="idle"
+          onAudioSyncChange={vi.fn()}
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    expect(container.textContent).not.toContain(
+      "Allow permission to use audio sync for this feature.",
+    );
+  });
+
   it("uses the ready event target when the constructor return value is not yet queryable", async () => {
     const onPlaybackChange = vi.fn();
     const readyPlayer = createMockPlayer();
@@ -701,7 +827,7 @@ describe("BwCircleYouTubePanel", () => {
     expect(latestAudioSync?.stream?.getVideoTracks()).toEqual([]);
   });
 
-  it("keeps the permission message visible when audio capture is denied", async () => {
+  it("keeps the permission message out of the panel when audio capture is denied", async () => {
     const readyPlayer = createMockPlayer(2);
 
     getDisplayMediaMock.mockRejectedValueOnce(
@@ -762,7 +888,7 @@ describe("BwCircleYouTubePanel", () => {
       await Promise.resolve();
     });
 
-    expect(container.textContent).toContain(
+    expect(container.textContent).not.toContain(
       "Allow permission to use audio sync for this feature.",
     );
   });

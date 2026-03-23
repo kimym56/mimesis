@@ -6,6 +6,10 @@ import type {
   BwCircleAudioSyncStatus,
   BwCirclePlaybackState,
 } from "./BwCircleProject";
+import {
+  readBwCircleCanvasContrastTone,
+  type BwCircleContrastTone,
+} from "./bwCircleCanvasContrast";
 import { parseYouTubeVideoId } from "./bwCircleYouTube";
 import styles from "./BwCircleProject.module.css";
 
@@ -68,8 +72,8 @@ const IDLE_PLAYBACK_STATE: BwCirclePlaybackState = {
   isPlaying: false,
   sampledAtMs: 0,
 };
-const AUDIO_SYNC_PERMISSION_COPY =
-  "Allow permission to use audio sync for this feature.";
+const DEFAULT_TEMPO_BADGE_TONE: BwCircleContrastTone = "light";
+const TEMPO_BADGE_SAMPLE_INTERVAL_MS = 80;
 const PLACEHOLDER_URL = "https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C";
 
 let youTubeApiPromise: Promise<void> | null = null;
@@ -170,7 +174,10 @@ export default function BwCircleYouTubePanel({
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [tempoBadgeTone, setTempoBadgeTone] =
+    useState<BwCircleContrastTone>(DEFAULT_TEMPO_BADGE_TONE);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const tempoBadgeRef = useRef<HTMLSpanElement | null>(null);
   const playerHostRef = useRef<HTMLDivElement | null>(null);
   const playerMountNodeRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
@@ -181,6 +188,7 @@ export default function BwCircleYouTubePanel({
   const pendingPlayRef = useRef(false);
   const playerCreationInFlightRef = useRef(false);
   const skipCueVideoIdRef = useRef<string | null>(null);
+  const tempoBadgeToneRef = useRef<BwCircleContrastTone>(DEFAULT_TEMPO_BADGE_TONE);
 
   useEffect(() => {
     playbackCallbackRef.current = onPlaybackChange;
@@ -189,6 +197,51 @@ export default function BwCircleYouTubePanel({
   useEffect(() => {
     latestVideoIdRef.current = videoId;
   }, [videoId]);
+
+  useEffect(() => {
+    tempoBadgeToneRef.current = tempoBadgeTone;
+  }, [tempoBadgeTone]);
+
+  useEffect(() => {
+    const updateTempoBadgeTone = () => {
+      const badge = tempoBadgeRef.current;
+
+      if (!badge) {
+        return;
+      }
+
+      const sceneShell = badge.closest("[data-scene-mode]");
+      const canvas = sceneShell?.querySelector("canvas");
+
+      if (!(canvas instanceof HTMLCanvasElement)) {
+        return;
+      }
+
+      const nextTone = readBwCircleCanvasContrastTone({
+        canvas,
+        previousTone: tempoBadgeToneRef.current,
+        targetRect: badge.getBoundingClientRect(),
+      });
+
+      if (!nextTone || nextTone === tempoBadgeToneRef.current) {
+        return;
+      }
+
+      tempoBadgeToneRef.current = nextTone;
+      setTempoBadgeTone(nextTone);
+    };
+
+    updateTempoBadgeTone();
+
+    const interval = window.setInterval(
+      updateTempoBadgeTone,
+      TEMPO_BADGE_SAMPLE_INTERVAL_MS,
+    );
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const commitInputVideo = (
     candidateInput = input,
@@ -495,9 +548,6 @@ export default function BwCircleYouTubePanel({
           type="url"
           value={input}
         />
-        <span aria-live="polite" className={styles.tempoBadge}>
-          {estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}
-        </span>
         <button
           className={styles.playbackButton}
           onClick={handlePlaybackToggle}
@@ -505,10 +555,19 @@ export default function BwCircleYouTubePanel({
         >
           {isPlaying ? "Stop" : "Play"}
         </button>
+        <span
+          aria-live="polite"
+          className={`${styles.tempoBadge} ${
+            tempoBadgeTone === "dark"
+              ? styles.tempoBadgeDark
+              : styles.tempoBadgeLight
+          }`}
+          data-contrast-tone={tempoBadgeTone}
+          ref={tempoBadgeRef}
+        >
+          {estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}
+        </span>
       </div>
-      {audioSyncStatus !== "active" ? (
-        <p className={styles.permissionText}>{AUDIO_SYNC_PERMISSION_COPY}</p>
-      ) : null}
       {error ? <p className={styles.errorText}>{error}</p> : null}
       <div
         aria-hidden="true"

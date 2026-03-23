@@ -152,4 +152,28 @@ describe("BwCircleProject playback updates", () => {
     expect(latestPanelProps?.estimatedBpm).toBe(128);
     expect(container.textContent).toContain("128 BPM");
   });
+
+  it("renders the permission copy beside the sync toggle instead of inside the panel", () => {
+    act(() => {
+      root.render(<BwCircleProject projectId="black-white-circle" />);
+    });
+
+    const syncButton = container.querySelector(
+      '[data-mode="sync"]',
+    ) as HTMLButtonElement | null;
+    const modeRow = container.querySelector('[data-sync-mode-row="true"]');
+
+    expect(syncButton).not.toBeNull();
+    expect(modeRow?.textContent).not.toContain(
+      "Allow permission to use audio sync for this feature.",
+    );
+
+    act(() => {
+      syncButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(modeRow?.textContent).toContain(
+      "Allow permission to use audio sync for this feature.",
+    );
+  });
 });

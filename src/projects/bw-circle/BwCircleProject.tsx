@@ -36,6 +36,8 @@ const IDLE_AUDIO_SYNC_STATE: BwCircleAudioSyncState = {
   status: "idle",
   stream: null,
 };
+const AUDIO_SYNC_PERMISSION_COPY =
+  "Allow permission to use audio sync for this feature.";
 
 export default function BwCircleProject({
   projectId,
@@ -78,23 +80,28 @@ export default function BwCircleProject({
 
   return (
     <div className={styles.interactivePane} data-project-id={projectId}>
-      <div className={styles.modeToggle}>
-        <button
-          className={`${styles.modeButton} ${mode === "mimesis" ? styles.modeButtonActive : ""}`}
-          data-mode="mimesis"
-          onClick={() => handleModeChange("mimesis")}
-          type="button"
-        >
-          Mimesis
-        </button>
-        <button
-          className={`${styles.modeButton} ${mode === "sync" ? styles.modeButtonActive : ""}`}
-          data-mode="sync"
-          onClick={() => handleModeChange("sync")}
-          type="button"
-        >
-          Sync
-        </button>
+      <div className={styles.modeToggleRow} data-sync-mode-row="true">
+        <div className={styles.modeToggle}>
+          <button
+            className={`${styles.modeButton} ${mode === "mimesis" ? styles.modeButtonActive : ""}`}
+            data-mode="mimesis"
+            onClick={() => handleModeChange("mimesis")}
+            type="button"
+          >
+            Mimesis
+          </button>
+          <button
+            className={`${styles.modeButton} ${mode === "sync" ? styles.modeButtonActive : ""}`}
+            data-mode="sync"
+            onClick={() => handleModeChange("sync")}
+            type="button"
+          >
+            Sync
+          </button>
+        </div>
+        {mode === "sync" && audioSync.status !== "active" ? (
+          <p className={styles.permissionText}>{AUDIO_SYNC_PERMISSION_COPY}</p>
+        ) : null}
       </div>
       <BwCircleScene
         audioSync={audioSync}
