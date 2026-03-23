@@ -332,7 +332,39 @@ describe("BwCircleYouTubePanel", () => {
     });
   });
 
-  it("commits a valid url on Enter and renders only a hidden player host", async () => {
+  it("does not render a youtube preview host before a video is loaded", async () => {
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId={null}
+        />,
+      );
+    });
+
+    expect(
+      container.querySelector('[data-youtube-player-host="true"]'),
+    ).toBeNull();
+  });
+
+  it("renders the youtube preview host once a video is loaded", async () => {
+    await act(async () => {
+      root.render(
+        <BwCircleYouTubePanel
+          onLoad={vi.fn()}
+          onPlaybackChange={vi.fn()}
+          videoId="97qr0BOdHkc"
+        />,
+      );
+    });
+
+    expect(
+      container.querySelector('[data-youtube-player-host="true"]'),
+    ).not.toBeNull();
+  });
+
+  it("commits a valid url on Enter without showing a load action", async () => {
     const onLoad = vi.fn();
 
     await act(async () => {
@@ -365,13 +397,10 @@ describe("BwCircleYouTubePanel", () => {
     });
 
     expect(onLoad).toHaveBeenCalledWith("97qr0BOdHkc");
-    expect(
-      container.querySelector('[data-youtube-player-host="true"]'),
-    ).not.toBeNull();
     expect(container.textContent).not.toContain("Load");
   });
 
-  it("plays and stops the hidden player from the single control button", async () => {
+  it("plays and stops the preview player from the single control button", async () => {
     const onPlaybackChange = vi.fn();
     const readyPlayer = createMockPlayer(2);
     let onStateChange:
@@ -452,7 +481,7 @@ describe("BwCircleYouTubePanel", () => {
     expect(readyPlayer.stopVideo).toHaveBeenCalledTimes(1);
   });
 
-  it("creates the hidden youtube player with a valid minimum viewport", async () => {
+  it("creates the youtube preview player with a valid minimum viewport", async () => {
     const readyPlayer = createMockPlayer(2);
 
     const MockPlayer = vi.fn(function MockPlayer(

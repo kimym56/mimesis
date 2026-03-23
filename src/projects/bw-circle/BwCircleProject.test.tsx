@@ -87,17 +87,7 @@ describe("BwCircleProject", () => {
       [...container.querySelectorAll("button")].map((button) =>
         button.textContent?.trim(),
       ),
-    ).toContain("N");
-    expect(
-      [...container.querySelectorAll("button")].map((button) =>
-        button.textContent?.trim(),
-      ),
-    ).not.toContain("W");
-    expect(
-      [...container.querySelectorAll("button")].map((button) =>
-        button.textContent?.trim(),
-      ),
-    ).not.toContain("B");
+    ).not.toContain("N");
     expect(container.textContent).not.toContain(
       "Tap the scene to arm bounce audio",
     );
@@ -129,5 +119,10 @@ describe("BwCircleProject", () => {
     expect(container.querySelector('input[type="number"]')).toBeNull();
     expect(container.textContent).not.toContain("Tap");
     expect(container.textContent).not.toContain("Load");
+    expect(
+      [...container.querySelectorAll("button")].map((button) =>
+        button.textContent?.trim(),
+      ),
+    ).not.toContain("N");
   });
 });

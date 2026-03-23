@@ -50,11 +50,21 @@
   position: absolute;
   top: var(--space-lg);
   left: var(--space-lg);
+  right: var(--space-lg);
   z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+
+.syncControls {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  max-width: min(34rem, calc(100% - (var(--space-lg) * 2) - 4rem));
+  max-width: min(34rem, 100%);
+  pointer-events: auto;
 }
 
 .inputRow {
@@ -66,8 +76,8 @@
 .linkInput {
   flex: 1;
   min-width: 0;
-  min-height: 42px;
-  padding: 0 16px;
+  min-height: 36px;
+  padding: 0 14px;
   color: #111111;
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(17, 17, 17, 0.12);
@@ -83,7 +93,7 @@
 .tempoBadge {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
+  min-height: 36px;
   padding: 0;
   background: transparent;
   border: none;
@@ -104,8 +114,8 @@
 }
 
 .playbackButton {
-  min-height: 42px;
-  padding: 0 18px;
+  min-height: 36px;
+  padding: 0 14px;
   color: rgba(255, 255, 255, 0.96);
   background: #111111;
   border: none;
@@ -130,14 +140,30 @@
   color: #b42318;
 }
 
-.hiddenPlayerHost {
-  position: absolute;
-  top: -9999px;
-  left: -9999px;
-  width: 200px;
-  height: 200px;
-  opacity: 0;
-  pointer-events: none;
+.previewFrame {
+  width: min(180px, 30vw);
+  aspect-ratio: 16 / 9;
+  justify-self: end;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: var(--radius-soft);
+  box-shadow: 0 14px 32px rgba(17, 17, 17, 0.16);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.previewHost {
+  width: 100%;
+  height: 100%;
+  background: rgba(17, 17, 17, 0.08);
+}
+
+.previewHost :global(iframe) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .sceneShell {
@@ -149,36 +175,6 @@
   background:
     radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 32%),
     linear-gradient(180deg, #f3f1eb 0%, #dbd8d2 100%);
-}
-
-.cameraToggle {
-  position: absolute;
-  top: var(--space-lg);
-  right: var(--space-lg);
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.cameraButton {
-  width: 40px;
-  height: 40px;
-  color: rgba(255, 255, 255, 0.82);
-  background: rgba(16, 16, 16, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--radius-pill);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-}
-
-.cameraButtonActive {
-  color: #101010;
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(255, 255, 255, 0.86);
 }
 
 .canvas {
@@ -203,22 +199,18 @@
   }
 
   .syncPanel {
-    right: var(--space-lg);
+    grid-template-columns: 1fr;
+  }
+
+  .syncControls {
     max-width: none;
+  }
+
+  .previewFrame {
+    width: min(156px, 46vw);
   }
 
   .linkInput {
     width: 100%;
-  }
-
-  .playbackButton {
-    min-height: 44px;
-  }
-
-  .cameraToggle {
-    top: auto;
-    bottom: var(--space-lg);
-    right: var(--space-lg);
-    flex-direction: row;
   }
 }

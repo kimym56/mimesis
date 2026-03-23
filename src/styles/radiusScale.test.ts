@@ -36,6 +36,7 @@ const SOFT_RADIUS_CASES = [
   { css: bwCircleCss, label: "bw-circle toggle button", selector: ".modeButton" },
   { css: bwCircleCss, label: "bw-circle link input", selector: ".linkInput" },
   { css: bwCircleCss, label: "bw-circle playback button", selector: ".playbackButton" },
+  { css: bwCircleCss, label: "bw-circle youtube preview", selector: ".previewFrame" },
   { css: projectDetailCss, label: "project detail image container", selector: ".imageContainer" },
   { css: projectDetailCss, label: "project detail iframe container", selector: ".iframeContainer" },
   { css: projectDetailCss, label: "project detail reference iframe", selector: ".referenceIframe" },
@@ -61,7 +62,6 @@ const PILL_RADIUS_CASES = [
     label: "page curl firefox slider thumb",
     selector: ".slider::-moz-range-thumb",
   },
-  { css: bwCircleCss, label: "bw-circle camera button", selector: ".cameraButton" },
 ] as const;
 
 describe("semantic radius scale", () => {

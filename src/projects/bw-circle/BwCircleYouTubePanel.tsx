@@ -530,51 +530,56 @@ export default function BwCircleYouTubePanel({
 
   return (
     <div className={styles.syncPanel}>
-      <div className={styles.inputRow}>
-        <input
-          className={styles.linkInput}
-          ref={inputRef}
-          onBlur={(event) => {
-            commitInputVideo(event.currentTarget.value);
-          }}
-          onChange={(event) => setInput(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
+      <div className={styles.syncControls}>
+        <div className={styles.inputRow}>
+          <input
+            className={styles.linkInput}
+            ref={inputRef}
+            onBlur={(event) => {
               commitInputVideo(event.currentTarget.value);
-            }
-          }}
-          placeholder={PLACEHOLDER_URL}
-          type="url"
-          value={input}
-        />
-        <button
-          className={styles.playbackButton}
-          onClick={handlePlaybackToggle}
-          type="button"
-        >
-          {isPlaying ? "Stop" : "Play"}
-        </button>
-        <span
-          aria-live="polite"
-          className={`${styles.tempoBadge} ${
-            tempoBadgeTone === "dark"
-              ? styles.tempoBadgeDark
-              : styles.tempoBadgeLight
-          }`}
-          data-contrast-tone={tempoBadgeTone}
-          ref={tempoBadgeRef}
-        >
-          {estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}
-        </span>
+            }}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitInputVideo(event.currentTarget.value);
+              }
+            }}
+            placeholder={PLACEHOLDER_URL}
+            type="url"
+            value={input}
+          />
+          <button
+            className={styles.playbackButton}
+            onClick={handlePlaybackToggle}
+            type="button"
+          >
+            {isPlaying ? "Stop" : "Play"}
+          </button>
+          <span
+            aria-live="polite"
+            className={`${styles.tempoBadge} ${
+              tempoBadgeTone === "dark"
+                ? styles.tempoBadgeDark
+                : styles.tempoBadgeLight
+            }`}
+            data-contrast-tone={tempoBadgeTone}
+            ref={tempoBadgeRef}
+          >
+            {estimatedBpm === null ? "-- BPM" : `${estimatedBpm} BPM`}
+          </span>
+        </div>
+        {error ? <p className={styles.errorText}>{error}</p> : null}
       </div>
-      {error ? <p className={styles.errorText}>{error}</p> : null}
-      <div
-        aria-hidden="true"
-        className={styles.hiddenPlayerHost}
-        data-youtube-player-host="true"
-        ref={playerHostRef}
-      />
+      {videoId ? (
+        <div className={styles.previewFrame} data-youtube-preview="true">
+          <div
+            className={styles.previewHost}
+            data-youtube-player-host="true"
+            ref={playerHostRef}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

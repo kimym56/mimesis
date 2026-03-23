@@ -1133,14 +1133,6 @@ export default function BwCircleScene({
   return (
     <div className={styles.sceneShell} data-scene-mode={mode}>
       {syncOverlay ? syncOverlay : null}
-      <div className={styles.cameraToggle}>
-        <button
-          className={`${styles.cameraButton} ${styles.cameraButtonActive}`}
-          type="button"
-        >
-          N
-        </button>
-      </div>
       <canvas
         aria-label="Black and white circle canvas"
         className={styles.canvas}
