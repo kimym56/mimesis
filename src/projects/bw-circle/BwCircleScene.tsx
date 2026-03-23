@@ -480,6 +480,7 @@ function updateParticles({
             normalX,
             normalY,
             particles,
+            removeSource: false,
             sourceIndex: index,
             speedMultiplier: 0.92 + Math.random() * 0.18,
             splashParticles,
