@@ -5,7 +5,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import type { InteractiveProjectProps } from "../types";
 import styles from "./StaggeredTextProject.module.css";
 
-const DISPLAY_TEXT = "Get started";
+const DISPLAY_TEXT = "Start deploying";
 
 function createCharacterSlots(text: string) {
   let staggerIndex = 0;

@@ -43,8 +43,8 @@ describe("StaggeredTextProject", () => {
     const trigger = container.querySelector("button");
 
     expect(trigger).not.toBeNull();
-    expect(trigger?.textContent?.replace(/\s+/g, " ").trim()).toBe("Get started");
-    expect(container.querySelectorAll('[data-slot="character"]')).toHaveLength(10);
+    expect(trigger?.textContent?.replace(/\s+/g, " ").trim()).toBe("Start deploying");
+    expect(container.querySelectorAll('[data-slot="character"]')).toHaveLength(14);
     expect(trigger?.getAttribute("data-active")).toBe("false");
 
     act(() => {

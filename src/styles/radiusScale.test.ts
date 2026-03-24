@@ -23,6 +23,9 @@ const tokensCss = readCss("./tokens.css");
 const wiperCss = readCss("../projects/wiper-typography/WiperTypographyProject.module.css");
 const pageCurlCss = readCss("../projects/page-curl/PageCurlProject.module.css");
 const bwCircleCss = readCss("../projects/bw-circle/BwCircleProject.module.css");
+const staggeredTextCss = readCss(
+  "../projects/staggered-text/StaggeredTextProject.module.css",
+);
 const projectDetailCss = readCss("../app/project/[id]/ProjectDetail.module.css");
 const themeToggleCss = readCss("../components/ThemeToggle.module.css");
 
@@ -103,5 +106,11 @@ describe("semantic radius scale", () => {
 
     expect(paneBlock).toContain("flex: 1 1 0;");
     expect(paneBlock).toContain("min-width: 0;");
+  });
+
+  it("reserves a motion box for staggered text wordmark transitions", () => {
+    const wordmarkBlock = readSelectorBlock(staggeredTextCss, ".wordmark");
+
+    expect(wordmarkBlock).toContain("min-height:");
   });
 });
