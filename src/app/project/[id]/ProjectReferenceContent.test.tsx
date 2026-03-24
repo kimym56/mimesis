@@ -64,6 +64,19 @@ const threadsProject: Project = {
   },
 };
 
+const xProject = {
+  ...baseProject,
+  id: "staggered-text",
+  title: "Staggered Text",
+  referencePreview: {
+    platform: "x",
+    url: "https://x.com/raunofreiberg/status/1826969932099104959",
+    image: "/images/staggered-text-cover.svg",
+    title: "Rauno Freiberg on X",
+    description: "Original staggered hover text motion reference.",
+  },
+} as Project;
+
 describe("ProjectReferenceContent", () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -121,5 +134,19 @@ describe("ProjectReferenceContent", () => {
 
     expect(container.textContent).toContain("Open on Threads");
     expect(container.textContent).toContain("Sabum Byun on Threads");
+  });
+
+  it("renders a generic X preview card without requesting oEmbed", () => {
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock as typeof globalThis.fetch;
+
+    const markup = renderToStaticMarkup(
+      <ProjectReferenceContent project={xProject} />,
+    );
+
+    expect(markup).toContain("Rauno Freiberg on X");
+    expect(markup).toContain("Open on X");
+    expect(markup).not.toContain("<iframe");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

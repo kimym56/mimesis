@@ -11,10 +11,18 @@ const BwCircleProject = dynamic(() => import("./bw-circle/BwCircleProject"), {
   loading: () => null,
 }) as InteractiveProjectComponent;
 
+const StaggeredTextProject = dynamic(
+  () => import("./staggered-text/StaggeredTextProject"),
+  {
+    loading: () => null,
+  },
+) as InteractiveProjectComponent;
+
 type InteractiveDemoId = NonNullable<Project["interactiveDemo"]>;
 
 export const interactiveProjectRegistry: Record<InteractiveDemoId, InteractiveProjectComponent> = {
   "bw-circle": BwCircleProject,
   "page-curl": PageCurlProject,
+  "staggered-text": StaggeredTextProject,
   "wiper-typography": WiperTypographyProject as InteractiveProjectComponent,
 };

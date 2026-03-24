@@ -40,4 +40,24 @@ describe("projects reference embeds", () => {
       "black and white spoon silhouettes",
     );
   });
+
+  it("replaces the placeholder creative portfolio with staggered text", () => {
+    const removedProject = projects.find(({ id }) => id === "creative-portfolio");
+    const project = projects.find(({ id }) => id === "staggered-text");
+
+    expect(removedProject).toBeUndefined();
+    expect(project).toBeDefined();
+    expect(project?.interactive).toBe(true);
+    expect(project?.interactiveDemo).toBe("staggered-text");
+    expect(project?.referencePreview).toEqual(
+      expect.objectContaining({
+        platform: "x",
+        url: "https://x.com/raunofreiberg/status/1826969932099104959",
+      }),
+    );
+    expect(project?.referenceUser).toEqual({
+      name: "Rauno Freiberg",
+      url: "https://x.com/raunofreiberg/status/1826969932099104959",
+    });
+  });
 });

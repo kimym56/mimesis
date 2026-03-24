@@ -3,10 +3,20 @@ import type { Project } from "@/data/projects";
 import ThreadsReferenceEmbed from "./ThreadsReferenceEmbed";
 import styles from "./ProjectDetail.module.css";
 
+function getReferencePlatformLabel(platform: NonNullable<Project["referencePreview"]>["platform"]) {
+  if (platform === "x") {
+    return "X";
+  }
+
+  return "Threads";
+}
+
 function renderReferencePreviewCard(project: Project) {
   if (!project.referencePreview) {
     return null;
   }
+
+  const platformLabel = getReferencePlatformLabel(project.referencePreview.platform);
 
   return (
     <div className={styles.referenceCard}>
@@ -21,9 +31,7 @@ function renderReferencePreviewCard(project: Project) {
         />
       </div>
       <div className={styles.referenceCardBody}>
-        <span className={styles.referencePlatformLabel}>
-          {project.referencePreview.platform}
-        </span>
+        <span className={styles.referencePlatformLabel}>{platformLabel}</span>
         <h2 className={styles.referenceCardTitle}>
           {project.referencePreview.title}
         </h2>
@@ -36,7 +44,7 @@ function renderReferencePreviewCard(project: Project) {
           rel="noopener noreferrer"
           className={styles.referenceCardLink}
         >
-          Open on Threads
+          {`Open on ${platformLabel}`}
         </a>
       </div>
     </div>

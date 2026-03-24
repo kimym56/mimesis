@@ -6,7 +6,11 @@ export interface Project {
   imitationImage: string;
   previewMedia?: ProjectPreviewMedia;
   interactive?: boolean;
-  interactiveDemo?: "page-curl" | "wiper-typography" | "bw-circle";
+  interactiveDemo?:
+    | "page-curl"
+    | "wiper-typography"
+    | "bw-circle"
+    | "staggered-text";
   referenceEmbed?: string; // iframe src URL
   referencePreview?: ProjectReferencePreview;
   referenceUser?: { name: string; url: string };
@@ -14,7 +18,7 @@ export interface Project {
 
 export interface ProjectReferencePreview {
   embed?: "official";
-  platform: "threads";
+  platform: "threads" | "x";
   url: string;
   image: string;
   title: string;
@@ -116,13 +120,25 @@ export const projects: Project[] = [
     },
   },
   {
-    id: "creative-portfolio",
-    title: "Creative Portfolio",
+    id: "staggered-text",
+    title: "Staggered Text",
     description:
-      "A highly animated and interactive portfolio concept with large typography and masked images.",
-    originalImage:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200",
-    imitationImage:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200",
+      "A CSS-first recreation of Rauno Freiberg's staggered hover lettering where each character flips through a soft 3D cascade on hover or press.",
+    originalImage: "/images/staggered-text-cover.svg",
+    imitationImage: "/images/staggered-text-cover.svg",
+    interactive: true,
+    interactiveDemo: "staggered-text",
+    referencePreview: {
+      platform: "x",
+      url: "https://x.com/raunofreiberg/status/1826969932099104959",
+      image: "/images/staggered-text-cover.svg",
+      title: "Rauno Freiberg on X",
+      description:
+        "Original staggered hover text motion shared by Rauno Freiberg.",
+    },
+    referenceUser: {
+      name: "Rauno Freiberg",
+      url: "https://x.com/raunofreiberg/status/1826969932099104959",
+    },
   },
 ];
