@@ -79,27 +79,47 @@ export default function StaggeredTextProject({
         }}
       >
         <span className={styles.wordmark}>
-          {CHARACTER_SLOTS.map((slot) => {
-            if (slot.isSpace) {
+          <span className={styles.baseWordmark} data-wordmark-layer="base">
+            {CHARACTER_SLOTS.map((slot) => (
+              <span
+                key={`base-${slot.id}`}
+                className={slot.isSpace ? styles.space : styles.slot}
+              >
+                <span className={styles.baseGlyph}>{slot.char}</span>
+              </span>
+            ))}
+          </span>
+          <span
+            className={styles.overlayWordmark}
+            data-wordmark-layer="overlay"
+            aria-hidden="true"
+          >
+            {CHARACTER_SLOTS.map((slot) => {
+              if (slot.isSpace) {
+                return (
+                  <span
+                    key={`overlay-${slot.id}`}
+                    className={styles.space}
+                    aria-hidden="true"
+                  >
+                    {" "}
+                  </span>
+                );
+              }
+
               return (
-                <span key={slot.id} className={styles.space} aria-hidden="true">
-                  {" "}
+                <span
+                  key={`overlay-${slot.id}`}
+                  className={styles.slot}
+                  data-slot="character"
+                  style={{ "--char-index": slot.staggerIndex } as CSSProperties}
+                >
+                  <span className={styles.overlayGlyph}>{slot.char}</span>
+                  <span className={styles.overlayGlow}>{slot.char}</span>
                 </span>
               );
-            }
-
-            return (
-              <span
-                key={slot.id}
-                className={styles.character}
-                data-char={slot.char}
-                data-slot="character"
-                style={{ "--char-index": slot.staggerIndex } as CSSProperties}
-              >
-                {slot.char}
-              </span>
-            );
-          })}
+            })}
+          </span>
         </span>
       </button>
     </div>

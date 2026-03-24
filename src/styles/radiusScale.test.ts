@@ -113,4 +113,10 @@ describe("semantic radius scale", () => {
 
     expect(wordmarkBlock).toContain("min-height:");
   });
+
+  it("uses a dark stage treatment for staggered text", () => {
+    const triggerBlock = readSelectorBlock(staggeredTextCss, ".trigger");
+
+    expect(triggerBlock).toContain("background-color: #05070a;");
+  });
 });
