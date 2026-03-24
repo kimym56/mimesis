@@ -97,4 +97,11 @@ describe("semantic radius scale", () => {
       );
     }
   });
+
+  it("keeps project detail panes shrinkable for an even split layout", () => {
+    const paneBlock = readSelectorBlock(projectDetailCss, ".pane");
+
+    expect(paneBlock).toContain("flex: 1 1 0;");
+    expect(paneBlock).toContain("min-width: 0;");
+  });
 });
