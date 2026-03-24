@@ -136,7 +136,7 @@ describe("ProjectReferenceContent", () => {
     expect(container.textContent).toContain("Sabum Byun on Threads");
   });
 
-  it("renders a generic X preview card without requesting oEmbed", () => {
+  it("routes staggered text through the official X embed branch", () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as typeof globalThis.fetch;
 
@@ -144,8 +144,8 @@ describe("ProjectReferenceContent", () => {
       <ProjectReferenceContent project={xProject} />,
     );
 
-    expect(markup).toContain("Rauno Freiberg on X");
-    expect(markup).toContain("Open on X");
+    expect(markup).toContain("twitter-tweet");
+    expect(markup).toContain("Staggered text hover effect");
     expect(markup).not.toContain("<iframe");
     expect(fetchMock).not.toHaveBeenCalled();
   });

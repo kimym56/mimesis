@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Project } from "@/data/projects";
 import ThreadsReferenceEmbed from "./ThreadsReferenceEmbed";
+import XPostReferenceEmbed from "./XPostReferenceEmbed";
 import styles from "./ProjectDetail.module.css";
 
 function getReferencePlatformLabel(platform: NonNullable<Project["referencePreview"]>["platform"]) {
@@ -58,6 +59,10 @@ export default function ProjectReferenceContent({
 }) {
   if (project.referencePreview) {
     const fallback = renderReferencePreviewCard(project);
+
+    if (project.id === "staggered-text" && fallback) {
+      return <XPostReferenceEmbed fallback={fallback} />;
+    }
 
     if (
       project.referencePreview.platform === "threads" &&
