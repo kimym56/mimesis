@@ -18,7 +18,7 @@
 - Modify: `src/projects/staggered-text/StaggeredTextProject.test.tsx`
 - Modify: `src/styles/radiusScale.test.ts`
 
-- [ ] **Step 1: Write the failing component test**
+- [x] **Step 1: Write the failing component test**
 
 Update `src/projects/staggered-text/StaggeredTextProject.test.tsx` so it asserts:
 - the animated character count still matches the non-space letters in `Start Deploying`,
@@ -26,14 +26,14 @@ Update `src/projects/staggered-text/StaggeredTextProject.test.tsx` so it asserts
 - each animated character renders an outgoing glyph and a separate incoming glyph,
 - the current active-state interaction behavior still works.
 
-- [ ] **Step 2: Write the failing CSS regression test**
+- [x] **Step 2: Write the failing CSS regression test**
 
 Update `src/styles/radiusScale.test.ts` so the staggered-text structural assertion checks for:
 - a `.outgoingArm` selector,
 - `transform-origin:` inside the `.outgoingArm` block,
 - a bottom-biased origin value that documents the hinge behavior.
 
-- [ ] **Step 3: Run the tests to verify they fail**
+- [x] **Step 3: Run the tests to verify they fail**
 
 Run: `npm test -- src/projects/staggered-text/StaggeredTextProject.test.tsx src/styles/radiusScale.test.ts`
 
@@ -47,7 +47,7 @@ Expected: FAIL because the component still renders the rigid cube structure and 
 - Modify: `src/projects/staggered-text/StaggeredTextProject.tsx`
 - Modify: `src/projects/staggered-text/StaggeredTextProject.module.css`
 
-- [ ] **Step 4: Replace the component markup**
+- [x] **Step 4: Replace the component markup**
 
 Refactor `src/projects/staggered-text/StaggeredTextProject.tsx` so each non-space character renders:
 - an `outgoingArm` wrapper,
@@ -57,7 +57,7 @@ Refactor `src/projects/staggered-text/StaggeredTextProject.tsx` so each non-spac
 
 Keep spaces lightweight and preserve the existing interaction state and `--char-index` stagger wiring.
 
-- [ ] **Step 5: Replace the CSS geometry**
+- [x] **Step 5: Replace the CSS geometry**
 
 Rewrite the staggered-text motion styles so:
 - the outgoing arm uses a low hinge point and carries the outgoing glyph upward,
@@ -66,7 +66,7 @@ Rewrite the staggered-text motion styles so:
 - the chosen softer `B` motion profile is preserved,
 - reduced-motion mode still presents a single readable line without doubled glyphs.
 
-- [ ] **Step 6: Run the targeted tests to verify they pass**
+- [x] **Step 6: Run the targeted tests to verify they pass**
 
 Run: `npm test -- src/projects/staggered-text/StaggeredTextProject.test.tsx src/styles/radiusScale.test.ts`
 
@@ -82,19 +82,19 @@ Expected: PASS
 - Verify: `src/app/project/[id]/ProjectReferenceContent.test.tsx`
 - Verify: `src/app/project/[id]/XPostReferenceEmbed.test.tsx`
 
-- [ ] **Step 7: Run targeted tests**
+- [x] **Step 7: Run targeted tests**
 
 Run: `npm test -- src/projects/staggered-text/StaggeredTextProject.test.tsx src/styles/radiusScale.test.ts 'src/app/project/[id]/ProjectReferenceContent.test.tsx' 'src/app/project/[id]/XPostReferenceEmbed.test.tsx'`
 
 Expected: PASS
 
-- [ ] **Step 8: Run lint**
+- [x] **Step 8: Run lint**
 
 Run: `npm run lint`
 
 Expected: PASS
 
-- [ ] **Step 9: Run production build**
+- [x] **Step 9: Run production build**
 
 Run: `npm run build`
 

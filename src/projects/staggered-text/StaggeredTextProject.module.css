@@ -62,8 +62,8 @@
   line-height: 0.94;
   letter-spacing: -0.065em;
   text-transform: none;
-  min-height: 2.16em;
-  padding-block: 0.46em 0.56em;
+  min-height: 2.3em;
+  padding-block: 0.5em 0.62em;
   max-width: 100%;
 }
 
@@ -75,46 +75,17 @@
 }
 
 .slot {
-  --stagger-step: 26ms;
-  --cube-depth: 0.56em;
+  --stagger-step: 28ms;
   position: relative;
   min-width: 0.59em;
-  height: 1.12em;
+  height: 1.14em;
   perspective: 1200px;
-}
-
-.cube {
-  position: relative;
-  width: 100%;
-  height: 100%;
   transform-style: preserve-3d;
-  will-change: transform;
-  transform: translateZ(calc(var(--cube-depth) * -1));
-  transition: transform 760ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--stagger-step));
 }
 
-.face {
-  position: absolute;
-  inset: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: #f4f7ff;
-  backface-visibility: hidden;
-  text-shadow: 0 0 0.01em currentColor;
-}
-
-.faceFront {
-  transform: rotateX(0deg) translateZ(var(--cube-depth));
-}
-
-.faceBottom {
-  transform: rotateX(-90deg) translateZ(var(--cube-depth));
-}
-
+.outgoingArm,
+.outgoingGlyph,
+.incomingGlyph,
 .shadow {
   position: absolute;
   inset: 0;
@@ -123,11 +94,47 @@
   justify-content: center;
   width: 100%;
   height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+
+.outgoingArm {
+  transform-origin: 50% 88%;
+  transition:
+    transform 760ms var(--ease-custom),
+    opacity 760ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--stagger-step));
+}
+
+.outgoingGlyph,
+.incomingGlyph {
+  color: #f4f7ff;
+  backface-visibility: hidden;
+  text-shadow: 0 0 0.01em currentColor;
+  transition:
+    transform 760ms var(--ease-custom),
+    opacity 760ms var(--ease-custom),
+    filter 760ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--stagger-step));
+}
+
+.outgoingGlyph {
+  transform: translateZ(0.02em);
+}
+
+.incomingGlyph {
+  transform-origin: 50% 78%;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(0.74em) rotateX(-78deg) translateZ(0.08em);
+}
+
+.shadow {
   color: rgba(244, 247, 255, 0.18);
   opacity: 0;
-  filter: blur(10px);
-  pointer-events: none;
-  transform: translateY(0.22em) scale(1.03);
+  filter: blur(12px);
+  transform: translateY(0.28em) scale(1.03);
   transition:
     opacity 760ms var(--ease-custom),
     transform 760ms var(--ease-custom),
@@ -135,39 +142,52 @@
   transition-delay: calc(var(--char-index) * var(--stagger-step));
 }
 
-.trigger[data-active="true"] .cube {
-  transform: translateZ(calc(var(--cube-depth) * -1)) rotateX(90deg);
+.trigger[data-active="true"] .outgoingArm {
+  transform: rotateX(82deg) translateY(-0.2em);
+  opacity: 0.92;
+}
+
+.trigger[data-active="true"] .outgoingGlyph {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(-0.1em) translateZ(0.14em) rotateX(-18deg);
+}
+
+.trigger[data-active="true"] .incomingGlyph {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(-0.02em) rotateX(0deg) translateZ(0);
 }
 
 .trigger[data-active="true"] .shadow {
-  opacity: 0.42;
-  filter: blur(8px);
-  transform: translateY(0.08em) scale(1.04);
+  opacity: 0.44;
+  filter: blur(9px);
+  transform: translateY(0.04em) scale(1.05);
 }
 
 .space {
   width: 0.22em;
 }
 
-.trigger[data-reduced-motion="true"] .cube,
+.trigger[data-reduced-motion="true"] .outgoingArm,
+.trigger[data-reduced-motion="true"] .outgoingGlyph,
+.trigger[data-reduced-motion="true"] .incomingGlyph,
 .trigger[data-reduced-motion="true"] .shadow {
   transition-duration: var(--duration-fast);
 }
 
-.trigger[data-reduced-motion="true"] .cube {
+.trigger[data-reduced-motion="true"] .outgoingArm,
+.trigger[data-reduced-motion="true"] .outgoingGlyph {
   transform: none;
+  filter: none;
 }
 
-.trigger[data-reduced-motion="true"] .faceFront {
-  transform: none;
-}
-
-.trigger[data-reduced-motion="true"] .faceBottom,
+.trigger[data-reduced-motion="true"] .incomingGlyph,
 .trigger[data-reduced-motion="true"] .shadow {
   display: none;
 }
 
-.trigger[data-reduced-motion="true"][data-active="true"] .faceFront {
+.trigger[data-reduced-motion="true"][data-active="true"] .outgoingGlyph {
   text-shadow: 0 0 0.3em rgba(244, 247, 255, 0.16);
   transform: translateY(-0.03em);
 }
@@ -180,7 +200,7 @@
   .wordmark {
     font-size: clamp(1.55rem, 8.5vw, 2.7rem);
     letter-spacing: -0.05em;
-    min-height: 2.36em;
-    padding-block: 0.54em 0.62em;
+    min-height: 2.48em;
+    padding-block: 0.58em 0.68em;
   }
 }

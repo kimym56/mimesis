@@ -41,21 +41,23 @@ describe("StaggeredTextProject", () => {
     });
 
     const trigger = container.querySelector("button");
-    const frontFaces = container.querySelectorAll('[data-face="front"]');
-    const bottomFaces = container.querySelectorAll('[data-face="bottom"]');
-    const frontText = Array.from(frontFaces)
-      .map((face) => face.textContent)
+    const outgoingArms = container.querySelectorAll('[data-part="outgoing-arm"]');
+    const outgoingGlyphs = container.querySelectorAll('[data-part="outgoing-glyph"]');
+    const incomingGlyphs = container.querySelectorAll('[data-part="incoming-glyph"]');
+    const outgoingText = Array.from(outgoingGlyphs)
+      .map((glyph) => glyph.textContent)
       .join("");
-    const bottomText = Array.from(bottomFaces)
-      .map((face) => face.textContent)
+    const incomingText = Array.from(incomingGlyphs)
+      .map((glyph) => glyph.textContent)
       .join("");
 
     expect(trigger).not.toBeNull();
     expect(container.querySelectorAll('[data-slot="character"]')).toHaveLength(14);
-    expect(frontFaces).toHaveLength(14);
-    expect(bottomFaces).toHaveLength(14);
-    expect(frontText).toBe("StartDeploying");
-    expect(bottomText).toBe("StartDeploying");
+    expect(outgoingArms).toHaveLength(14);
+    expect(outgoingGlyphs).toHaveLength(14);
+    expect(incomingGlyphs).toHaveLength(14);
+    expect(outgoingText).toBe("StartDeploying");
+    expect(incomingText).toBe("StartDeploying");
     expect(trigger?.getAttribute("data-active")).toBe("false");
 
     act(() => {

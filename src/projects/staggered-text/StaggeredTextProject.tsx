@@ -95,22 +95,16 @@ export default function StaggeredTextProject({
                 data-slot="character"
                 style={{ "--char-index": slot.staggerIndex } as CSSProperties}
               >
-                <span className={styles.cube}>
-                  <span
-                    className={`${styles.face} ${styles.faceFront}`}
-                    data-face="front"
-                  >
+                <span className={styles.outgoingArm} data-part="outgoing-arm">
+                  <span className={styles.outgoingGlyph} data-part="outgoing-glyph">
                     {slot.char}
                   </span>
-                  <span
-                    className={`${styles.face} ${styles.faceBottom}`}
-                    data-face="bottom"
-                  >
-                    {slot.char}
-                  </span>
-                  <span className={styles.shadow} aria-hidden="true">
-                    {slot.char}
-                  </span>
+                </span>
+                <span className={styles.incomingGlyph} data-part="incoming-glyph">
+                  {slot.char}
+                </span>
+                <span className={styles.shadow} aria-hidden="true">
+                  {slot.char}
                 </span>
               </span>
             );
