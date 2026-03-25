@@ -17,7 +17,7 @@
 **Files:**
 - Modify: `src/styles/radiusScale.test.ts`
 
-- [ ] **Step 1: Write the failing CSS regression test**
+- [x] **Step 1: Write the failing CSS regression test**
 
 Update `src/styles/radiusScale.test.ts` so it asserts:
 - `.slot` uses the slower stagger step,
@@ -25,7 +25,7 @@ Update `src/styles/radiusScale.test.ts` so it asserts:
 - `.outgoingGlyph` uses slower transform/opacity/filter timings,
 - `.incomingGlyph` uses slower transform/opacity/filter timings.
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npm test -- src/styles/radiusScale.test.ts`
 
@@ -38,14 +38,14 @@ Expected: FAIL because the current CSS still uses the faster motion profile.
 **Files:**
 - Modify: `src/projects/staggered-text/StaggeredTextProject.module.css`
 
-- [ ] **Step 3: Increase the motion durations**
+- [x] **Step 3: Increase the motion durations**
 
 Adjust `src/projects/staggered-text/StaggeredTextProject.module.css` so:
 - `--stagger-step` increases into the mid-30ms range,
 - outgoing arm/incoming movement use the slower transform duration,
 - outgoing/incoming opacity and filter durations are lengthened to match the slower cadence.
 
-- [ ] **Step 4: Run the CSS test to verify it passes**
+- [x] **Step 4: Run the CSS test to verify it passes**
 
 Run: `npm test -- src/styles/radiusScale.test.ts`
 
@@ -61,19 +61,19 @@ Expected: PASS
 - Verify: `src/app/project/[id]/ProjectReferenceContent.test.tsx`
 - Verify: `src/app/project/[id]/XPostReferenceEmbed.test.tsx`
 
-- [ ] **Step 5: Run targeted tests**
+- [x] **Step 5: Run targeted tests**
 
 Run: `npm test -- src/projects/staggered-text/StaggeredTextProject.test.tsx src/styles/radiusScale.test.ts 'src/app/project/[id]/ProjectReferenceContent.test.tsx' 'src/app/project/[id]/XPostReferenceEmbed.test.tsx'`
 
 Expected: PASS
 
-- [ ] **Step 6: Run lint**
+- [x] **Step 6: Run lint**
 
 Run: `npm run lint`
 
 Expected: PASS
 
-- [ ] **Step 7: Run production build**
+- [x] **Step 7: Run production build**
 
 Run: `npm run build`
 

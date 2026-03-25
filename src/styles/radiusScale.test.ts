@@ -146,7 +146,23 @@ describe("semantic radius scale", () => {
 
     expect(outgoingGlyphBlock).toContain("filter: blur(0);");
     expect(incomingGlyphBlock).toContain("filter: blur(8px);");
-    expect(incomingGlyphBlock).toContain("filter 980ms");
+    expect(incomingGlyphBlock).toContain("filter 1280ms");
     expect(activeOutgoingGlyphBlock).toContain("filter: blur(8px);");
+  });
+
+  it("uses a slower full-motion timing profile for staggered text", () => {
+    const slotBlock = readSelectorBlock(staggeredTextCss, ".slot");
+    const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
+    const outgoingGlyphBlock = readSelectorBlock(staggeredTextCss, ".outgoingGlyph");
+    const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
+
+    expect(slotBlock).toContain("--stagger-step: 36ms;");
+    expect(outgoingArmBlock).toContain("transform 980ms");
+    expect(outgoingGlyphBlock).toContain("transform 980ms");
+    expect(outgoingGlyphBlock).toContain("opacity 940ms");
+    expect(outgoingGlyphBlock).toContain("filter 1180ms");
+    expect(incomingGlyphBlock).toContain("transform 980ms");
+    expect(incomingGlyphBlock).toContain("opacity 1020ms");
+    expect(incomingGlyphBlock).toContain("filter 1280ms");
   });
 });
