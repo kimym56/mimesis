@@ -95,6 +95,9 @@ export default function StaggeredTextProject({
                 data-slot="character"
                 style={{ "--char-index": slot.staggerIndex } as CSSProperties}
               >
+                <span className={styles.slotSizer} data-part="slot-sizer" aria-hidden="true">
+                  {slot.char}
+                </span>
                 <span className={styles.outgoingArm} data-part="outgoing-arm">
                   <span className={styles.outgoingGlyph} data-part="outgoing-glyph">
                     {slot.char}

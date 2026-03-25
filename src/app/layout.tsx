@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Space_Grotesk } from "next/font/google";
+import { Archivo, Schibsted_Grotesk, Space_Grotesk } from "next/font/google";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
@@ -15,6 +15,13 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   display: "swap",
   weight: ["400", "500", "600"],
+});
+
+const schibstedGrotesk = Schibsted_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-schibsted-grotesk",
+  display: "swap",
+  weight: ["700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +43,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${archivo.variable} ${spaceGrotesk.variable}`}>
+      <body
+        className={`${archivo.variable} ${spaceGrotesk.variable} ${schibstedGrotesk.variable}`}
+      >
         <a href="#main" className="skip-link">
           Skip to main content
         </a>

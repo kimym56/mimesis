@@ -58,13 +58,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.015em;
+  gap: 0;
   perspective: 1600px;
-  font-family: var(--font-heading);
-  font-size: clamp(1.55rem, 4.2vw, 3.55rem);
-  font-weight: var(--font-semibold);
-  line-height: 0.94;
-  letter-spacing: -0.065em;
+  font-family: var(--font-schibsted-grotesk), sans-serif;
+  font-size: clamp(1.62rem, 4.35vw, 3.72rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  font-kerning: normal;
   text-transform: none;
   min-height: 2.3em;
   padding-block: 0.5em 0.62em;
@@ -82,10 +83,19 @@
   --outgoing-stagger-step: 24ms;
   --incoming-stagger-step: 30ms;
   position: relative;
-  min-width: 0.59em;
   height: 1.14em;
   perspective: 1200px;
   transform-style: preserve-3d;
+}
+
+.slot + .slot {
+  margin-inline-start: -0.052em;
+}
+
+.slotSizer {
+  display: block;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .outgoingArm,
@@ -177,7 +187,7 @@
 }
 
 .space {
-  width: 0.22em;
+  width: 0.27em;
 }
 
 .trigger[data-reduced-motion="true"] .outgoingArm,
@@ -209,8 +219,8 @@
   }
 
   .wordmark {
-    font-size: clamp(1.55rem, 8.5vw, 2.7rem);
-    letter-spacing: -0.05em;
+    font-size: clamp(1.6rem, 8.7vw, 2.82rem);
+    letter-spacing: -0.02em;
     min-height: 2.48em;
     padding-block: 0.58em 0.68em;
   }

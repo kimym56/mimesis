@@ -41,6 +41,7 @@ describe("StaggeredTextProject", () => {
     });
 
     const trigger = container.querySelector("button");
+    const slotSizers = container.querySelectorAll('[data-part="slot-sizer"]');
     const outgoingArms = container.querySelectorAll('[data-part="outgoing-arm"]');
     const outgoingGlyphs = container.querySelectorAll('[data-part="outgoing-glyph"]');
     const incomingGlyphs = container.querySelectorAll('[data-part="incoming-glyph"]');
@@ -53,6 +54,7 @@ describe("StaggeredTextProject", () => {
 
     expect(trigger).not.toBeNull();
     expect(container.querySelectorAll('[data-slot="character"]')).toHaveLength(14);
+    expect(slotSizers).toHaveLength(14);
     expect(outgoingArms).toHaveLength(14);
     expect(outgoingGlyphs).toHaveLength(14);
     expect(incomingGlyphs).toHaveLength(14);

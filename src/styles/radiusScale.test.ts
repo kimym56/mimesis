@@ -110,8 +110,14 @@ describe("semantic radius scale", () => {
 
   it("reserves a motion box for staggered text wordmark transitions", () => {
     const wordmarkBlock = readSelectorBlock(staggeredTextCss, ".wordmark");
+    const slotBlock = readSelectorBlock(staggeredTextCss, ".slot");
+    const slotSizerBlock = readSelectorBlock(staggeredTextCss, ".slotSizer");
 
+    expect(wordmarkBlock).toContain("font-family: var(--font-schibsted-grotesk), sans-serif;");
+    expect(wordmarkBlock).toContain("gap: 0;");
     expect(wordmarkBlock).toContain("min-height:");
+    expect(slotBlock).not.toContain("min-width: 0.59em;");
+    expect(slotSizerBlock).toContain("visibility: hidden;");
   });
 
   it("uses a dark stage treatment for staggered text", () => {
