@@ -17,13 +17,13 @@
 **Files:**
 - Modify: `src/styles/radiusScale.test.ts`
 
-- [ ] **Step 1: Write the failing CSS regression test**
+- [x] **Step 1: Write the failing CSS regression test**
 
 Update `src/styles/radiusScale.test.ts` so it asserts:
 - `.outgoingArm` uses a top-edge-biased `transform-origin`,
 - the active `.outgoingArm` and `.outgoingGlyph` blocks contain the corrected top-face exit transforms.
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npm test -- src/styles/radiusScale.test.ts`
 
@@ -36,14 +36,14 @@ Expected: FAIL because the current CSS still uses the low hinge geometry.
 **Files:**
 - Modify: `src/projects/staggered-text/StaggeredTextProject.module.css`
 
-- [ ] **Step 3: Update the outgoing hinge and active transforms**
+- [x] **Step 3: Update the outgoing hinge and active transforms**
 
 Adjust `src/projects/staggered-text/StaggeredTextProject.module.css` so:
 - `.outgoingArm` uses the top-edge hinge value,
 - the active `.outgoingArm` and `.outgoingGlyph` transforms match the upper-face exit,
 - the supporting blur/shadow response no longer implies a lower-plane exit.
 
-- [ ] **Step 4: Run the CSS test to verify it passes**
+- [x] **Step 4: Run the CSS test to verify it passes**
 
 Run: `npm test -- src/styles/radiusScale.test.ts`
 
@@ -59,19 +59,19 @@ Expected: PASS
 - Verify: `src/app/project/[id]/ProjectReferenceContent.test.tsx`
 - Verify: `src/app/project/[id]/XPostReferenceEmbed.test.tsx`
 
-- [ ] **Step 5: Run targeted tests**
+- [x] **Step 5: Run targeted tests**
 
 Run: `npm test -- src/projects/staggered-text/StaggeredTextProject.test.tsx src/styles/radiusScale.test.ts 'src/app/project/[id]/ProjectReferenceContent.test.tsx' 'src/app/project/[id]/XPostReferenceEmbed.test.tsx'`
 
 Expected: PASS
 
-- [ ] **Step 6: Run lint**
+- [x] **Step 6: Run lint**
 
 Run: `npm run lint`
 
 Expected: PASS
 
-- [ ] **Step 7: Run production build**
+- [x] **Step 7: Run production build**
 
 Run: `npm run build`
 

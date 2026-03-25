@@ -120,7 +120,7 @@ describe("semantic radius scale", () => {
     expect(triggerBlock).toContain("background-color: #05070a;");
   });
 
-  it("uses a bottom-hinged outgoing arm for staggered text", () => {
+  it("uses a top-hinged outgoing arm for staggered text", () => {
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
     const activeOutgoingArmBlock = readSelectorBlock(
       staggeredTextCss,
@@ -131,8 +131,8 @@ describe("semantic radius scale", () => {
       '.trigger[data-active="true"] .outgoingGlyph',
     );
 
-    expect(outgoingArmBlock).toContain("transform-origin: 50% 88%;");
-    expect(activeOutgoingArmBlock).toContain("rotateX(-82deg)");
-    expect(activeOutgoingGlyphBlock).toContain("rotateX(18deg)");
+    expect(outgoingArmBlock).toContain("transform-origin: 50% 12%;");
+    expect(activeOutgoingArmBlock).toContain("rotateX(82deg)");
+    expect(activeOutgoingGlyphBlock).toContain("rotateX(-18deg)");
   });
 });
