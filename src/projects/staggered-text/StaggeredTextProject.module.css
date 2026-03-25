@@ -107,27 +107,33 @@
   transition-delay: calc(var(--char-index) * var(--stagger-step));
 }
 
-.outgoingGlyph,
+.outgoingGlyph {
+  color: #f4f7ff;
+  backface-visibility: hidden;
+  text-shadow: 0 0 0.01em currentColor;
+  opacity: 1;
+  filter: blur(0);
+  transform: translateZ(0.02em);
+  transition:
+    transform 760ms var(--ease-custom),
+    opacity 720ms var(--ease-custom),
+    filter 860ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--stagger-step));
+}
+
 .incomingGlyph {
   color: #f4f7ff;
   backface-visibility: hidden;
   text-shadow: 0 0 0.01em currentColor;
-  transition:
-    transform 760ms var(--ease-custom),
-    opacity 760ms var(--ease-custom),
-    filter 760ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--stagger-step));
-}
-
-.outgoingGlyph {
-  transform: translateZ(0.02em);
-}
-
-.incomingGlyph {
   transform-origin: 50% 78%;
   opacity: 0;
-  filter: blur(4px);
+  filter: blur(8px);
   transform: translateY(0.74em) rotateX(-78deg) translateZ(0.08em);
+  transition:
+    transform 760ms var(--ease-custom),
+    opacity 780ms var(--ease-custom),
+    filter 980ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--stagger-step));
 }
 
 .shadow {
@@ -149,7 +155,7 @@
 
 .trigger[data-active="true"] .outgoingGlyph {
   opacity: 0;
-  filter: blur(4px);
+  filter: blur(8px);
   transform: translateY(0.08em) translateZ(0.14em) rotateX(-18deg);
 }
 

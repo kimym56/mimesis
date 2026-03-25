@@ -135,4 +135,18 @@ describe("semantic radius scale", () => {
     expect(activeOutgoingArmBlock).toContain("rotateX(82deg)");
     expect(activeOutgoingGlyphBlock).toContain("rotateX(-18deg)");
   });
+
+  it("uses a stronger blur ramp for staggered text glyph handoff", () => {
+    const outgoingGlyphBlock = readSelectorBlock(staggeredTextCss, ".outgoingGlyph");
+    const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
+    const activeOutgoingGlyphBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"] .outgoingGlyph',
+    );
+
+    expect(outgoingGlyphBlock).toContain("filter: blur(0);");
+    expect(incomingGlyphBlock).toContain("filter: blur(8px);");
+    expect(incomingGlyphBlock).toContain("filter 980ms");
+    expect(activeOutgoingGlyphBlock).toContain("filter: blur(8px);");
+  });
 });
