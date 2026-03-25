@@ -175,24 +175,47 @@ describe("semantic radius scale", () => {
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
     const outgoingGlyphBlock = readSelectorBlock(staggeredTextCss, ".outgoingGlyph");
     const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
+    const activeOutgoingArmBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"] .outgoingArm',
+    );
+    const activeOutgoingGlyphBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"] .outgoingGlyph',
+    );
+    const activeIncomingGlyphBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"] .incomingGlyph',
+    );
     const shadowBlock = readSelectorBlockStartingWith(staggeredTextCss, ".shadow", "color:");
 
     expect(slotBlock).toContain("--outgoing-stagger-step: 24ms;");
     expect(slotBlock).toContain("--incoming-stagger-step: 30ms;");
-    expect(slotBlock).toContain("--handoff-delay: 160ms;");
+    expect(slotBlock).toContain("--handoff-delay: 60ms;");
     expect(slotBlock).not.toContain("--stagger-step: 70ms;");
     expect(outgoingArmBlock).toContain("transform 788ms");
-    expect(outgoingArmBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
-    );
+    expect(outgoingArmBlock).toContain("transition-delay: calc(");
+    expect(outgoingArmBlock).toContain("var(--outgoing-stagger-step) + var(--handoff-delay)");
     expect(outgoingGlyphBlock).toContain("transform 788ms");
     expect(outgoingGlyphBlock).toContain("opacity 720ms");
     expect(outgoingGlyphBlock).toContain("filter 788ms");
+    expect(outgoingGlyphBlock).toContain("transition-delay: calc(");
+    expect(outgoingGlyphBlock).toContain("var(--outgoing-stagger-step) + var(--handoff-delay)");
     expect(incomingGlyphBlock).toContain("transform 710ms");
     expect(incomingGlyphBlock).toContain("opacity 710ms");
     expect(incomingGlyphBlock).toContain("filter 710ms");
     expect(incomingGlyphBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step) + var(--handoff-delay));",
+      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));",
+    );
+    expect(activeOutgoingArmBlock).toContain(
+      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
+    );
+    expect(activeOutgoingGlyphBlock).toContain(
+      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
+    );
+    expect(activeIncomingGlyphBlock).toContain("transition-delay: calc(");
+    expect(activeIncomingGlyphBlock).toContain(
+      "var(--incoming-stagger-step) + var(--handoff-delay)",
     );
     expect(shadowBlock).toContain("opacity 788ms");
     expect(shadowBlock).toContain("transform 788ms");

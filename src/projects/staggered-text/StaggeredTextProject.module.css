@@ -82,7 +82,7 @@
 .slot {
   --outgoing-stagger-step: 24ms;
   --incoming-stagger-step: 30ms;
-  --handoff-delay: 80ms;
+  --handoff-delay: 60ms;
   position: relative;
   height: 1.14em;
   perspective: 1200px;
@@ -120,7 +120,9 @@
   transition:
     transform 788ms var(--ease-custom),
     opacity 788ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
+  transition-delay: calc(
+    var(--char-index) * var(--outgoing-stagger-step) + var(--handoff-delay)
+  );
 }
 
 .outgoingGlyph {
@@ -134,7 +136,9 @@
     transform 788ms var(--ease-custom),
     opacity 720ms var(--ease-custom),
     filter 788ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
+  transition-delay: calc(
+    var(--char-index) * var(--outgoing-stagger-step) + var(--handoff-delay)
+  );
 }
 
 .incomingGlyph {
@@ -149,9 +153,7 @@
     transform 710ms var(--ease-custom),
     opacity 710ms var(--ease-custom),
     filter 710ms var(--ease-custom);
-  transition-delay: calc(
-    var(--char-index) * var(--incoming-stagger-step) + var(--handoff-delay)
-  );
+  transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));
 }
 
 .shadow {
@@ -167,17 +169,22 @@
 }
 
 .trigger[data-active="true"] .outgoingArm {
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
   transform: translateY(-0.18em) rotateX(82deg);
   opacity: 0.92;
 }
 
 .trigger[data-active="true"] .outgoingGlyph {
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
   opacity: 0;
   filter: blur(8px);
   transform: translateY(-0.1em) translateZ(0.14em) rotateX(-18deg);
 }
 
 .trigger[data-active="true"] .incomingGlyph {
+  transition-delay: calc(
+    var(--char-index) * var(--incoming-stagger-step) + var(--handoff-delay)
+  );
   opacity: 1;
   filter: blur(0);
   transform: translateY(-0.02em) rotateX(0deg) translateZ(0);
