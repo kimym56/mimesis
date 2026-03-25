@@ -119,4 +119,12 @@ describe("semantic radius scale", () => {
 
     expect(triggerBlock).toContain("background-color: #05070a;");
   });
+
+  it("uses a true 3d cube structure for staggered text", () => {
+    const cubeBlock = readSelectorBlock(staggeredTextCss, ".cube");
+    const bottomFaceBlock = readSelectorBlock(staggeredTextCss, ".faceBottom");
+
+    expect(cubeBlock).toContain("transform-style: preserve-3d;");
+    expect(bottomFaceBlock).toContain("rotateX(");
+  });
 });

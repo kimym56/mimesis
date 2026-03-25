@@ -19,16 +19,15 @@
   width: 100%;
   min-height: 100%;
   padding: clamp(2rem, 6vw, 4rem);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-prominent);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-soft);
   background-color: #05070a;
-  background:
-    radial-gradient(circle at 20% 18%, rgba(118, 138, 255, 0.18), transparent 32%),
-    radial-gradient(circle at 76% 82%, rgba(82, 222, 255, 0.08), transparent 34%),
-    linear-gradient(160deg, #161b27 0%, #0b0f17 48%, #05070a 100%);
+  background-image:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.03), transparent 36%),
+    linear-gradient(180deg, rgba(8, 10, 14, 1), rgba(3, 4, 6, 1));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 22px 44px rgba(0, 0, 0, 0.42);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 18px 40px rgba(0, 0, 0, 0.34);
   color: #f4f7ff;
   cursor: pointer;
   overflow: clip;
@@ -36,76 +35,36 @@
   user-select: none;
   isolation: isolate;
   transition:
-    transform var(--transition-base),
     box-shadow var(--transition-base),
+    transform var(--transition-base),
     border-color var(--transition-base);
 }
 
-.trigger::before,
-.trigger::after {
-  content: "";
-  position: absolute;
-  inset: auto;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.trigger::before {
-  width: min(38vw, 18rem);
-  height: min(38vw, 18rem);
-  top: -8%;
-  right: -4%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 72%);
-  opacity: 1;
-}
-
-.trigger::after {
-  width: min(40vw, 24rem);
-  height: min(40vw, 24rem);
-  bottom: -24%;
-  left: -8%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(82, 222, 255, 0.08), transparent 68%);
-  opacity: 0.55;
-}
-
 .trigger[data-active="true"] {
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.1);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 28px 48px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 48px rgba(0, 0, 0, 0.42);
   transform: translateY(-1px);
 }
 
 .wordmark {
   position: relative;
   z-index: 1;
-  display: grid;
-  place-items: center;
-  perspective: 1400px;
-  font-family: var(--font-heading);
-  font-size: clamp(2rem, 6.4vw, 4.8rem);
-  font-weight: var(--font-bold);
-  line-height: 0.94;
-  letter-spacing: -0.05em;
-  text-transform: none;
-  min-height: 2.2em;
-  padding-block: 0.48em 0.42em;
-  max-width: 100%;
-}
-
-.baseWordmark,
-.overlayWordmark {
-  grid-area: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.015em;
-}
-
-.overlayWordmark {
-  pointer-events: none;
+  perspective: 1600px;
+  font-family: var(--font-heading);
+  font-size: clamp(1.55rem, 4.2vw, 3.55rem);
+  font-weight: var(--font-semibold);
+  line-height: 0.94;
+  letter-spacing: -0.065em;
+  text-transform: none;
+  min-height: 2.16em;
+  padding-block: 0.46em 0.56em;
+  max-width: 100%;
 }
 
 .slot,
@@ -116,34 +75,59 @@
 }
 
 .slot {
-  --stagger-step: 24ms;
+  --stagger-step: 26ms;
+  --cube-depth: 0.56em;
   position: relative;
-  min-width: 0.62em;
-  min-height: 1.68em;
-  transform-style: preserve-3d;
+  min-width: 0.59em;
+  height: 1.12em;
+  perspective: 1200px;
 }
 
-.baseGlyph,
-.overlayGlyph,
-.overlayGlow {
+.cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transform: translateZ(calc(var(--cube-depth) * -1));
+  transition: transform 760ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--stagger-step));
+}
+
+.face {
+  position: absolute;
+  inset: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  color: #f4f7ff;
+  backface-visibility: hidden;
+  text-shadow: 0 0 0.01em currentColor;
 }
 
-.baseGlyph {
-  color: rgba(244, 247, 255, 0.42);
-  text-shadow: 0 0 18px rgba(244, 247, 255, 0.04);
+.faceFront {
+  transform: rotateX(0deg) translateZ(var(--cube-depth));
 }
 
-.overlayGlyph,
-.overlayGlow {
+.faceBottom {
+  transform: rotateX(-90deg) translateZ(var(--cube-depth));
+}
+
+.shadow {
   position: absolute;
   inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(244, 247, 255, 0.18);
+  opacity: 0;
+  filter: blur(10px);
   pointer-events: none;
-  transform-origin: 50% 76%;
+  transform: translateY(0.22em) scale(1.03);
   transition:
     opacity 760ms var(--ease-custom),
     transform 760ms var(--ease-custom),
@@ -151,57 +135,41 @@
   transition-delay: calc(var(--char-index) * var(--stagger-step));
 }
 
-.overlayGlyph {
-  color: #f4f7ff;
-  opacity: 0;
-  transform: translate3d(0, 0.52em, 0) rotateX(-82deg);
+.trigger[data-active="true"] .cube {
+  transform: translateZ(calc(var(--cube-depth) * -1)) rotateX(90deg);
 }
 
-.overlayGlow {
-  color: rgba(194, 211, 255, 0.34);
-  opacity: 0;
-  filter: blur(10px);
-  transform: translate3d(0, 0.28em, -0.46em) scale(1.015);
-}
-
-.trigger[data-active="true"] .overlayGlyph {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) rotateX(0deg);
-}
-
-.trigger[data-active="true"] .overlayGlow {
-  opacity: 0.4;
-  filter: blur(9px);
-  transform: translate3d(0, 0.1em, -0.52em) scale(1.04);
+.trigger[data-active="true"] .shadow {
+  opacity: 0.42;
+  filter: blur(8px);
+  transform: translateY(0.08em) scale(1.04);
 }
 
 .space {
-  width: 0.24em;
+  width: 0.22em;
 }
 
-.trigger[data-reduced-motion="true"] .overlayGlyph,
-.trigger[data-reduced-motion="true"] .overlayGlow {
+.trigger[data-reduced-motion="true"] .cube,
+.trigger[data-reduced-motion="true"] .shadow {
   transition-duration: var(--duration-fast);
 }
 
-.trigger[data-reduced-motion="true"] .overlayGlyph {
-  opacity: 0;
-  transform: translateY(0.08em);
+.trigger[data-reduced-motion="true"] .cube {
+  transform: none;
 }
 
-.trigger[data-reduced-motion="true"] .overlayGlow {
-  filter: none;
-  opacity: 0;
-  transform: translateY(0.06em);
+.trigger[data-reduced-motion="true"] .faceFront {
+  transform: none;
 }
 
-.trigger[data-reduced-motion="true"][data-active="true"] .overlayGlyph {
-  opacity: 1;
-  transform: translateY(0);
+.trigger[data-reduced-motion="true"] .faceBottom,
+.trigger[data-reduced-motion="true"] .shadow {
+  display: none;
 }
 
-.trigger[data-reduced-motion="true"][data-active="true"] .overlayGlow {
-  opacity: 0;
+.trigger[data-reduced-motion="true"][data-active="true"] .faceFront {
+  text-shadow: 0 0 0.3em rgba(244, 247, 255, 0.16);
+  transform: translateY(-0.03em);
 }
 
 @media (max-width: 767px) {
@@ -210,8 +178,9 @@
   }
 
   .wordmark {
-    letter-spacing: -0.04em;
-    min-height: 2.45em;
-    padding-block: 0.56em 0.48em;
+    font-size: clamp(1.55rem, 8.5vw, 2.7rem);
+    letter-spacing: -0.05em;
+    min-height: 2.36em;
+    padding-block: 0.54em 0.62em;
   }
 }

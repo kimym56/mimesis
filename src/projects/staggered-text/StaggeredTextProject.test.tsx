@@ -41,13 +41,21 @@ describe("StaggeredTextProject", () => {
     });
 
     const trigger = container.querySelector("button");
-    const baseLayer = container.querySelector('[data-wordmark-layer="base"]');
-    const overlayLayer = container.querySelector('[data-wordmark-layer="overlay"]');
+    const frontFaces = container.querySelectorAll('[data-face="front"]');
+    const bottomFaces = container.querySelectorAll('[data-face="bottom"]');
+    const frontText = Array.from(frontFaces)
+      .map((face) => face.textContent)
+      .join("");
+    const bottomText = Array.from(bottomFaces)
+      .map((face) => face.textContent)
+      .join("");
 
     expect(trigger).not.toBeNull();
-    expect(baseLayer?.textContent?.replace(/\s+/g, " ").trim()).toBe("Start deploying");
-    expect(overlayLayer).not.toBeNull();
     expect(container.querySelectorAll('[data-slot="character"]')).toHaveLength(14);
+    expect(frontFaces).toHaveLength(14);
+    expect(bottomFaces).toHaveLength(14);
+    expect(frontText).toBe("StartDeploying");
+    expect(bottomText).toBe("StartDeploying");
     expect(trigger?.getAttribute("data-active")).toBe("false");
 
     act(() => {

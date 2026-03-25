@@ -5,7 +5,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import type { InteractiveProjectProps } from "../types";
 import styles from "./StaggeredTextProject.module.css";
 
-const DISPLAY_TEXT = "Start deploying";
+const DISPLAY_TEXT = "Start Deploying";
 
 function createCharacterSlots(text: string) {
   let staggerIndex = 0;
@@ -79,47 +79,42 @@ export default function StaggeredTextProject({
         }}
       >
         <span className={styles.wordmark}>
-          <span className={styles.baseWordmark} data-wordmark-layer="base">
-            {CHARACTER_SLOTS.map((slot) => (
-              <span
-                key={`base-${slot.id}`}
-                className={slot.isSpace ? styles.space : styles.slot}
-              >
-                <span className={styles.baseGlyph}>{slot.char}</span>
-              </span>
-            ))}
-          </span>
-          <span
-            className={styles.overlayWordmark}
-            data-wordmark-layer="overlay"
-            aria-hidden="true"
-          >
-            {CHARACTER_SLOTS.map((slot) => {
-              if (slot.isSpace) {
-                return (
-                  <span
-                    key={`overlay-${slot.id}`}
-                    className={styles.space}
-                    aria-hidden="true"
-                  >
-                    {" "}
-                  </span>
-                );
-              }
-
+          {CHARACTER_SLOTS.map((slot) => {
+            if (slot.isSpace) {
               return (
-                <span
-                  key={`overlay-${slot.id}`}
-                  className={styles.slot}
-                  data-slot="character"
-                  style={{ "--char-index": slot.staggerIndex } as CSSProperties}
-                >
-                  <span className={styles.overlayGlyph}>{slot.char}</span>
-                  <span className={styles.overlayGlow}>{slot.char}</span>
+                <span key={slot.id} className={styles.space} aria-hidden="true">
+                  {" "}
                 </span>
               );
-            })}
-          </span>
+            }
+
+            return (
+              <span
+                key={slot.id}
+                className={styles.slot}
+                data-slot="character"
+                style={{ "--char-index": slot.staggerIndex } as CSSProperties}
+              >
+                <span className={styles.cube}>
+                  <span
+                    className={`${styles.face} ${styles.faceFront}`}
+                    data-face="front"
+                  >
+                    {slot.char}
+                  </span>
+                  <span
+                    className={`${styles.face} ${styles.faceBottom}`}
+                    data-face="bottom"
+                  >
+                    {slot.char}
+                  </span>
+                  <span className={styles.shadow} aria-hidden="true">
+                    {slot.char}
+                  </span>
+                </span>
+              </span>
+            );
+          })}
         </span>
       </button>
     </div>
