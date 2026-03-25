@@ -179,6 +179,7 @@ describe("semantic radius scale", () => {
 
     expect(slotBlock).toContain("--outgoing-stagger-step: 24ms;");
     expect(slotBlock).toContain("--incoming-stagger-step: 30ms;");
+    expect(slotBlock).toContain("--handoff-delay: 160ms;");
     expect(slotBlock).not.toContain("--stagger-step: 70ms;");
     expect(outgoingArmBlock).toContain("transform 788ms");
     expect(outgoingArmBlock).toContain(
@@ -191,7 +192,7 @@ describe("semantic radius scale", () => {
     expect(incomingGlyphBlock).toContain("opacity 710ms");
     expect(incomingGlyphBlock).toContain("filter 710ms");
     expect(incomingGlyphBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));",
+      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step) + var(--handoff-delay));",
     );
     expect(shadowBlock).toContain("opacity 788ms");
     expect(shadowBlock).toContain("transform 788ms");

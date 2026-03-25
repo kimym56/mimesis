@@ -82,6 +82,7 @@
 .slot {
   --outgoing-stagger-step: 24ms;
   --incoming-stagger-step: 30ms;
+  --handoff-delay: 160ms;
   position: relative;
   height: 1.14em;
   perspective: 1200px;
@@ -148,7 +149,7 @@
     transform 710ms var(--ease-custom),
     opacity 710ms var(--ease-custom),
     filter 710ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));
+  transition-delay: calc(var(--char-index) * var(--incoming-stagger-step) + var(--handoff-delay));
 }
 
 .shadow {
