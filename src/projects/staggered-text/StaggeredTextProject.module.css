@@ -80,7 +80,8 @@
 }
 
 .slot {
-  --stagger-step: 70ms;
+  --outgoing-stagger-step: 24ms;
+  --incoming-stagger-step: 30ms;
   position: relative;
   height: 1.14em;
   perspective: 1200px;
@@ -116,9 +117,9 @@
 .outgoingArm {
   transform-origin: 50% 12%;
   transition:
-    transform 215ms var(--ease-custom),
-    opacity 215ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--stagger-step));
+    transform 788ms var(--ease-custom),
+    opacity 788ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
 }
 
 .outgoingGlyph {
@@ -129,10 +130,10 @@
   filter: blur(0);
   transform: translateZ(0.02em);
   transition:
-    transform 215ms var(--ease-custom),
-    opacity 190ms var(--ease-custom),
-    filter 215ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--stagger-step));
+    transform 788ms var(--ease-custom),
+    opacity 720ms var(--ease-custom),
+    filter 788ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
 }
 
 .incomingGlyph {
@@ -144,10 +145,10 @@
   filter: blur(8px);
   transform: translateY(0.74em) rotateX(-78deg) translateZ(0.08em);
   transition:
-    transform 215ms var(--ease-custom),
-    opacity 215ms var(--ease-custom),
-    filter 215ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--stagger-step));
+    transform 710ms var(--ease-custom),
+    opacity 710ms var(--ease-custom),
+    filter 710ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));
 }
 
 .shadow {
@@ -156,10 +157,10 @@
   filter: blur(12px);
   transform: translateY(0.28em) scale(1.03);
   transition:
-    opacity 215ms var(--ease-custom),
-    transform 215ms var(--ease-custom),
-    filter 215ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--stagger-step));
+    opacity 788ms var(--ease-custom),
+    transform 788ms var(--ease-custom),
+    filter 788ms var(--ease-custom);
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
 }
 
 .trigger[data-active="true"] .outgoingArm {

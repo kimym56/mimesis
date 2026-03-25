@@ -31,7 +31,6 @@ function readSelectorBlockStartingWith(css: string, selector: string, firstLine:
 
   return match?.[0] ?? "";
 }
-
 const tokensCss = readCss("./tokens.css");
 const wiperCss = readCss("../projects/wiper-typography/WiperTypographyProject.module.css");
 const pageCurlCss = readCss("../projects/page-curl/PageCurlProject.module.css");
@@ -165,36 +164,38 @@ describe("semantic radius scale", () => {
 
     expect(outgoingGlyphBlock).toContain("filter: blur(0);");
     expect(incomingGlyphBlock).toContain("filter: blur(8px);");
-    expect(incomingGlyphBlock).toContain("filter 215ms");
+    expect(incomingGlyphBlock).toContain("filter 710ms");
     expect(activeOutgoingGlyphBlock).toContain("filter: blur(8px);");
   });
 
-  it("uses a 70ms shared stagger and 215ms settle window for staggered text", () => {
+  it("uses split outgoing and incoming timing tracks for staggered text", () => {
     const slotBlock = readSelectorBlock(staggeredTextCss, ".slot");
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
     const outgoingGlyphBlock = readSelectorBlock(staggeredTextCss, ".outgoingGlyph");
     const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
     const shadowBlock = readSelectorBlockStartingWith(staggeredTextCss, ".shadow", "color:");
 
-    expect(slotBlock).toContain("--stagger-step: 70ms;");
-    expect(slotBlock).not.toContain("--outgoing-stagger-step:");
-    expect(slotBlock).not.toContain("--incoming-stagger-step:");
-    expect(outgoingArmBlock).toContain("transform 215ms");
+    expect(slotBlock).toContain("--outgoing-stagger-step: 24ms;");
+    expect(slotBlock).toContain("--incoming-stagger-step: 30ms;");
+    expect(slotBlock).not.toContain("--stagger-step: 70ms;");
+    expect(outgoingArmBlock).toContain("transform 788ms");
     expect(outgoingArmBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--stagger-step));",
+      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
     );
-    expect(outgoingGlyphBlock).toContain("transform 215ms");
-    expect(outgoingGlyphBlock).toContain("opacity 190ms");
-    expect(outgoingGlyphBlock).toContain("filter 215ms");
-    expect(incomingGlyphBlock).toContain("transform 215ms");
-    expect(incomingGlyphBlock).toContain("opacity 215ms");
-    expect(incomingGlyphBlock).toContain("filter 215ms");
+    expect(outgoingGlyphBlock).toContain("transform 788ms");
+    expect(outgoingGlyphBlock).toContain("opacity 720ms");
+    expect(outgoingGlyphBlock).toContain("filter 788ms");
+    expect(incomingGlyphBlock).toContain("transform 710ms");
+    expect(incomingGlyphBlock).toContain("opacity 710ms");
+    expect(incomingGlyphBlock).toContain("filter 710ms");
     expect(incomingGlyphBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--stagger-step));",
+      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));",
     );
-    expect(shadowBlock).toContain("opacity 215ms");
+    expect(shadowBlock).toContain("opacity 788ms");
+    expect(shadowBlock).toContain("transform 788ms");
+    expect(shadowBlock).toContain("filter 788ms");
     expect(shadowBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--stagger-step));",
+      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
     );
   });
 });
