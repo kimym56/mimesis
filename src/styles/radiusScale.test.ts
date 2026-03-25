@@ -150,7 +150,9 @@ describe("semantic radius scale", () => {
     );
 
     expect(outgoingArmBlock).toContain("transform-origin: 50% 12%;");
-    expect(activeOutgoingArmBlock).toContain("rotateX(82deg)");
+    expect(activeOutgoingArmBlock).toContain("translateY(-0.18em) rotateX(82deg)");
+    expect(activeOutgoingArmBlock).not.toContain("rotateX(82deg) translateY(0.18em)");
+    expect(activeOutgoingGlyphBlock).toContain("translateY(-0.1em)");
     expect(activeOutgoingGlyphBlock).toContain("rotateX(-18deg)");
   });
 
