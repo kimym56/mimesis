@@ -146,23 +146,30 @@ describe("semantic radius scale", () => {
 
     expect(outgoingGlyphBlock).toContain("filter: blur(0);");
     expect(incomingGlyphBlock).toContain("filter: blur(8px);");
-    expect(incomingGlyphBlock).toContain("filter 788ms");
+    expect(incomingGlyphBlock).toContain("filter 710ms");
     expect(activeOutgoingGlyphBlock).toContain("filter: blur(8px);");
   });
 
-  it("uses a slower full-motion timing profile for staggered text", () => {
+  it("uses split outgoing and incoming timing tracks for staggered text", () => {
     const slotBlock = readSelectorBlock(staggeredTextCss, ".slot");
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
     const outgoingGlyphBlock = readSelectorBlock(staggeredTextCss, ".outgoingGlyph");
     const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
 
-    expect(slotBlock).toContain("--stagger-step: 24ms;");
+    expect(slotBlock).toContain("--outgoing-stagger-step: 24ms;");
+    expect(slotBlock).toContain("--incoming-stagger-step: 30ms;");
     expect(outgoingArmBlock).toContain("transform 788ms");
+    expect(outgoingArmBlock).toContain(
+      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
+    );
     expect(outgoingGlyphBlock).toContain("transform 788ms");
     expect(outgoingGlyphBlock).toContain("opacity 720ms");
     expect(outgoingGlyphBlock).toContain("filter 788ms");
-    expect(incomingGlyphBlock).toContain("transform 788ms");
-    expect(incomingGlyphBlock).toContain("opacity 788ms");
-    expect(incomingGlyphBlock).toContain("filter 788ms");
+    expect(incomingGlyphBlock).toContain("transform 710ms");
+    expect(incomingGlyphBlock).toContain("opacity 710ms");
+    expect(incomingGlyphBlock).toContain("filter 710ms");
+    expect(incomingGlyphBlock).toContain(
+      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));",
+    );
   });
 });
