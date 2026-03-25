@@ -86,4 +86,93 @@ describe("StaggeredTextProject", () => {
 
     expect(trigger?.getAttribute("data-active")).toBe("false");
   });
+
+  it("assigns reverse stagger positions so the release cascade can unwind from the last character", () => {
+    act(() => {
+      root.render(<StaggeredTextProject projectId="staggered-text" />);
+    });
+
+    const slots = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-slot="character"]'),
+    );
+    const forwardIndices = slots.map((slot) => slot.style.getPropertyValue("--char-index"));
+    const reverseIndices = slots.map((slot) =>
+      slot.style.getPropertyValue("--char-reverse-index"),
+    );
+
+    expect(forwardIndices).toEqual([
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+    ]);
+    expect(reverseIndices).toEqual([
+      "13",
+      "12",
+      "11",
+      "10",
+      "9",
+      "8",
+      "7",
+      "6",
+      "5",
+      "4",
+      "3",
+      "2",
+      "1",
+      "0",
+    ]);
+  });
+
+  it("creates reversible web animations with end delays for the rollback cascade", () => {
+    const originalAnimate = Element.prototype.animate;
+    const animateMock = vi.fn(() => ({
+      cancel: vi.fn(),
+      currentTime: 0,
+      pause: vi.fn(),
+      play: vi.fn(),
+      playbackRate: 1,
+    }));
+
+    Object.defineProperty(Element.prototype, "animate", {
+      configurable: true,
+      value: animateMock,
+    });
+
+    try {
+      act(() => {
+        root.render(<StaggeredTextProject projectId="staggered-text" />);
+      });
+
+      const trigger = container.querySelector("button");
+
+      expect(trigger?.getAttribute("data-motion-driver")).toBe("waapi");
+      expect(animateMock).toHaveBeenCalled();
+      expect(animateMock.mock.calls[0]?.[1]).toMatchObject({
+        delay: 0,
+        endDelay: 780,
+        fill: "both",
+      });
+    } finally {
+      if (originalAnimate) {
+        Object.defineProperty(Element.prototype, "animate", {
+          configurable: true,
+          value: originalAnimate,
+        });
+      } else {
+        delete (Element.prototype as Partial<typeof Element.prototype>).animate;
+      }
+    }
+  });
+
 });

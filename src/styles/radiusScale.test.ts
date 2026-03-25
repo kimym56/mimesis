@@ -142,16 +142,16 @@ describe("semantic radius scale", () => {
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
     const activeOutgoingArmBlock = readSelectorBlock(
       staggeredTextCss,
-      '.trigger[data-active="true"] .outgoingArm',
+      '.trigger[data-motion-driver="css"][data-active="true"] .outgoingArm',
     );
     const activeOutgoingGlyphBlock = readSelectorBlock(
       staggeredTextCss,
-      '.trigger[data-active="true"] .outgoingGlyph',
+      '.trigger[data-motion-driver="css"][data-active="true"] .outgoingGlyph',
     );
 
     expect(outgoingArmBlock).toContain("transform-origin: 50% 12%;");
-    expect(activeOutgoingArmBlock).toContain("translateY(-0.18em) rotateX(82deg)");
-    expect(activeOutgoingArmBlock).not.toContain("rotateX(82deg) translateY(0.18em)");
+    expect(activeOutgoingArmBlock).toContain("translateY(-0.12em) rotateX(82deg)");
+    expect(activeOutgoingArmBlock).not.toContain("rotateX(82deg) translateY(0.12em)");
     expect(activeOutgoingGlyphBlock).toContain("translateY(-0.1em)");
     expect(activeOutgoingGlyphBlock).toContain("rotateX(-18deg)");
   });
@@ -161,13 +161,29 @@ describe("semantic radius scale", () => {
     const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
     const activeOutgoingGlyphBlock = readSelectorBlock(
       staggeredTextCss,
-      '.trigger[data-active="true"] .outgoingGlyph',
+      '.trigger[data-motion-driver="css"][data-active="true"] .outgoingGlyph',
     );
 
     expect(outgoingGlyphBlock).toContain("filter: blur(0);");
     expect(incomingGlyphBlock).toContain("filter: blur(8px);");
     expect(incomingGlyphBlock).toContain("filter 710ms");
     expect(activeOutgoingGlyphBlock).toContain("filter: blur(8px);");
+  });
+
+  it("hinges the staggered text incoming face from the front edge instead of below the glyph box", () => {
+    const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
+    const activeIncomingGlyphBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-motion-driver="css"][data-active="true"] .incomingGlyph',
+    );
+
+    expect(incomingGlyphBlock).toContain("transform-origin: 50% 100%;");
+    expect(incomingGlyphBlock).toContain(
+      "transform: translateY(-0.02em) rotateX(-88deg) translateZ(0);",
+    );
+    expect(activeIncomingGlyphBlock).toContain(
+      "transform: translateY(-0.02em) rotateX(0deg) translateZ(0);",
+    );
   });
 
   it("uses split outgoing and incoming timing tracks for staggered text", () => {
@@ -177,36 +193,32 @@ describe("semantic radius scale", () => {
     const incomingGlyphBlock = readSelectorBlock(staggeredTextCss, ".incomingGlyph");
     const activeOutgoingArmBlock = readSelectorBlock(
       staggeredTextCss,
-      '.trigger[data-active="true"] .outgoingArm',
+      '.trigger[data-motion-driver="css"][data-active="true"] .outgoingArm',
     );
     const activeOutgoingGlyphBlock = readSelectorBlock(
       staggeredTextCss,
-      '.trigger[data-active="true"] .outgoingGlyph',
+      '.trigger[data-motion-driver="css"][data-active="true"] .outgoingGlyph',
     );
     const activeIncomingGlyphBlock = readSelectorBlock(
       staggeredTextCss,
-      '.trigger[data-active="true"] .incomingGlyph',
+      '.trigger[data-motion-driver="css"][data-active="true"] .incomingGlyph',
     );
     const shadowBlock = readSelectorBlockStartingWith(staggeredTextCss, ".shadow", "color:");
 
-    expect(slotBlock).toContain("--outgoing-stagger-step: 24ms;");
-    expect(slotBlock).toContain("--incoming-stagger-step: 30ms;");
+    expect(slotBlock).toContain("--outgoing-stagger-step: 60ms;");
+    expect(slotBlock).toContain("--incoming-stagger-step: 60ms;");
     expect(slotBlock).toContain("--handoff-delay: 60ms;");
     expect(slotBlock).not.toContain("--stagger-step: 70ms;");
     expect(outgoingArmBlock).toContain("transform 788ms");
-    expect(outgoingArmBlock).toContain("transition-delay: calc(");
-    expect(outgoingArmBlock).toContain("var(--outgoing-stagger-step) + var(--handoff-delay)");
+    expect(outgoingArmBlock).not.toContain("transition-delay:");
     expect(outgoingGlyphBlock).toContain("transform 788ms");
     expect(outgoingGlyphBlock).toContain("opacity 720ms");
     expect(outgoingGlyphBlock).toContain("filter 788ms");
-    expect(outgoingGlyphBlock).toContain("transition-delay: calc(");
-    expect(outgoingGlyphBlock).toContain("var(--outgoing-stagger-step) + var(--handoff-delay)");
+    expect(outgoingGlyphBlock).not.toContain("transition-delay:");
     expect(incomingGlyphBlock).toContain("transform 710ms");
     expect(incomingGlyphBlock).toContain("opacity 710ms");
     expect(incomingGlyphBlock).toContain("filter 710ms");
-    expect(incomingGlyphBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));",
-    );
+    expect(incomingGlyphBlock).not.toContain("transition-delay:");
     expect(activeOutgoingArmBlock).toContain(
       "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
     );
@@ -220,8 +232,6 @@ describe("semantic radius scale", () => {
     expect(shadowBlock).toContain("opacity 788ms");
     expect(shadowBlock).toContain("transform 788ms");
     expect(shadowBlock).toContain("filter 788ms");
-    expect(shadowBlock).toContain(
-      "transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));",
-    );
+    expect(shadowBlock).not.toContain("transition-delay:");
   });
 });

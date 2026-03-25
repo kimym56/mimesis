@@ -80,8 +80,8 @@
 }
 
 .slot {
-  --outgoing-stagger-step: 24ms;
-  --incoming-stagger-step: 30ms;
+  --outgoing-stagger-step: 60ms;
+  --incoming-stagger-step: 60ms;
   --handoff-delay: 60ms;
   position: relative;
   height: 1.14em;
@@ -120,9 +120,6 @@
   transition:
     transform 788ms var(--ease-custom),
     opacity 788ms var(--ease-custom);
-  transition-delay: calc(
-    var(--char-index) * var(--outgoing-stagger-step) + var(--handoff-delay)
-  );
 }
 
 .outgoingGlyph {
@@ -136,24 +133,20 @@
     transform 788ms var(--ease-custom),
     opacity 720ms var(--ease-custom),
     filter 788ms var(--ease-custom);
-  transition-delay: calc(
-    var(--char-index) * var(--outgoing-stagger-step) + var(--handoff-delay)
-  );
 }
 
 .incomingGlyph {
   color: #f4f7ff;
   backface-visibility: hidden;
   text-shadow: 0 0 0.01em currentColor;
-  transform-origin: 50% 78%;
+  transform-origin: 50% 100%;
   opacity: 0;
   filter: blur(8px);
-  transform: translateY(0.74em) rotateX(-78deg) translateZ(0.08em);
+  transform: translateY(-0.02em) rotateX(-88deg) translateZ(0);
   transition:
     transform 710ms var(--ease-custom),
     opacity 710ms var(--ease-custom),
     filter 710ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--incoming-stagger-step));
 }
 
 .shadow {
@@ -165,23 +158,22 @@
     opacity 788ms var(--ease-custom),
     transform 788ms var(--ease-custom),
     filter 788ms var(--ease-custom);
-  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
 }
 
-.trigger[data-active="true"] .outgoingArm {
+.trigger[data-motion-driver="css"][data-active="true"] .outgoingArm {
   transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
-  transform: translateY(-0.18em) rotateX(82deg);
+  transform: translateY(-0.12em) rotateX(82deg);
   opacity: 0.92;
 }
 
-.trigger[data-active="true"] .outgoingGlyph {
+.trigger[data-motion-driver="css"][data-active="true"] .outgoingGlyph {
   transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
   opacity: 0;
   filter: blur(8px);
   transform: translateY(-0.1em) translateZ(0.14em) rotateX(-18deg);
 }
 
-.trigger[data-active="true"] .incomingGlyph {
+.trigger[data-motion-driver="css"][data-active="true"] .incomingGlyph {
   transition-delay: calc(
     var(--char-index) * var(--incoming-stagger-step) + var(--handoff-delay)
   );
@@ -190,7 +182,8 @@
   transform: translateY(-0.02em) rotateX(0deg) translateZ(0);
 }
 
-.trigger[data-active="true"] .shadow {
+.trigger[data-motion-driver="css"][data-active="true"] .shadow {
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
   opacity: 0.36;
   filter: blur(8px);
   transform: translateY(-0.04em) scale(1.04);
@@ -218,7 +211,7 @@
   display: none;
 }
 
-.trigger[data-reduced-motion="true"][data-active="true"] .outgoingGlyph {
+.trigger[data-motion-driver="css"][data-reduced-motion="true"][data-active="true"] .outgoingGlyph {
   text-shadow: 0 0 0.3em rgba(244, 247, 255, 0.16);
   transform: translateY(-0.03em);
 }
