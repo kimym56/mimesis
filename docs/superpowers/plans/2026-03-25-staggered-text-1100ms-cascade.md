@@ -17,7 +17,7 @@
 **Files:**
 - Modify: `src/styles/radiusScale.test.ts`
 
-- [ ] **Step 1: Write the failing CSS regression test**
+- [x] **Step 1: Write the failing CSS regression test**
 
 Update `src/styles/radiusScale.test.ts` so it asserts:
 - `.slot` uses `--stagger-step: 24ms;`,
@@ -25,7 +25,7 @@ Update `src/styles/radiusScale.test.ts` so it asserts:
 - `.outgoingGlyph` uses `transform 788ms`, `opacity 720ms`, and `filter 788ms`,
 - `.incomingGlyph` uses `transform 788ms`, `opacity 788ms`, and `filter 788ms`.
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npm test -- src/styles/radiusScale.test.ts`
 
@@ -38,7 +38,7 @@ Expected: FAIL because the current CSS still uses a slower, longer timing profil
 **Files:**
 - Modify: `src/projects/staggered-text/StaggeredTextProject.module.css`
 
-- [ ] **Step 3: Replace the timing values with the 1100ms profile**
+- [x] **Step 3: Replace the timing values with the 1100ms profile**
 
 Adjust `src/projects/staggered-text/StaggeredTextProject.module.css` so:
 - `--stagger-step` becomes `24ms`,
@@ -48,7 +48,7 @@ Adjust `src/projects/staggered-text/StaggeredTextProject.module.css` so:
 - outgoing and incoming filter timings become `788ms`,
 - shadow timing also fits the same settle window.
 
-- [ ] **Step 4: Run the CSS test to verify it passes**
+- [x] **Step 4: Run the CSS test to verify it passes**
 
 Run: `npm test -- src/styles/radiusScale.test.ts`
 
@@ -64,19 +64,19 @@ Expected: PASS
 - Verify: `src/app/project/[id]/ProjectReferenceContent.test.tsx`
 - Verify: `src/app/project/[id]/XPostReferenceEmbed.test.tsx`
 
-- [ ] **Step 5: Run targeted tests**
+- [x] **Step 5: Run targeted tests**
 
 Run: `npm test -- src/projects/staggered-text/StaggeredTextProject.test.tsx src/styles/radiusScale.test.ts 'src/app/project/[id]/ProjectReferenceContent.test.tsx' 'src/app/project/[id]/XPostReferenceEmbed.test.tsx'`
 
 Expected: PASS
 
-- [ ] **Step 6: Run lint**
+- [x] **Step 6: Run lint**
 
 Run: `npm run lint`
 
 Expected: PASS
 
-- [ ] **Step 7: Run production build**
+- [x] **Step 7: Run production build**
 
 Run: `npm run build`
 
