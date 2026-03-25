@@ -122,7 +122,17 @@ describe("semantic radius scale", () => {
 
   it("uses a bottom-hinged outgoing arm for staggered text", () => {
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
+    const activeOutgoingArmBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"] .outgoingArm',
+    );
+    const activeOutgoingGlyphBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"] .outgoingGlyph',
+    );
 
     expect(outgoingArmBlock).toContain("transform-origin: 50% 88%;");
+    expect(activeOutgoingArmBlock).toContain("rotateX(-82deg)");
+    expect(activeOutgoingGlyphBlock).toContain("rotateX(18deg)");
   });
 });

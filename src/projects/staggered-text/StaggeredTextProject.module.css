@@ -143,14 +143,14 @@
 }
 
 .trigger[data-active="true"] .outgoingArm {
-  transform: rotateX(82deg) translateY(-0.2em);
+  transform: rotateX(-82deg) translateY(-0.2em);
   opacity: 0.92;
 }
 
 .trigger[data-active="true"] .outgoingGlyph {
   opacity: 0;
   filter: blur(4px);
-  transform: translateY(-0.1em) translateZ(0.14em) rotateX(-18deg);
+  transform: translateY(-0.1em) translateZ(0.14em) rotateX(18deg);
 }
 
 .trigger[data-active="true"] .incomingGlyph {
@@ -162,7 +162,7 @@
 .trigger[data-active="true"] .shadow {
   opacity: 0.44;
   filter: blur(9px);
-  transform: translateY(0.04em) scale(1.05);
+  transform: translateY(0.08em) scale(1.05);
 }
 
 .space {
