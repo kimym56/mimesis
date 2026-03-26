@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
+import { createRoot, hydrateRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import {
   afterEach,
   beforeEach,
@@ -182,6 +183,69 @@ describe("StaggeredTextProject", () => {
         fill: "both",
       });
     } finally {
+      if (originalAnimate) {
+        Object.defineProperty(Element.prototype, "animate", {
+          configurable: true,
+          value: originalAnimate,
+        });
+      } else {
+        delete (Element.prototype as Partial<typeof Element.prototype>).animate;
+      }
+    }
+  });
+
+  it("hydrates without changing the motion driver between the server and first client render", async () => {
+    const originalAnimate = Element.prototype.animate;
+    const originalElement = globalThis.Element;
+    const animateMock = vi.fn(() => ({
+      cancel: vi.fn(),
+      currentTime: 0,
+      pause: vi.fn(),
+      play: vi.fn(),
+      playbackRate: 1,
+    }));
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const hydrationContainer = document.createElement("div");
+    let hydrationRoot: Root | null = null;
+
+    document.body.appendChild(hydrationContainer);
+
+    Object.defineProperty(Element.prototype, "animate", {
+      configurable: true,
+      value: animateMock,
+    });
+
+    try {
+      // Simulate the server environment where Element is unavailable during render.
+      // @ts-expect-error Test-only server emulation.
+      delete globalThis.Element;
+      const serverHtml = renderToString(
+        <StaggeredTextProject projectId="staggered-text" />,
+      );
+      globalThis.Element = originalElement;
+
+      hydrationContainer.innerHTML = serverHtml;
+
+      await act(async () => {
+        hydrationRoot = hydrateRoot(
+          hydrationContainer,
+          <StaggeredTextProject projectId="staggered-text" />,
+        );
+      });
+
+      const trigger = hydrationContainer.querySelector("button");
+
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(trigger?.getAttribute("data-motion-driver")).toBe("waapi");
+    } finally {
+      hydrationRoot?.unmount();
+      hydrationContainer.remove();
+      consoleErrorSpy.mockRestore();
+
+      if (originalElement) {
+        globalThis.Element = originalElement;
+      }
+
       if (originalAnimate) {
         Object.defineProperty(Element.prototype, "animate", {
           configurable: true,

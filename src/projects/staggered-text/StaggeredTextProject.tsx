@@ -1,7 +1,13 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import type { InteractiveProjectProps } from "../types";
 import {
   DEFAULT_STAGGERED_TEXT_TUNING,
@@ -67,6 +73,10 @@ function createPausedAnimation(
   return animation;
 }
 
+function subscribeToHydration() {
+  return () => {};
+}
+
 export default function StaggeredTextProject({
   projectId,
 }: InteractiveProjectProps) {
@@ -83,7 +93,13 @@ export default function StaggeredTextProject({
 
   const prefersReducedMotion = shouldReduceMotion ?? false;
   const isActive = isPressed || isKeyboardFocusVisible;
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
   const motionDriver: MotionDriver =
+    !isHydrated ||
     prefersReducedMotion ||
     typeof Element === "undefined" ||
     typeof Element.prototype.animate !== "function"
