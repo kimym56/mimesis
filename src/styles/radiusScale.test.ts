@@ -138,6 +138,28 @@ describe("semantic radius scale", () => {
     expect(triggerBlock).toContain("background-color: #05070a;");
   });
 
+  it("keeps the staggered text trigger free of pane shadows", () => {
+    const triggerBlock = readSelectorBlock(staggeredTextCss, ".trigger");
+    const activeTriggerBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"]',
+    );
+
+    expect(triggerBlock).not.toContain("box-shadow:");
+    expect(activeTriggerBlock).not.toContain("box-shadow:");
+  });
+
+  it("keeps the staggered text trigger stationary while active", () => {
+    const triggerBlock = readSelectorBlock(staggeredTextCss, ".trigger");
+    const activeTriggerBlock = readSelectorBlock(
+      staggeredTextCss,
+      '.trigger[data-active="true"]',
+    );
+
+    expect(triggerBlock).not.toContain("transform var(--transition-base)");
+    expect(activeTriggerBlock).not.toContain("transform:");
+  });
+
   it("uses a top-hinged outgoing arm for staggered text", () => {
     const outgoingArmBlock = readSelectorBlock(staggeredTextCss, ".outgoingArm");
     const activeOutgoingArmBlock = readSelectorBlock(
