@@ -12,6 +12,7 @@ import {
   vi,
 } from "vitest";
 import StaggeredTextProject from "./StaggeredTextProject";
+import styles from "./StaggeredTextProject.module.css";
 import { DEFAULT_STAGGERED_TEXT_TUNING } from "./staggeredTextTuning";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -37,47 +38,112 @@ describe("StaggeredTextProject", () => {
     container.remove();
   });
 
-  it("renders split characters and toggles active state for pointer and keyboard interaction", () => {
+  it("renders hover mode by default and switches implementations with the mode toggle", () => {
     act(() => {
       root.render(<StaggeredTextProject projectId="staggered-text" />);
     });
 
-    const trigger = container.querySelector("button");
-    const slotSizers = container.querySelectorAll('[data-part="slot-sizer"]');
-    const outgoingArms = container.querySelectorAll('[data-part="outgoing-arm"]');
-    const outgoingGlyphs = container.querySelectorAll('[data-part="outgoing-glyph"]');
-    const incomingGlyphs = container.querySelectorAll('[data-part="incoming-glyph"]');
-    const outgoingText = Array.from(outgoingGlyphs)
+    const hoverImplementation = container.querySelector('[data-implementation="hover"]');
+    const buttonImplementation = container.querySelector('[data-implementation="button"]');
+    const toggleShell = container.querySelector('[role="tablist"]');
+    const hoverToggle = container.querySelector('[data-mode-toggle="hover"]');
+    const buttonToggle = container.querySelector('[data-mode-toggle="button"]');
+
+    expect(hoverImplementation).not.toBeNull();
+    expect(buttonImplementation).toBeNull();
+    expect(toggleShell?.className).toContain(styles.modeToggle);
+    expect(hoverToggle?.className).toContain(styles.modeButton);
+    expect(hoverToggle?.className).toContain(styles.modeButtonActive);
+    expect(buttonToggle?.className).toContain(styles.modeButton);
+    expect(buttonToggle?.className).not.toContain(styles.modeButtonActive);
+    expect(container.querySelector('input[type="text"]')).toBeNull();
+    expect(hoverImplementation?.querySelectorAll('[data-slot="character"]')).toHaveLength(14);
+    expect(hoverImplementation?.getAttribute("data-active")).toBe("false");
+    expect(hoverImplementation?.style.getPropertyValue("--outgoing-stagger-step")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.outgoingStaggerStepMs}ms`,
+    );
+    expect(hoverImplementation?.style.getPropertyValue("--incoming-stagger-step")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.incomingStaggerStepMs}ms`,
+    );
+    expect(hoverImplementation?.style.getPropertyValue("--handoff-delay")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.handoffDelayMs}ms`,
+    );
+    expect(hoverImplementation?.style.getPropertyValue("--outgoing-duration")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.outgoingDurationMs}ms`,
+    );
+    expect(hoverImplementation?.style.getPropertyValue("--incoming-duration")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.incomingDurationMs}ms`,
+    );
+
+    act(() => {
+      buttonToggle?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(buttonToggle?.className).toContain(styles.modeButtonActive);
+    expect(container.querySelector('[data-implementation="hover"]')).toBeNull();
+    expect(container.querySelector('[data-implementation="button"]')).not.toBeNull();
+    expect(container.querySelector('input[type="text"]')).not.toBeNull();
+  });
+
+  it("activates the hover implementation on stage hover", () => {
+    act(() => {
+      root.render(<StaggeredTextProject projectId="staggered-text" />);
+    });
+
+    const stage = container.querySelector('[data-implementation="hover"]');
+
+    expect(stage?.getAttribute("data-active")).toBe("false");
+
+    act(() => {
+      stage?.dispatchEvent(new Event("pointerover", { bubbles: true }));
+    });
+
+    expect(stage?.getAttribute("data-active")).toBe("true");
+
+    act(() => {
+      stage?.dispatchEvent(new Event("pointerout", { bubbles: true }));
+    });
+
+    expect(stage?.getAttribute("data-active")).toBe("false");
+  });
+
+  it("updates the button-mode text input, falls back when empty, and preserves the press interaction", () => {
+    act(() => {
+      root.render(<StaggeredTextProject projectId="staggered-text" />);
+    });
+
+    const buttonToggle = container.querySelector('[data-mode-toggle="button"]');
+
+    act(() => {
+      buttonToggle?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    const implementation = container.querySelector('[data-implementation="button"]');
+    const input = container.querySelector('input[type="text"]') as HTMLInputElement | null;
+    const trigger = implementation?.querySelector("button");
+
+    expect(input).not.toBeNull();
+    expect(trigger).not.toBeNull();
+    expect(trigger?.getAttribute("data-active")).toBe("false");
+
+    act(() => {
+      input!.value = "Hello Motion";
+      input!.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const updatedOutgoingText = Array.from(
+      implementation?.querySelectorAll('[data-part="outgoing-glyph"]') ?? [],
+    )
       .map((glyph) => glyph.textContent)
       .join("");
-    const incomingText = Array.from(incomingGlyphs)
+    const updatedIncomingText = Array.from(
+      implementation?.querySelectorAll('[data-part="incoming-glyph"]') ?? [],
+    )
       .map((glyph) => glyph.textContent)
       .join("");
 
-    expect(trigger).not.toBeNull();
-    expect(container.querySelectorAll('[data-slot="character"]')).toHaveLength(14);
-    expect(slotSizers).toHaveLength(14);
-    expect(outgoingArms).toHaveLength(14);
-    expect(outgoingGlyphs).toHaveLength(14);
-    expect(incomingGlyphs).toHaveLength(14);
-    expect(outgoingText).toBe("StartDeploying");
-    expect(incomingText).toBe("StartDeploying");
-    expect(trigger?.getAttribute("data-active")).toBe("false");
-    expect(trigger?.style.getPropertyValue("--outgoing-stagger-step")).toBe(
-      `${DEFAULT_STAGGERED_TEXT_TUNING.outgoingStaggerStepMs}ms`,
-    );
-    expect(trigger?.style.getPropertyValue("--incoming-stagger-step")).toBe(
-      `${DEFAULT_STAGGERED_TEXT_TUNING.incomingStaggerStepMs}ms`,
-    );
-    expect(trigger?.style.getPropertyValue("--handoff-delay")).toBe(
-      `${DEFAULT_STAGGERED_TEXT_TUNING.handoffDelayMs}ms`,
-    );
-    expect(trigger?.style.getPropertyValue("--outgoing-duration")).toBe(
-      `${DEFAULT_STAGGERED_TEXT_TUNING.outgoingDurationMs}ms`,
-    );
-    expect(trigger?.style.getPropertyValue("--incoming-duration")).toBe(
-      `${DEFAULT_STAGGERED_TEXT_TUNING.incomingDurationMs}ms`,
-    );
+    expect(updatedOutgoingText).toBe("HelloMotion");
+    expect(updatedIncomingText).toBe("HelloMotion");
 
     act(() => {
       trigger?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
@@ -92,25 +158,26 @@ describe("StaggeredTextProject", () => {
     expect(trigger?.getAttribute("data-active")).toBe("false");
 
     act(() => {
-      trigger?.focus();
+      input!.value = "";
+      input!.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    expect(trigger?.getAttribute("data-active")).toBe("true");
+    const fallbackOutgoingText = Array.from(
+      implementation?.querySelectorAll('[data-part="outgoing-glyph"]') ?? [],
+    )
+      .map((glyph) => glyph.textContent)
+      .join("");
 
-    act(() => {
-      trigger?.blur();
-    });
-
-    expect(trigger?.getAttribute("data-active")).toBe("false");
+    expect(fallbackOutgoingText).toBe("StartDeploying");
   });
 
-  it("assigns reverse stagger positions so the release cascade can unwind from the last character", () => {
+  it("assigns reverse stagger positions in hover mode so the release cascade can unwind from the last character", () => {
     act(() => {
       root.render(<StaggeredTextProject projectId="staggered-text" />);
     });
 
     const slots = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-slot="character"]'),
+      container.querySelectorAll<HTMLElement>('[data-implementation="hover"] [data-slot="character"]'),
     );
     const forwardIndices = slots.map((slot) => slot.style.getPropertyValue("--char-index"));
     const reverseIndices = slots.map((slot) =>
@@ -171,9 +238,9 @@ describe("StaggeredTextProject", () => {
         root.render(<StaggeredTextProject projectId="staggered-text" />);
       });
 
-      const trigger = container.querySelector("button");
+      const stage = container.querySelector('[data-implementation="hover"]');
 
-      expect(trigger?.getAttribute("data-motion-driver")).toBe("waapi");
+      expect(stage?.getAttribute("data-motion-driver")).toBe("waapi");
       expect(animateMock).toHaveBeenCalled();
       expect(animateMock.mock.calls[0]?.[1]).toMatchObject({
         delay: 0,
@@ -233,10 +300,10 @@ describe("StaggeredTextProject", () => {
         );
       });
 
-      const trigger = hydrationContainer.querySelector("button");
+      const stage = hydrationContainer.querySelector('[data-implementation="hover"]');
 
       expect(consoleErrorSpy).not.toHaveBeenCalled();
-      expect(trigger?.getAttribute("data-motion-driver")).toBe("waapi");
+      expect(stage?.getAttribute("data-motion-driver")).toBe("waapi");
     } finally {
       hydrationRoot?.unmount();
       hydrationContainer.remove();
@@ -256,5 +323,4 @@ describe("StaggeredTextProject", () => {
       }
     }
   });
-
 });

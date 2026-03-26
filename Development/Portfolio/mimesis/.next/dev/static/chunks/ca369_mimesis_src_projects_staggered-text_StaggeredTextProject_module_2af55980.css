@@ -1,12 +1,99 @@
 /* [project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.module.css [app-client] (css) */
+.StaggeredTextProject-module__t0AzOq__projectShell {
+  flex-direction: column;
+  flex: 1;
+  gap: clamp(.75rem, 2vw, 1rem);
+  min-height: 40vh;
+  display: flex;
+}
+
+.StaggeredTextProject-module__t0AzOq__controls {
+  align-items: center;
+  display: flex;
+}
+
+.StaggeredTextProject-module__t0AzOq__modeToggle {
+  background: var(--border);
+  border-radius: var(--radius-soft);
+  align-self: flex-start;
+  gap: .25rem;
+  padding: 2px;
+  display: flex;
+}
+
+.StaggeredTextProject-module__t0AzOq__modeButton {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--foreground-muted);
+  border-radius: var(--radius-soft);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: none;
+  border: none;
+  padding: 6px 16px;
+}
+
+.StaggeredTextProject-module__t0AzOq__modeButton:hover {
+  color: var(--foreground);
+}
+
+.StaggeredTextProject-module__t0AzOq__modeButtonActive {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+.StaggeredTextProject-module__t0AzOq__previewFrame {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
 .StaggeredTextProject-module__t0AzOq__interactivePane {
   flex: 1;
   min-height: 40vh;
   display: flex;
 }
 
+.StaggeredTextProject-module__t0AzOq__buttonModePane {
+  flex-direction: column;
+  gap: clamp(.75rem, 2vw, 1rem);
+}
+
+.StaggeredTextProject-module__t0AzOq__textInputRow {
+  flex-direction: column;
+  gap: .45rem;
+  display: flex;
+}
+
+.StaggeredTextProject-module__t0AzOq__textInputLabel {
+  color: #f4f7ffb8;
+  letter-spacing: .01em;
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.StaggeredTextProject-module__t0AzOq__textInput {
+  border-radius: var(--radius-soft);
+  color: #f4f7ff;
+  width: 100%;
+  font: inherit;
+  transition: border-color var(--transition-base), background-color var(--transition-base);
+  background: #05070ae0;
+  border: 1px solid #ffffff14;
+  padding: .9rem 1rem;
+}
+
+.StaggeredTextProject-module__t0AzOq__textInput:focus {
+  background: #080a0ef5;
+  border-color: #f4f7ff38;
+  outline: none;
+}
+
 @media (min-width: 1024px) {
-  .StaggeredTextProject-module__t0AzOq__interactivePane {
+  .StaggeredTextProject-module__t0AzOq__projectShell, .StaggeredTextProject-module__t0AzOq__interactivePane {
     height: 100%;
     min-height: 0;
   }
@@ -32,6 +119,14 @@
   display: grid;
   position: relative;
   overflow: clip;
+}
+
+.StaggeredTextProject-module__t0AzOq__hoverStage {
+  cursor: pointer;
+}
+
+.StaggeredTextProject-module__t0AzOq__buttonStage {
+  min-height: 0;
 }
 
 .StaggeredTextProject-module__t0AzOq__trigger[data-active="true"] {
@@ -178,6 +273,19 @@
 }
 
 @media (max-width: 767px) {
+  .StaggeredTextProject-module__t0AzOq__projectShell {
+    gap: .75rem;
+  }
+
+  .StaggeredTextProject-module__t0AzOq__modeToggle {
+    width: 100%;
+  }
+
+  .StaggeredTextProject-module__t0AzOq__modeButton {
+    flex: 1;
+    justify-content: center;
+  }
+
   .StaggeredTextProject-module__t0AzOq__trigger {
     padding: var(--space-xl) var(--space-lg);
   }
@@ -187,6 +295,10 @@
     min-height: 2.48em;
     padding-block: .58em .68em;
     font-size: clamp(1.6rem, 8.7vw, 2.82rem);
+  }
+
+  .StaggeredTextProject-module__t0AzOq__textInput {
+    padding: .82rem .9rem;
   }
 }
 

@@ -1,124 +1,23 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
-import {
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type CSSProperties,
-} from "react";
+import { useState } from "react";
 import type { InteractiveProjectProps } from "../types";
-import {
-  DEFAULT_STAGGERED_TEXT_TUNING,
-} from "./staggeredTextTuning";
+import { StaggeredTextButtonPreview } from "./StaggeredTextButtonPreview";
+import { StaggeredTextHoverPreview } from "./StaggeredTextHoverPreview";
+import { DEFAULT_STAGGERED_TEXT_TUNING } from "./staggeredTextTuning";
 import styles from "./StaggeredTextProject.module.css";
 import { useStaggeredTextGui } from "./useStaggeredTextGui";
 
-const DISPLAY_TEXT = "Start Deploying";
-const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
+type PreviewMode = "hover" | "button";
 
-function createCharacterSlots(text: string) {
-  const characterCount = Array.from(text).filter((char) => char !== " ").length;
-  let staggerIndex = 0;
-
-  return Array.from(text).map((char, index) => {
-    const isSpace = char === " ";
-    const slot = {
-      char,
-      id: `${char}-${index}`,
-      isSpace,
-      staggerIndex,
-      reverseStaggerIndex: characterCount - staggerIndex - 1,
-    };
-
-    if (!isSpace) {
-      staggerIndex += 1;
-    }
-
-    return slot;
-  });
-}
-
-const CHARACTER_SLOTS = createCharacterSlots(DISPLAY_TEXT);
-
-type MotionDriver = "css" | "waapi";
-type CharacterPart = "outgoingArm" | "outgoingGlyph" | "incomingGlyph" | "shadow";
-type CharacterAnimations = Partial<Record<CharacterPart, Animation>>;
-type TimingStyle = CSSProperties & {
-  "--handoff-delay"?: string;
-  "--incoming-duration"?: string;
-  "--incoming-stagger-step"?: string;
-  "--outgoing-duration"?: string;
-  "--outgoing-stagger-step"?: string;
-};
-
-function createPausedAnimation(
-  element: HTMLElement | null,
-  keyframes: Keyframe[],
-  options: KeyframeAnimationOptions,
-) {
-  if (!element || typeof element.animate !== "function") {
-    return null;
-  }
-
-  const animation = element.animate(keyframes, {
-    ...options,
-    fill: "both",
-  });
-
-  animation.pause();
-  animation.currentTime = 0;
-
-  return animation;
-}
-
-function subscribeToHydration() {
-  return () => {};
-}
+const DEFAULT_BUTTON_TEXT = "Start Deploying";
 
 export default function StaggeredTextProject({
   projectId,
 }: InteractiveProjectProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const suppressNextFocusRef = useRef(false);
-  const [isPressed, setIsPressed] = useState(false);
-  const [isKeyboardFocusVisible, setIsKeyboardFocusVisible] = useState(false);
+  const [mode, setMode] = useState<PreviewMode>("hover");
+  const [buttonText, setButtonText] = useState(DEFAULT_BUTTON_TEXT);
   const [tuning, setTuning] = useState(DEFAULT_STAGGERED_TEXT_TUNING);
-  const outgoingArmRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const outgoingGlyphRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const incomingGlyphRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const shadowRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const animationSetsRef = useRef<CharacterAnimations[]>([]);
-
-  const prefersReducedMotion = shouldReduceMotion ?? false;
-  const isActive = isPressed || isKeyboardFocusVisible;
-  const isHydrated = useSyncExternalStore(
-    subscribeToHydration,
-    () => true,
-    () => false,
-  );
-  const motionDriver: MotionDriver =
-    !isHydrated ||
-    prefersReducedMotion ||
-    typeof Element === "undefined" ||
-    typeof Element.prototype.animate !== "function"
-      ? "css"
-      : "waapi";
-  const {
-    handoffDelayMs,
-    incomingDurationMs,
-    incomingStaggerStepMs,
-    outgoingDurationMs,
-    outgoingStaggerStepMs,
-  } = tuning;
-  const timingStyle: TimingStyle = {
-    "--handoff-delay": `${handoffDelayMs}ms`,
-    "--incoming-duration": `${incomingDurationMs}ms`,
-    "--incoming-stagger-step": `${incomingStaggerStepMs}ms`,
-    "--outgoing-duration": `${outgoingDurationMs}ms`,
-    "--outgoing-stagger-step": `${outgoingStaggerStepMs}ms`,
-  };
 
   useStaggeredTextGui({
     enabled: true,
@@ -126,244 +25,51 @@ export default function StaggeredTextProject({
     tuning,
   });
 
-  useEffect(() => {
-    if (motionDriver !== "waapi") {
-      animationSetsRef.current.forEach((animations) => {
-        Object.values(animations).forEach((animation) => animation?.cancel());
-      });
-      animationSetsRef.current = [];
-      return;
-    }
-
-    const animations = CHARACTER_SLOTS.filter((slot) => !slot.isSpace).map((slot) => {
-      const index = slot.staggerIndex;
-      const reverseDelay = slot.reverseStaggerIndex * outgoingStaggerStepMs;
-
-      return {
-        outgoingArm: createPausedAnimation(
-          outgoingArmRefs.current[index],
-          [
-            { opacity: 1, transform: "none" },
-            { opacity: 0.92, transform: "translateY(-0.12em) rotateX(82deg)" },
-          ],
-          {
-            delay: index * outgoingStaggerStepMs,
-            duration: outgoingDurationMs,
-            easing: EASE_CUSTOM,
-            endDelay: reverseDelay,
-          },
-        ),
-        outgoingGlyph: createPausedAnimation(
-          outgoingGlyphRefs.current[index],
-          [
-            { filter: "blur(0)", opacity: 1, transform: "translateZ(0.02em)" },
-            {
-              filter: "blur(8px)",
-              opacity: 0,
-              transform: "translateY(-0.1em) translateZ(0.14em) rotateX(-18deg)",
-            },
-          ],
-          {
-            delay: index * outgoingStaggerStepMs,
-            duration: outgoingDurationMs,
-            easing: EASE_CUSTOM,
-            endDelay: reverseDelay,
-          },
-        ),
-        incomingGlyph: createPausedAnimation(
-          incomingGlyphRefs.current[index],
-          [
-            {
-              filter: "blur(8px)",
-              opacity: 0,
-              transform: "translateY(-0.02em) rotateX(-88deg) translateZ(0)",
-            },
-            {
-              filter: "blur(0)",
-              opacity: 1,
-              transform: "translateY(-0.02em) rotateX(0deg) translateZ(0)",
-            },
-          ],
-          {
-            delay: index * incomingStaggerStepMs + handoffDelayMs,
-            duration: incomingDurationMs,
-            easing: EASE_CUSTOM,
-            endDelay: slot.reverseStaggerIndex * incomingStaggerStepMs,
-          },
-        ),
-        shadow: createPausedAnimation(
-          shadowRefs.current[index],
-          [
-            { filter: "blur(12px)", opacity: 0, transform: "translateY(0.28em) scale(1.03)" },
-            { filter: "blur(8px)", opacity: 0.36, transform: "translateY(-0.04em) scale(1.04)" },
-          ],
-          {
-            delay: index * outgoingStaggerStepMs,
-            duration: outgoingDurationMs,
-            easing: EASE_CUSTOM,
-            endDelay: reverseDelay,
-          },
-        ),
-      } satisfies CharacterAnimations;
-    });
-
-    animationSetsRef.current = animations;
-
-    return () => {
-      animations.forEach((animationSet) => {
-        Object.values(animationSet).forEach((animation) => animation?.cancel());
-      });
-      animationSetsRef.current = [];
-    };
-  }, [
-    handoffDelayMs,
-    incomingDurationMs,
-    incomingStaggerStepMs,
-    motionDriver,
-    outgoingDurationMs,
-    outgoingStaggerStepMs,
-  ]);
-
-  useEffect(() => {
-    if (motionDriver !== "waapi") {
-      return;
-    }
-
-    animationSetsRef.current.forEach((animationSet) => {
-      Object.values(animationSet).forEach((animation) => {
-        if (!animation) return;
-
-        if (isActive) {
-          animation.playbackRate = 1;
-          animation.play();
-          return;
-        }
-
-        if ((animation.currentTime ?? 0) <= 0) {
-          animation.pause();
-          animation.currentTime = 0;
-          return;
-        }
-
-        animation.playbackRate = -1;
-        animation.play();
-      });
-    });
-  }, [
-    handoffDelayMs,
-    incomingDurationMs,
-    incomingStaggerStepMs,
-    isActive,
-    motionDriver,
-    outgoingDurationMs,
-    outgoingStaggerStepMs,
-  ]);
-
   return (
-    <div className={styles.interactivePane} data-project-id={projectId}>
-      <button
-        type="button"
-        className={styles.trigger}
-        aria-label="Preview the staggered text hover motion"
-        data-active={isActive}
-        data-motion-driver={motionDriver}
-        data-reduced-motion={prefersReducedMotion}
-        style={timingStyle}
-        onPointerDown={() => {
-          suppressNextFocusRef.current = true;
-          setIsPressed(true);
-        }}
-        onPointerUp={() => {
-          suppressNextFocusRef.current = false;
-          setIsPressed(false);
-        }}
-        onPointerLeave={() => {
-          suppressNextFocusRef.current = false;
-          setIsPressed(false);
-        }}
-        onPointerCancel={() => {
-          suppressNextFocusRef.current = false;
-          setIsPressed(false);
-        }}
-        onFocus={() => {
-          if (suppressNextFocusRef.current) {
-            suppressNextFocusRef.current = false;
-            return;
-          }
-
-          setIsKeyboardFocusVisible(true);
-        }}
-        onBlur={() => {
-          suppressNextFocusRef.current = false;
-          setIsPressed(false);
-          setIsKeyboardFocusVisible(false);
-        }}
-      >
-        <span className={styles.wordmark}>
-          {CHARACTER_SLOTS.map((slot) => {
-            if (slot.isSpace) {
-              return (
-                <span key={slot.id} className={styles.space} aria-hidden="true">
-                  {" "}
-                </span>
-              );
-            }
-
-            return (
-              <span
-                key={slot.id}
-                className={styles.slot}
-                data-slot="character"
-                style={
-                  {
-                    "--char-index": slot.staggerIndex,
-                    "--char-reverse-index": slot.reverseStaggerIndex,
-                  } as CSSProperties
-                }
-              >
-                <span className={styles.slotSizer} data-part="slot-sizer" aria-hidden="true">
-                  {slot.char}
-                </span>
-                <span
-                  className={styles.outgoingArm}
-                  data-part="outgoing-arm"
-                  ref={(node) => {
-                    outgoingArmRefs.current[slot.staggerIndex] = node;
-                  }}
-                >
-                  <span
-                    className={styles.outgoingGlyph}
-                    data-part="outgoing-glyph"
-                    ref={(node) => {
-                      outgoingGlyphRefs.current[slot.staggerIndex] = node;
-                    }}
-                  >
-                    {slot.char}
-                  </span>
-                </span>
-                <span
-                  className={styles.incomingGlyph}
-                  data-part="incoming-glyph"
-                  ref={(node) => {
-                    incomingGlyphRefs.current[slot.staggerIndex] = node;
-                  }}
-                >
-                  {slot.char}
-                </span>
-                <span
-                  className={styles.shadow}
-                  aria-hidden="true"
-                  ref={(node) => {
-                    shadowRefs.current[slot.staggerIndex] = node;
-                  }}
-                >
-                  {slot.char}
-                </span>
-              </span>
-            );
-          })}
-        </span>
-      </button>
+    <div className={styles.projectShell} data-project-id={projectId}>
+      <div className={styles.controls}>
+        <div
+          className={styles.modeToggle}
+          role="tablist"
+          aria-label="Staggered text preview mode"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "hover"}
+            className={`${styles.modeButton} ${mode === "hover" ? styles.modeButtonActive : ""}`}
+            data-mode-toggle="hover"
+            onClick={() => {
+              setMode("hover");
+            }}
+          >
+            Hover
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "button"}
+            className={`${styles.modeButton} ${mode === "button" ? styles.modeButtonActive : ""}`}
+            data-mode-toggle="button"
+            onClick={() => {
+              setMode("button");
+            }}
+          >
+            Button
+          </button>
+        </div>
+      </div>
+      <div className={styles.previewFrame}>
+        {mode === "hover" ? (
+          <StaggeredTextHoverPreview tuning={tuning} />
+        ) : (
+          <StaggeredTextButtonPreview
+            text={buttonText}
+            onTextChange={setButtonText}
+            tuning={tuning}
+          />
+        )}
+      </div>
     </div>
   );
 }
