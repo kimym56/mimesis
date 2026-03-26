@@ -156,7 +156,7 @@
   font-size: clamp(1.62rem, 4.35vw, 3.72rem);
   font-weight: 700;
   line-height: 0.92;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.022em;
   font-kerning: normal;
   text-transform: none;
   min-height: 2.3em;
@@ -179,7 +179,7 @@
 }
 
 .slot + .slot {
-  margin-inline-start: -0.052em;
+  margin-inline-start: -0.044em;
 }
 
 .slotSizer {

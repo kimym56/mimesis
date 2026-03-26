@@ -90,7 +90,11 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
     const shadowRefs = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])([]);
     const animationSetsRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])([]);
     const displayText = text.trim() || DEFAULT_BUTTON_TEXT;
-    const characterSlots = createCharacterSlots(displayText);
+    const characterSlots = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
+        "StaggeredTextButtonPreview.useMemo[characterSlots]": ()=>createCharacterSlots(displayText)
+    }["StaggeredTextButtonPreview.useMemo[characterSlots]"], [
+        displayText
+    ]);
     const prefersReducedMotion = shouldReduceMotion ?? false;
     const isActive = isPressed || isKeyboardFocusVisible;
     const isHydrated = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSyncExternalStore"])(subscribeToHydration, {
@@ -270,7 +274,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                         children: "Text"
                     }, void 0, false, {
                         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                        lineNumber: 274,
+                        lineNumber: 275,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -283,13 +287,13 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                         }
                     }, void 0, false, {
                         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                        lineNumber: 275,
+                        lineNumber: 276,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                lineNumber: 273,
+                lineNumber: 274,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -300,22 +304,19 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                 "data-motion-driver": motionDriver,
                 "data-reduced-motion": prefersReducedMotion,
                 style: timingStyle,
-                onPointerDown: (event)=>{
+                onPointerDown: ()=>{
                     suppressNextFocusRef.current = true;
-                    event.currentTarget.setPointerCapture?.(event.pointerId);
                     setIsPressed(true);
                 },
-                onPointerUp: (event)=>{
+                onPointerUp: ()=>{
                     suppressNextFocusRef.current = false;
-                    event.currentTarget.releasePointerCapture?.(event.pointerId);
                     setIsPressed(false);
                 },
-                onPointerCancel: (event)=>{
+                onPointerLeave: ()=>{
                     suppressNextFocusRef.current = false;
-                    event.currentTarget.releasePointerCapture?.(event.pointerId);
                     setIsPressed(false);
                 },
-                onLostPointerCapture: ()=>{
+                onPointerCancel: ()=>{
                     suppressNextFocusRef.current = false;
                     setIsPressed(false);
                 },
@@ -341,7 +342,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                 children: " "
                             }, slot.id, false, {
                                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                lineNumber: 330,
+                                lineNumber: 328,
                                 columnNumber: 17
                             }, this);
                         }
@@ -360,7 +361,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 348,
+                                    lineNumber: 346,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -378,12 +379,12 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                         children: slot.char
                                     }, void 0, false, {
                                         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                        lineNumber: 358,
+                                        lineNumber: 356,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 351,
+                                    lineNumber: 349,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -395,7 +396,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 368,
+                                    lineNumber: 366,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -407,34 +408,34 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 377,
+                                    lineNumber: 375,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, slot.id, true, {
                             fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                            lineNumber: 337,
+                            lineNumber: 335,
                             columnNumber: 15
                         }, this);
                     })
                 }, void 0, false, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                    lineNumber: 326,
+                    lineNumber: 324,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                lineNumber: 285,
+                lineNumber: 286,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-        lineNumber: 272,
+        lineNumber: 273,
         columnNumber: 5
     }, this);
 }
-_s(StaggeredTextButtonPreview, "nb6foyRkbjHOV8anNK4zAVsJ6Pg=", false, function() {
+_s(StaggeredTextButtonPreview, "yFZGEWujvB6yNbiibl/623nKK0k=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$utils$2f$reduced$2d$motion$2f$use$2d$reduced$2d$motion$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useReducedMotion"],
         __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSyncExternalStore"]
@@ -967,7 +968,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-const DEFAULT_BUTTON_TEXT = "Start Deploying";
+const DEFAULT_BUTTON_TEXT = "Type Anything";
 function StaggeredTextProject({ projectId }) {
     _s();
     const [mode, setMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("hover");

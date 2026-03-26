@@ -3,6 +3,7 @@
 import { useReducedMotion } from "framer-motion";
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -91,7 +92,7 @@ export function StaggeredTextButtonPreview({
   const animationSetsRef = useRef<CharacterAnimations[]>([]);
 
   const displayText = text.trim() || DEFAULT_BUTTON_TEXT;
-  const characterSlots = createCharacterSlots(displayText);
+  const characterSlots = useMemo(() => createCharacterSlots(displayText), [displayText]);
   const prefersReducedMotion = shouldReduceMotion ?? false;
   const isActive = isPressed || isKeyboardFocusVisible;
   const isHydrated = useSyncExternalStore(
@@ -290,22 +291,19 @@ export function StaggeredTextButtonPreview({
         data-motion-driver={motionDriver}
         data-reduced-motion={prefersReducedMotion}
         style={timingStyle}
-        onPointerDown={(event) => {
+        onPointerDown={() => {
           suppressNextFocusRef.current = true;
-          event.currentTarget.setPointerCapture?.(event.pointerId);
           setIsPressed(true);
         }}
-        onPointerUp={(event) => {
+        onPointerUp={() => {
           suppressNextFocusRef.current = false;
-          event.currentTarget.releasePointerCapture?.(event.pointerId);
           setIsPressed(false);
         }}
-        onPointerCancel={(event) => {
+        onPointerLeave={() => {
           suppressNextFocusRef.current = false;
-          event.currentTarget.releasePointerCapture?.(event.pointerId);
           setIsPressed(false);
         }}
-        onLostPointerCapture={() => {
+        onPointerCancel={() => {
           suppressNextFocusRef.current = false;
           setIsPressed(false);
         }}

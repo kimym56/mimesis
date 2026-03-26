@@ -97,7 +97,14 @@ function TestHarness({ enabled = true }: { enabled?: boolean }) {
     tuning,
   });
 
-  return <div data-testid="outgoing-stagger-step">{tuning.outgoingStaggerStepMs}</div>;
+  return (
+    <div
+      data-testid="tuning-values"
+      data-font-weight={tuning.fontWeight}
+      data-letter-spacing={tuning.letterSpacingEm}
+      data-outgoing-stagger-step={tuning.outgoingStaggerStepMs}
+    />
+  );
 }
 
 describe("useStaggeredTextGui", () => {
@@ -171,6 +178,32 @@ describe("useStaggeredTextGui", () => {
       outgoingStaggerController?.setValue(26);
     });
 
-    expect(container.textContent).toContain("26");
+    expect(container.querySelector('[data-testid="tuning-values"]')?.getAttribute("data-outgoing-stagger-step")).toBe("26");
+  });
+
+  it("updates the live typography state when typography controls change", async () => {
+    await act(async () => {
+      root.render(<TestHarness />);
+    });
+    await vi.dynamicImportSettled();
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const letterSpacingController = guiMockState.controllers.get("letterSpacingEm");
+    const fontWeightController = guiMockState.controllers.get("fontWeight");
+
+    expect(letterSpacingController).toBeDefined();
+    expect(fontWeightController).toBeDefined();
+
+    await act(async () => {
+      letterSpacingController?.setValue(-0.018);
+      fontWeightController?.setValue(760);
+    });
+
+    const tuningValues = container.querySelector('[data-testid="tuning-values"]');
+
+    expect(tuningValues?.getAttribute("data-letter-spacing")).toBe("-0.018");
+    expect(tuningValues?.getAttribute("data-font-weight")).toBe("760");
   });
 });

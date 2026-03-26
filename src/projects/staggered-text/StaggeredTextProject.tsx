@@ -10,7 +10,7 @@ import { useStaggeredTextGui } from "./useStaggeredTextGui";
 
 type PreviewMode = "hover" | "button";
 
-const DEFAULT_BUTTON_TEXT = "Start Deploying";
+const DEFAULT_BUTTON_TEXT = "Type Anything";
 
 export default function StaggeredTextProject({
   projectId,

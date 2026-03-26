@@ -137,7 +137,7 @@
   z-index: 1;
   perspective: 1600px;
   font-family: var(--font-schibsted-grotesk), sans-serif;
-  letter-spacing: -.03em;
+  letter-spacing: -.022em;
   font-kerning: normal;
   text-transform: none;
   justify-content: center;
@@ -167,7 +167,7 @@
 }
 
 .StaggeredTextProject-module__t0AzOq__slot + .StaggeredTextProject-module__t0AzOq__slot {
-  margin-inline-start: -.052em;
+  margin-inline-start: -.044em;
 }
 
 .StaggeredTextProject-module__t0AzOq__slotSizer {

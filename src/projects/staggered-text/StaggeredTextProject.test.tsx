@@ -152,6 +152,18 @@ describe("StaggeredTextProject", () => {
     expect(trigger?.getAttribute("data-active")).toBe("true");
 
     act(() => {
+      trigger?.dispatchEvent(new Event("pointerout", { bubbles: true }));
+    });
+
+    expect(trigger?.getAttribute("data-active")).toBe("false");
+
+    act(() => {
+      trigger?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+    });
+
+    expect(trigger?.getAttribute("data-active")).toBe("true");
+
+    act(() => {
       trigger?.dispatchEvent(new Event("pointerup", { bubbles: true }));
     });
 
@@ -249,6 +261,56 @@ describe("StaggeredTextProject", () => {
           13 * DEFAULT_STAGGERED_TEXT_TUNING.outgoingStaggerStepMs,
         fill: "both",
       });
+    } finally {
+      if (originalAnimate) {
+        Object.defineProperty(Element.prototype, "animate", {
+          configurable: true,
+          value: originalAnimate,
+        });
+      } else {
+        delete (Element.prototype as Partial<typeof Element.prototype>).animate;
+      }
+    }
+  });
+
+  it("does not rebuild button-mode animations when pointer leave triggers rollback", () => {
+    const originalAnimate = Element.prototype.animate;
+    const animateMock = vi.fn(() => ({
+      cancel: vi.fn(),
+      currentTime: 120,
+      pause: vi.fn(),
+      play: vi.fn(),
+      playbackRate: 1,
+    }));
+
+    Object.defineProperty(Element.prototype, "animate", {
+      configurable: true,
+      value: animateMock,
+    });
+
+    try {
+      act(() => {
+        root.render(<StaggeredTextProject projectId="staggered-text" />);
+      });
+
+      const buttonToggle = container.querySelector('[data-mode-toggle="button"]');
+
+      act(() => {
+        buttonToggle?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+
+      const trigger = container.querySelector('[data-implementation="button"] button');
+      const initialAnimateCalls = animateMock.mock.calls.length;
+
+      act(() => {
+        trigger?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+      });
+
+      act(() => {
+        trigger?.dispatchEvent(new Event("pointerout", { bubbles: true }));
+      });
+
+      expect(animateMock.mock.calls).toHaveLength(initialAnimateCalls);
     } finally {
       if (originalAnimate) {
         Object.defineProperty(Element.prototype, "animate", {
