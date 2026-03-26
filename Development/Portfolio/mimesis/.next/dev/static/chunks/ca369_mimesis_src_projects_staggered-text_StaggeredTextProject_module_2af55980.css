@@ -1,0 +1,193 @@
+/* [project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.module.css [app-client] (css) */
+.StaggeredTextProject-module__t0AzOq__interactivePane {
+  flex: 1;
+  min-height: 40vh;
+  display: flex;
+}
+
+@media (min-width: 1024px) {
+  .StaggeredTextProject-module__t0AzOq__interactivePane {
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger {
+  border-radius: var(--radius-soft);
+  color: #f4f7ff;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100%;
+  transition: border-color var(--transition-base);
+  background-color: #05070a;
+  background-image: radial-gradient(circle at 50% 42%, #ffffff08, #0000 36%), linear-gradient(#080a0e, #030406);
+  border: 1px solid #ffffff0f;
+  flex: 1;
+  place-items: center;
+  padding: clamp(2rem, 6vw, 4rem);
+  display: grid;
+  position: relative;
+  overflow: clip;
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-active="true"] {
+  border-color: #ffffff1a;
+}
+
+.StaggeredTextProject-module__t0AzOq__wordmark {
+  z-index: 1;
+  perspective: 1600px;
+  font-family: var(--font-schibsted-grotesk), sans-serif;
+  letter-spacing: -.03em;
+  font-kerning: normal;
+  text-transform: none;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  max-width: 100%;
+  min-height: 2.3em;
+  padding-block: .5em .62em;
+  font-size: clamp(1.62rem, 4.35vw, 3.72rem);
+  font-weight: 700;
+  line-height: .92;
+  display: flex;
+  position: relative;
+}
+
+.StaggeredTextProject-module__t0AzOq__slot, .StaggeredTextProject-module__t0AzOq__space {
+  justify-content: center;
+  align-items: center;
+  display: inline-flex;
+}
+
+.StaggeredTextProject-module__t0AzOq__slot {
+  perspective: 1200px;
+  height: 1.14em;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.StaggeredTextProject-module__t0AzOq__slot + .StaggeredTextProject-module__t0AzOq__slot {
+  margin-inline-start: -.052em;
+}
+
+.StaggeredTextProject-module__t0AzOq__slotSizer {
+  visibility: hidden;
+  pointer-events: none;
+  display: block;
+}
+
+.StaggeredTextProject-module__t0AzOq__outgoingArm, .StaggeredTextProject-module__t0AzOq__outgoingGlyph, .StaggeredTextProject-module__t0AzOq__incomingGlyph, .StaggeredTextProject-module__t0AzOq__shadow {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+  justify-content: center;
+  align-items: center;
+  display: inline-flex;
+  position: absolute;
+  inset: 0;
+}
+
+.StaggeredTextProject-module__t0AzOq__outgoingArm {
+  transform-origin: 50% 12%;
+  transition: transform var(--outgoing-duration) var(--ease-custom), opacity var(--outgoing-duration) var(--ease-custom);
+}
+
+.StaggeredTextProject-module__t0AzOq__outgoingGlyph {
+  color: #f4f7ff;
+  backface-visibility: hidden;
+  text-shadow: 0 0 .01em;
+  opacity: 1;
+  filter: blur();
+  transition: transform var(--outgoing-duration) var(--ease-custom), opacity .72s var(--ease-custom), filter var(--outgoing-duration) var(--ease-custom);
+  transform: translateZ(.02em);
+}
+
+.StaggeredTextProject-module__t0AzOq__incomingGlyph {
+  color: #f4f7ff;
+  backface-visibility: hidden;
+  text-shadow: 0 0 .01em;
+  transform-origin: 50% 100%;
+  opacity: 0;
+  filter: blur(8px);
+  transition: transform var(--incoming-duration) var(--ease-custom), opacity var(--incoming-duration) var(--ease-custom), filter var(--incoming-duration) var(--ease-custom);
+  transform: translateY(-.02em)rotateX(-88deg)translateZ(0);
+}
+
+.StaggeredTextProject-module__t0AzOq__shadow {
+  color: #f4f7ff2e;
+  opacity: 0;
+  filter: blur(12px);
+  transition: opacity var(--outgoing-duration) var(--ease-custom), transform var(--outgoing-duration) var(--ease-custom), filter var(--outgoing-duration) var(--ease-custom);
+  transform: translateY(.28em)scale(1.03);
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-motion-driver="css"][data-active="true"] .StaggeredTextProject-module__t0AzOq__outgoingArm {
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
+  opacity: .92;
+  transform: translateY(-.12em)rotateX(82deg);
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-motion-driver="css"][data-active="true"] .StaggeredTextProject-module__t0AzOq__outgoingGlyph {
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(-.1em)translateZ(.14em)rotateX(-18deg);
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-motion-driver="css"][data-active="true"] .StaggeredTextProject-module__t0AzOq__incomingGlyph {
+  transition-delay: calc(var(--char-index) * var(--incoming-stagger-step)  + var(--handoff-delay));
+  opacity: 1;
+  filter: blur();
+  transform: translateY(-.02em)rotateX(0)translateZ(0);
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-motion-driver="css"][data-active="true"] .StaggeredTextProject-module__t0AzOq__shadow {
+  transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
+  opacity: .36;
+  filter: blur(8px);
+  transform: translateY(-.04em)scale(1.04);
+}
+
+.StaggeredTextProject-module__t0AzOq__space {
+  width: .27em;
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__outgoingArm, .StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__outgoingGlyph, .StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__incomingGlyph, .StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__shadow {
+  transition-duration: var(--duration-fast);
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__outgoingArm, .StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__outgoingGlyph {
+  filter: none;
+  transform: none;
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__incomingGlyph, .StaggeredTextProject-module__t0AzOq__trigger[data-reduced-motion="true"] .StaggeredTextProject-module__t0AzOq__shadow {
+  display: none;
+}
+
+.StaggeredTextProject-module__t0AzOq__trigger[data-motion-driver="css"][data-reduced-motion="true"][data-active="true"] .StaggeredTextProject-module__t0AzOq__outgoingGlyph {
+  text-shadow: 0 0 .3em #f4f7ff29;
+  transform: translateY(-.03em);
+}
+
+@media (max-width: 767px) {
+  .StaggeredTextProject-module__t0AzOq__trigger {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .StaggeredTextProject-module__t0AzOq__wordmark {
+    letter-spacing: -.02em;
+    min-height: 2.48em;
+    padding-block: .58em .68em;
+    font-size: clamp(1.6rem, 8.7vw, 2.82rem);
+  }
+}
+
+/*# sourceMappingURL=ca369_mimesis_src_projects_staggered-text_StaggeredTextProject_module_2af55980.css.map*/

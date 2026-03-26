@@ -1,0 +1,587 @@
+/* [next]/internal/font/google/archivo_5d145397.module.css [app-client] (css) */
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/a2947afc6a06879b-s.5f161693.woff2") format("woff2");
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/651aaf1801011892-s.7b2da7da.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/75affa71d1e2f6a7-s.p.51cde8ff.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/a2947afc6a06879b-s.5f161693.woff2") format("woff2");
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/651aaf1801011892-s.7b2da7da.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/75affa71d1e2f6a7-s.p.51cde8ff.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/a2947afc6a06879b-s.5f161693.woff2") format("woff2");
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/651aaf1801011892-s.7b2da7da.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../media/75affa71d1e2f6a7-s.p.51cde8ff.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Archivo Fallback;
+  src: local(Arial);
+  ascent-override: 88.96%;
+  descent-override: 21.28%;
+  line-gap-override: 0.0%;
+  size-adjust: 98.7%;
+}
+
+.archivo_5d145397-module__lqYJiq__className {
+  font-family: Archivo, Archivo Fallback;
+  font-style: normal;
+}
+
+.archivo_5d145397-module__lqYJiq__variable {
+  --font-archivo: "Archivo", "Archivo Fallback";
+}
+
+/* [next]/internal/font/google/space_grotesk_a5965153.module.css [app-client] (css) */
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../media/32687112bd2dd8db-s.cfdd66c2.woff2") format("woff2");
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../media/28868e710e86be81-s.c30238d4.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../media/0c89a48fa5027cee-s.p.4564287c.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../media/32687112bd2dd8db-s.cfdd66c2.woff2") format("woff2");
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../media/28868e710e86be81-s.c30238d4.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../media/0c89a48fa5027cee-s.p.4564287c.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../media/32687112bd2dd8db-s.cfdd66c2.woff2") format("woff2");
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../media/28868e710e86be81-s.c30238d4.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../media/0c89a48fa5027cee-s.p.4564287c.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Space Grotesk Fallback;
+  src: local(Arial);
+  ascent-override: 89.71%;
+  descent-override: 26.62%;
+  line-gap-override: 0.0%;
+  size-adjust: 109.69%;
+}
+
+.space_grotesk_a5965153-module__LbC2oa__className {
+  font-family: Space Grotesk, Space Grotesk Fallback;
+  font-style: normal;
+}
+
+.space_grotesk_a5965153-module__LbC2oa__variable {
+  --font-space-grotesk: "Space Grotesk", "Space Grotesk Fallback";
+}
+
+/* [next]/internal/font/google/schibsted_grotesk_7778439.module.css [app-client] (css) */
+@font-face {
+  font-family: Schibsted Grotesk;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../media/481eac7be1c268b7-s.9491d1be.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Schibsted Grotesk;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../media/31a9145ccb84606d-s.p.fa7e779d.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Schibsted Grotesk;
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../media/481eac7be1c268b7-s.9491d1be.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Schibsted Grotesk;
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../media/31a9145ccb84606d-s.p.fa7e779d.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Schibsted Grotesk Fallback;
+  src: local(Arial);
+  ascent-override: 93.46%;
+  descent-override: 24.67%;
+  line-gap-override: 0.0%;
+  size-adjust: 104.49%;
+}
+
+.schibsted_grotesk_7778439-module__8KVRva__className {
+  font-family: Schibsted Grotesk, Schibsted Grotesk Fallback;
+  font-style: normal;
+}
+
+.schibsted_grotesk_7778439-module__8KVRva__variable {
+  --font-schibsted-grotesk: "Schibsted Grotesk", "Schibsted Grotesk Fallback";
+}
+
+/* [project]/Development/Portfolio/mimesis/src/components/ThemeToggle.module.css [app-client] (css) */
+.ThemeToggle-module__O8dWba__toggle {
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: var(--z-fixed);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
+  opacity: .7;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  position: fixed;
+}
+
+.ThemeToggle-module__O8dWba__toggle:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.ThemeToggle-module__O8dWba__toggle:active {
+  transform: scale(.95);
+}
+
+.ThemeToggle-module__O8dWba__toggle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* [project]/Development/Portfolio/mimesis/src/styles/tokens.css [app-client] (css) */
+:root {
+  --background: #f9f9f7;
+  --surface: #fff;
+  --surface-elevated: #fefefe;
+  --foreground: #1c1c1c;
+  --foreground-muted: #1c1c1c99;
+  --foreground-subtle: #1c1c1c66;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: #2563eb14;
+  --border: #0000000f;
+  --border-strong: #0000001a;
+  --border-focus: #2563eb80;
+  --focus-ring: #2563eb;
+  --error: #ef4444;
+  --success: #22c55e;
+  --overlay-hover: #0000002e;
+  --overlay-pressed: #0000003d;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+  --radius-subtle: var(--radius-md);
+  --radius-soft: var(--radius-lg);
+  --radius-prominent: var(--radius-xl);
+  --radius-pill: var(--radius-full);
+  --space-xs: .25rem;
+  --space-sm: .5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+  --font-heading: var(--font-archivo), sans-serif;
+  --font-body: var(--font-space-grotesk), sans-serif;
+  --text-xs: .75rem;
+  --text-sm: .875rem;
+  --text-base: .9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 2.5rem;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --leading-tight: 1.15;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+  --leading-loose: 2;
+  --tracking-tight: -.02em;
+  --tracking-normal: 0;
+  --tracking-wide: .08em;
+  --duration-fast: .15s;
+  --duration-base: .3s;
+  --duration-slow: .5s;
+  --ease-out: ease-out;
+  --ease-in-out: ease-in-out;
+  --ease-custom: cubic-bezier(.16, 1, .3, 1);
+  --transition-fast: .15s ease-out;
+  --transition-base: .3s cubic-bezier(.16, 1, .3, 1);
+  --transition-slow: .5s cubic-bezier(.16, 1, .3, 1);
+  --container-max: 1200px;
+  --container-padding: 1.5rem;
+  --grid-gap-sm: 2rem;
+  --grid-gap-md: 3rem;
+  --grid-gap-lg: 4rem;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --shadow-sm: 0 1px 2px #0000000d;
+  --shadow-md: 0 4px 6px #00000012;
+  --shadow-lg: 0 10px 15px #00000014;
+  --shadow-xl: 0 20px 25px #0000001a;
+  --shadow-focus: 0 0 0 3px var(--border-focus);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #121212;
+    --surface: #1a1a1a;
+    --surface-elevated: #1f1f1f;
+    --foreground: #f5f5f3;
+    --foreground-muted: #f5f5f399;
+    --foreground-subtle: #f5f5f366;
+    --border: #ffffff14;
+    --border-strong: #ffffff1f;
+    --border-focus: #2563eb66;
+    --overlay-hover: #ffffff1f;
+    --overlay-pressed: #ffffff29;
+  }
+}
+
+[data-theme="dark"] {
+  --background: #121212;
+  --surface: #1a1a1a;
+  --surface-elevated: #1f1f1f;
+  --foreground: #f5f5f3;
+  --foreground-muted: #f5f5f399;
+  --foreground-subtle: #f5f5f366;
+  --border: #ffffff14;
+  --border-strong: #ffffff1f;
+  --border-focus: #2563eb66;
+  --overlay-hover: #ffffff1f;
+  --overlay-pressed: #ffffff29;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, :before, :after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* [project]/Development/Portfolio/mimesis/src/app/globals.css [app-client] (css) */
+html, body {
+  background-color: var(--background);
+  max-width: 100vw;
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, :before, :after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.container {
+  max-width: var(--container-max);
+  padding: 0 var(--container-padding);
+  margin: 0 auto;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-5xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-md);
+  text-wrap: balance;
+}
+
+.subtitle {
+  font-size: var(--text-lg);
+  color: var(--foreground-muted);
+  max-width: 600px;
+  line-height: var(--leading-relaxed);
+  font-style: italic;
+}
+
+.subtitle-attribution {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  font-style: normal;
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--foreground-subtle);
+  display: block;
+}
+
+.home-page {
+  min-height: 100vh;
+  padding-top: var(--space-4xl);
+  padding-bottom: var(--space-xl);
+}
+
+.home-header {
+  background-color: var(--background);
+  min-height: clamp(16rem, 72vw, 23rem);
+  box-shadow: none;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 0;
+  display: grid;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-header-copy {
+  z-index: 2;
+  flex-direction: column;
+  justify-content: center;
+  max-width: min(34rem, 100%);
+  display: flex;
+  position: relative;
+}
+
+.home-header-cover {
+  z-index: 0;
+  min-height: 0;
+  color: var(--foreground-subtle);
+  pointer-events: none;
+  isolation: isolate;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.home-header-cover:after {
+  content: "";
+  z-index: 2;
+  background: linear-gradient(90deg, var(--background) 0%, var(--background) 42%, transparent 50%), linear-gradient(180deg, transparent 0%, var(--background) 100%);
+  position: absolute;
+  inset: 0;
+}
+
+.home-header-cover-image {
+  z-index: 1;
+  object-fit: cover;
+  object-position: center 45%;
+  opacity: .5;
+  mix-blend-mode: normal;
+  position: relative;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .home-header-cover-image {
+    filter: invert() brightness(.92);
+  }
+}
+
+[data-theme="dark"] .home-header-cover-image {
+  filter: invert() brightness(.92);
+}
+
+.skip-link {
+  background: var(--foreground);
+  color: var(--background);
+  padding: var(--space-sm) var(--space-md);
+  z-index: var(--z-modal);
+  transition: top var(--transition-base);
+  border-radius: 0 0 var(--radius-sm) 0;
+  font-weight: var(--font-medium);
+  position: absolute;
+  top: -40px;
+  left: 0;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/*# sourceMappingURL=%5Broot-of-the-server%5D__2fc73bf1._.css.map*/

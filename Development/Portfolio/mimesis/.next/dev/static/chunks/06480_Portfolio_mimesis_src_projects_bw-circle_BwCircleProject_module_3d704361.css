@@ -1,0 +1,218 @@
+/* [project]/Development/Portfolio/mimesis/src/projects/bw-circle/BwCircleProject.module.css [app-client] (css) */
+.BwCircleProject-module__NbkQ1W__interactivePane {
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.BwCircleProject-module__NbkQ1W__modeToggleRow {
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+  display: flex;
+}
+
+.BwCircleProject-module__NbkQ1W__modeToggle {
+  background: var(--border);
+  border-radius: var(--radius-soft);
+  align-self: flex-start;
+  gap: 2px;
+  padding: 2px;
+  display: flex;
+}
+
+.BwCircleProject-module__NbkQ1W__modeButton {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--foreground-muted);
+  border-radius: var(--radius-soft);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: none;
+  border: none;
+  padding: 6px 16px;
+}
+
+.BwCircleProject-module__NbkQ1W__modeButton:hover {
+  color: var(--foreground);
+}
+
+.BwCircleProject-module__NbkQ1W__modeButtonActive {
+  color: var(--foreground);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.BwCircleProject-module__NbkQ1W__syncPanel {
+  top: var(--space-lg);
+  left: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 2;
+  align-items: start;
+  gap: var(--space-sm);
+  pointer-events: none;
+  grid-template-columns: minmax(0, 1fr) auto;
+  display: grid;
+  position: absolute;
+}
+
+.BwCircleProject-module__NbkQ1W__syncControls {
+  gap: var(--space-sm);
+  pointer-events: auto;
+  flex-direction: column;
+  max-width: min(34rem, 100%);
+  display: flex;
+}
+
+.BwCircleProject-module__NbkQ1W__inputRow {
+  gap: var(--space-sm);
+  align-items: center;
+  display: flex;
+}
+
+.BwCircleProject-module__NbkQ1W__linkInput {
+  color: #111;
+  border-radius: var(--radius-soft);
+  background: #ffffffe0;
+  border: 1px solid #1111111f;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 14px;
+  box-shadow: 0 10px 24px #1111111a;
+}
+
+.BwCircleProject-module__NbkQ1W__linkInput::placeholder {
+  color: #1111116b;
+}
+
+.BwCircleProject-module__NbkQ1W__tempoBadge {
+  min-height: 36px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  align-items: center;
+  padding: 0;
+  display: inline-flex;
+}
+
+.BwCircleProject-module__NbkQ1W__tempoBadgeLight {
+  color: #fff;
+}
+
+.BwCircleProject-module__NbkQ1W__tempoBadgeDark {
+  color: #111;
+}
+
+.BwCircleProject-module__NbkQ1W__playbackButton {
+  color: #fffffff5;
+  border-radius: var(--radius-soft);
+  min-height: 36px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  background: #111;
+  border: none;
+  padding: 0 14px;
+  box-shadow: 0 10px 24px #11111124;
+}
+
+.BwCircleProject-module__NbkQ1W__permissionText {
+  color: #11111194;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.BwCircleProject-module__NbkQ1W__errorText {
+  font-size: var(--text-xs);
+  color: #b42318;
+}
+
+.BwCircleProject-module__NbkQ1W__previewFrame {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-soft);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  background: #ffffff2e;
+  border: 1px solid #ffffff52;
+  justify-self: end;
+  width: min(180px, 30vw);
+  overflow: hidden;
+  box-shadow: 0 14px 32px #11111129;
+}
+
+.BwCircleProject-module__NbkQ1W__previewHost {
+  background: #11111114;
+  width: 100%;
+  height: 100%;
+}
+
+.BwCircleProject-module__NbkQ1W__previewHost iframe {
+  border: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.BwCircleProject-module__NbkQ1W__sceneShell {
+  border-radius: var(--radius-prominent);
+  background: radial-gradient(circle, #ffffff1a, #0000 32%), linear-gradient(#f3f1eb 0%, #dbd8d2 100%);
+  flex: 1;
+  min-height: 40vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.BwCircleProject-module__NbkQ1W__canvas {
+  touch-action: manipulation;
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+@media (min-width: 1024px) {
+  .BwCircleProject-module__NbkQ1W__sceneShell {
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .BwCircleProject-module__NbkQ1W__inputRow {
+    flex-wrap: wrap;
+  }
+
+  .BwCircleProject-module__NbkQ1W__syncPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .BwCircleProject-module__NbkQ1W__syncControls {
+    max-width: none;
+  }
+
+  .BwCircleProject-module__NbkQ1W__previewFrame {
+    width: min(156px, 46vw);
+  }
+
+  .BwCircleProject-module__NbkQ1W__linkInput {
+    width: 100%;
+  }
+}
+
+/*# sourceMappingURL=06480_Portfolio_mimesis_src_projects_bw-circle_BwCircleProject_module_3d704361.css.map*/

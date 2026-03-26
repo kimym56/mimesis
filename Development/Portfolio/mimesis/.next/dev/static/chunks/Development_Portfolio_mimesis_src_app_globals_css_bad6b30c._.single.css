@@ -1,0 +1,163 @@
+/* [project]/Development/Portfolio/mimesis/src/app/globals.css [app-client] (css) */
+html, body {
+  background-color: var(--background);
+  max-width: 100vw;
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, :before, :after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.container {
+  max-width: var(--container-max);
+  padding: 0 var(--container-padding);
+  margin: 0 auto;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-5xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-md);
+  text-wrap: balance;
+}
+
+.subtitle {
+  font-size: var(--text-lg);
+  color: var(--foreground-muted);
+  max-width: 600px;
+  line-height: var(--leading-relaxed);
+  font-style: italic;
+}
+
+.subtitle-attribution {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  font-style: normal;
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--foreground-subtle);
+  display: block;
+}
+
+.home-page {
+  min-height: 100vh;
+  padding-top: var(--space-4xl);
+  padding-bottom: var(--space-xl);
+}
+
+.home-header {
+  background-color: var(--background);
+  min-height: clamp(16rem, 72vw, 23rem);
+  box-shadow: none;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 0;
+  display: grid;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-header-copy {
+  z-index: 2;
+  flex-direction: column;
+  justify-content: center;
+  max-width: min(34rem, 100%);
+  display: flex;
+  position: relative;
+}
+
+.home-header-cover {
+  z-index: 0;
+  min-height: 0;
+  color: var(--foreground-subtle);
+  pointer-events: none;
+  isolation: isolate;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.home-header-cover:after {
+  content: "";
+  z-index: 2;
+  background: linear-gradient(90deg, var(--background) 0%, var(--background) 42%, transparent 50%), linear-gradient(180deg, transparent 0%, var(--background) 100%);
+  position: absolute;
+  inset: 0;
+}
+
+.home-header-cover-image {
+  z-index: 1;
+  object-fit: cover;
+  object-position: center 45%;
+  opacity: .5;
+  mix-blend-mode: normal;
+  position: relative;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .home-header-cover-image {
+    filter: invert() brightness(.92);
+  }
+}
+
+[data-theme="dark"] .home-header-cover-image {
+  filter: invert() brightness(.92);
+}
+
+.skip-link {
+  background: var(--foreground);
+  color: var(--background);
+  padding: var(--space-sm) var(--space-md);
+  z-index: var(--z-modal);
+  transition: top var(--transition-base);
+  border-radius: 0 0 var(--radius-sm) 0;
+  font-weight: var(--font-medium);
+  position: absolute;
+  top: -40px;
+  left: 0;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/*# sourceMappingURL=Development_Portfolio_mimesis_src_app_globals_css_bad6b30c._.single.css.map*/

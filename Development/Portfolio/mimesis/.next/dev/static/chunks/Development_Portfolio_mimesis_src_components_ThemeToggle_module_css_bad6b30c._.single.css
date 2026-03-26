@@ -1,0 +1,35 @@
+/* [project]/Development/Portfolio/mimesis/src/components/ThemeToggle.module.css [app-client] (css) */
+.ThemeToggle-module__O8dWba__toggle {
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: var(--z-fixed);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
+  opacity: .7;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  position: fixed;
+}
+
+.ThemeToggle-module__O8dWba__toggle:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.ThemeToggle-module__O8dWba__toggle:active {
+  transform: scale(.95);
+}
+
+.ThemeToggle-module__O8dWba__toggle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/*# sourceMappingURL=Development_Portfolio_mimesis_src_components_ThemeToggle_module_css_bad6b30c._.single.css.map*/
