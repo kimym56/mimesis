@@ -3,14 +3,13 @@
 import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { InteractiveProjectProps } from "../types";
+import {
+  DEFAULT_STAGGERED_TEXT_TUNING,
+} from "./staggeredTextTuning";
 import styles from "./StaggeredTextProject.module.css";
+import { useStaggeredTextGui } from "./useStaggeredTextGui";
 
 const DISPLAY_TEXT = "Start Deploying";
-const OUTGOING_STAGGER_STEP_MS = 60;
-const INCOMING_STAGGER_STEP_MS = 60;
-const HANDOFF_DELAY_MS = 60;
-const OUTGOING_DURATION_MS = 788;
-const INCOMING_DURATION_MS = 710;
 const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 function createCharacterSlots(text: string) {
@@ -40,6 +39,13 @@ const CHARACTER_SLOTS = createCharacterSlots(DISPLAY_TEXT);
 type MotionDriver = "css" | "waapi";
 type CharacterPart = "outgoingArm" | "outgoingGlyph" | "incomingGlyph" | "shadow";
 type CharacterAnimations = Partial<Record<CharacterPart, Animation>>;
+type TimingStyle = CSSProperties & {
+  "--handoff-delay"?: string;
+  "--incoming-duration"?: string;
+  "--incoming-stagger-step"?: string;
+  "--outgoing-duration"?: string;
+  "--outgoing-stagger-step"?: string;
+};
 
 function createPausedAnimation(
   element: HTMLElement | null,
@@ -68,6 +74,7 @@ export default function StaggeredTextProject({
   const suppressNextFocusRef = useRef(false);
   const [isPressed, setIsPressed] = useState(false);
   const [isKeyboardFocusVisible, setIsKeyboardFocusVisible] = useState(false);
+  const [tuning, setTuning] = useState(DEFAULT_STAGGERED_TEXT_TUNING);
   const outgoingArmRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const outgoingGlyphRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const incomingGlyphRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -82,6 +89,26 @@ export default function StaggeredTextProject({
     typeof Element.prototype.animate !== "function"
       ? "css"
       : "waapi";
+  const {
+    handoffDelayMs,
+    incomingDurationMs,
+    incomingStaggerStepMs,
+    outgoingDurationMs,
+    outgoingStaggerStepMs,
+  } = tuning;
+  const timingStyle: TimingStyle = {
+    "--handoff-delay": `${handoffDelayMs}ms`,
+    "--incoming-duration": `${incomingDurationMs}ms`,
+    "--incoming-stagger-step": `${incomingStaggerStepMs}ms`,
+    "--outgoing-duration": `${outgoingDurationMs}ms`,
+    "--outgoing-stagger-step": `${outgoingStaggerStepMs}ms`,
+  };
+
+  useStaggeredTextGui({
+    enabled: true,
+    setTuning,
+    tuning,
+  });
 
   useEffect(() => {
     if (motionDriver !== "waapi") {
@@ -94,7 +121,7 @@ export default function StaggeredTextProject({
 
     const animations = CHARACTER_SLOTS.filter((slot) => !slot.isSpace).map((slot) => {
       const index = slot.staggerIndex;
-      const reverseDelay = slot.reverseStaggerIndex * OUTGOING_STAGGER_STEP_MS;
+      const reverseDelay = slot.reverseStaggerIndex * outgoingStaggerStepMs;
 
       return {
         outgoingArm: createPausedAnimation(
@@ -104,8 +131,8 @@ export default function StaggeredTextProject({
             { opacity: 0.92, transform: "translateY(-0.12em) rotateX(82deg)" },
           ],
           {
-            delay: index * OUTGOING_STAGGER_STEP_MS,
-            duration: OUTGOING_DURATION_MS,
+            delay: index * outgoingStaggerStepMs,
+            duration: outgoingDurationMs,
             easing: EASE_CUSTOM,
             endDelay: reverseDelay,
           },
@@ -121,8 +148,8 @@ export default function StaggeredTextProject({
             },
           ],
           {
-            delay: index * OUTGOING_STAGGER_STEP_MS,
-            duration: OUTGOING_DURATION_MS,
+            delay: index * outgoingStaggerStepMs,
+            duration: outgoingDurationMs,
             easing: EASE_CUSTOM,
             endDelay: reverseDelay,
           },
@@ -142,10 +169,10 @@ export default function StaggeredTextProject({
             },
           ],
           {
-            delay: index * INCOMING_STAGGER_STEP_MS + HANDOFF_DELAY_MS,
-            duration: INCOMING_DURATION_MS,
+            delay: index * incomingStaggerStepMs + handoffDelayMs,
+            duration: incomingDurationMs,
             easing: EASE_CUSTOM,
-            endDelay: slot.reverseStaggerIndex * INCOMING_STAGGER_STEP_MS,
+            endDelay: slot.reverseStaggerIndex * incomingStaggerStepMs,
           },
         ),
         shadow: createPausedAnimation(
@@ -155,8 +182,8 @@ export default function StaggeredTextProject({
             { filter: "blur(8px)", opacity: 0.36, transform: "translateY(-0.04em) scale(1.04)" },
           ],
           {
-            delay: index * OUTGOING_STAGGER_STEP_MS,
-            duration: OUTGOING_DURATION_MS,
+            delay: index * outgoingStaggerStepMs,
+            duration: outgoingDurationMs,
             easing: EASE_CUSTOM,
             endDelay: reverseDelay,
           },
@@ -172,7 +199,14 @@ export default function StaggeredTextProject({
       });
       animationSetsRef.current = [];
     };
-  }, [motionDriver]);
+  }, [
+    handoffDelayMs,
+    incomingDurationMs,
+    incomingStaggerStepMs,
+    motionDriver,
+    outgoingDurationMs,
+    outgoingStaggerStepMs,
+  ]);
 
   useEffect(() => {
     if (motionDriver !== "waapi") {
@@ -199,7 +233,15 @@ export default function StaggeredTextProject({
         animation.play();
       });
     });
-  }, [isActive, motionDriver]);
+  }, [
+    handoffDelayMs,
+    incomingDurationMs,
+    incomingStaggerStepMs,
+    isActive,
+    motionDriver,
+    outgoingDurationMs,
+    outgoingStaggerStepMs,
+  ]);
 
   return (
     <div className={styles.interactivePane} data-project-id={projectId}>
@@ -210,6 +252,7 @@ export default function StaggeredTextProject({
         data-active={isActive}
         data-motion-driver={motionDriver}
         data-reduced-motion={prefersReducedMotion}
+        style={timingStyle}
         onPointerDown={() => {
           suppressNextFocusRef.current = true;
           setIsPressed(true);

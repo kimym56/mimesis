@@ -11,6 +11,7 @@ import {
   vi,
 } from "vitest";
 import StaggeredTextProject from "./StaggeredTextProject";
+import { DEFAULT_STAGGERED_TEXT_TUNING } from "./staggeredTextTuning";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -61,6 +62,21 @@ describe("StaggeredTextProject", () => {
     expect(outgoingText).toBe("StartDeploying");
     expect(incomingText).toBe("StartDeploying");
     expect(trigger?.getAttribute("data-active")).toBe("false");
+    expect(trigger?.style.getPropertyValue("--outgoing-stagger-step")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.outgoingStaggerStepMs}ms`,
+    );
+    expect(trigger?.style.getPropertyValue("--incoming-stagger-step")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.incomingStaggerStepMs}ms`,
+    );
+    expect(trigger?.style.getPropertyValue("--handoff-delay")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.handoffDelayMs}ms`,
+    );
+    expect(trigger?.style.getPropertyValue("--outgoing-duration")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.outgoingDurationMs}ms`,
+    );
+    expect(trigger?.style.getPropertyValue("--incoming-duration")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.incomingDurationMs}ms`,
+    );
 
     act(() => {
       trigger?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
@@ -160,7 +176,9 @@ describe("StaggeredTextProject", () => {
       expect(animateMock).toHaveBeenCalled();
       expect(animateMock.mock.calls[0]?.[1]).toMatchObject({
         delay: 0,
-        endDelay: 780,
+        duration: DEFAULT_STAGGERED_TEXT_TUNING.outgoingDurationMs,
+        endDelay:
+          13 * DEFAULT_STAGGERED_TEXT_TUNING.outgoingStaggerStepMs,
         fill: "both",
       });
     } finally {

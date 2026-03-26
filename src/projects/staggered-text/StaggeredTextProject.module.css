@@ -80,9 +80,6 @@
 }
 
 .slot {
-  --outgoing-stagger-step: 60ms;
-  --incoming-stagger-step: 60ms;
-  --handoff-delay: 60ms;
   position: relative;
   height: 1.14em;
   perspective: 1200px;
@@ -118,8 +115,8 @@
 .outgoingArm {
   transform-origin: 50% 12%;
   transition:
-    transform 788ms var(--ease-custom),
-    opacity 788ms var(--ease-custom);
+    transform var(--outgoing-duration) var(--ease-custom),
+    opacity var(--outgoing-duration) var(--ease-custom);
 }
 
 .outgoingGlyph {
@@ -130,9 +127,9 @@
   filter: blur(0);
   transform: translateZ(0.02em);
   transition:
-    transform 788ms var(--ease-custom),
+    transform var(--outgoing-duration) var(--ease-custom),
     opacity 720ms var(--ease-custom),
-    filter 788ms var(--ease-custom);
+    filter var(--outgoing-duration) var(--ease-custom);
 }
 
 .incomingGlyph {
@@ -144,9 +141,9 @@
   filter: blur(8px);
   transform: translateY(-0.02em) rotateX(-88deg) translateZ(0);
   transition:
-    transform 710ms var(--ease-custom),
-    opacity 710ms var(--ease-custom),
-    filter 710ms var(--ease-custom);
+    transform var(--incoming-duration) var(--ease-custom),
+    opacity var(--incoming-duration) var(--ease-custom),
+    filter var(--incoming-duration) var(--ease-custom);
 }
 
 .shadow {
@@ -155,9 +152,9 @@
   filter: blur(12px);
   transform: translateY(0.28em) scale(1.03);
   transition:
-    opacity 788ms var(--ease-custom),
-    transform 788ms var(--ease-custom),
-    filter 788ms var(--ease-custom);
+    opacity var(--outgoing-duration) var(--ease-custom),
+    transform var(--outgoing-duration) var(--ease-custom),
+    filter var(--outgoing-duration) var(--ease-custom);
 }
 
 .trigger[data-motion-driver="css"][data-active="true"] .outgoingArm {
