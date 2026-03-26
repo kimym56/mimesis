@@ -12,7 +12,7 @@ import {
 import type { StaggeredTextTuning } from "./staggeredTextTuning";
 import styles from "./StaggeredTextProject.module.css";
 
-const DEFAULT_BUTTON_TEXT = "Start Deploying";
+const DEFAULT_BUTTON_TEXT = "Type Anything";
 const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 function createCharacterSlots(text: string) {
@@ -46,6 +46,10 @@ type TimingStyle = CSSProperties & {
   "--incoming-stagger-step"?: string;
   "--outgoing-duration"?: string;
   "--outgoing-stagger-step"?: string;
+};
+type WordmarkStyle = CSSProperties & {
+  "--wordmark-font-weight"?: string;
+  "--wordmark-letter-spacing"?: string;
 };
 
 function createPausedAnimation(
@@ -108,9 +112,11 @@ export function StaggeredTextButtonPreview({
       ? "css"
       : "waapi";
   const {
+    fontWeight,
     handoffDelayMs,
     incomingDurationMs,
     incomingStaggerStepMs,
+    letterSpacingEm,
     outgoingDurationMs,
     outgoingStaggerStepMs,
   } = tuning;
@@ -120,6 +126,10 @@ export function StaggeredTextButtonPreview({
     "--incoming-stagger-step": `${incomingStaggerStepMs}ms`,
     "--outgoing-duration": `${outgoingDurationMs}ms`,
     "--outgoing-stagger-step": `${outgoingStaggerStepMs}ms`,
+  };
+  const wordmarkStyle: WordmarkStyle = {
+    "--wordmark-font-weight": `${fontWeight}`,
+    "--wordmark-letter-spacing": `${letterSpacingEm}em`,
   };
 
   useEffect(() => {
@@ -277,6 +287,7 @@ export function StaggeredTextButtonPreview({
           type="text"
           className={styles.textInput}
           aria-label="Edit staggered text"
+          placeholder={DEFAULT_BUTTON_TEXT}
           value={text}
           onInput={(event) => {
             onTextChange(event.currentTarget.value);
@@ -321,7 +332,7 @@ export function StaggeredTextButtonPreview({
           setIsKeyboardFocusVisible(false);
         }}
       >
-        <span className={styles.wordmark}>
+        <span className={styles.wordmark} style={wordmarkStyle}>
           {characterSlots.map((slot) => {
             if (slot.isSpace) {
               return (

@@ -74,6 +74,13 @@ describe("StaggeredTextProject", () => {
     expect(hoverImplementation?.style.getPropertyValue("--incoming-duration")).toBe(
       `${DEFAULT_STAGGERED_TEXT_TUNING.incomingDurationMs}ms`,
     );
+    const hoverWordmark = hoverImplementation?.querySelector(`.${styles.wordmark}`) as HTMLElement | null;
+    expect(hoverWordmark?.style.getPropertyValue("--wordmark-letter-spacing")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.letterSpacingEm}em`,
+    );
+    expect(hoverWordmark?.style.getPropertyValue("--wordmark-font-weight")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.fontWeight}`,
+    );
 
     act(() => {
       buttonToggle?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -81,7 +88,15 @@ describe("StaggeredTextProject", () => {
 
     expect(buttonToggle?.className).toContain(styles.modeButtonActive);
     expect(container.querySelector('[data-implementation="hover"]')).toBeNull();
-    expect(container.querySelector('[data-implementation="button"]')).not.toBeNull();
+    const nextButtonImplementation = container.querySelector('[data-implementation="button"]');
+    const buttonWordmark = nextButtonImplementation?.querySelector(`.${styles.wordmark}`) as HTMLElement | null;
+    expect(nextButtonImplementation).not.toBeNull();
+    expect(buttonWordmark?.style.getPropertyValue("--wordmark-letter-spacing")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.letterSpacingEm}em`,
+    );
+    expect(buttonWordmark?.style.getPropertyValue("--wordmark-font-weight")).toBe(
+      `${DEFAULT_STAGGERED_TEXT_TUNING.fontWeight}`,
+    );
     expect(container.querySelector('input[type="text"]')).not.toBeNull();
   });
 
@@ -125,6 +140,22 @@ describe("StaggeredTextProject", () => {
     expect(input).not.toBeNull();
     expect(trigger).not.toBeNull();
     expect(trigger?.getAttribute("data-active")).toBe("false");
+    expect(input?.value).toBe("");
+    expect(input?.getAttribute("placeholder")).toBe("Type Anything");
+
+    const initialOutgoingText = Array.from(
+      implementation?.querySelectorAll('[data-part="outgoing-glyph"]') ?? [],
+    )
+      .map((glyph) => glyph.textContent)
+      .join("");
+    const initialIncomingText = Array.from(
+      implementation?.querySelectorAll('[data-part="incoming-glyph"]') ?? [],
+    )
+      .map((glyph) => glyph.textContent)
+      .join("");
+
+    expect(initialOutgoingText).toBe("TypeAnything");
+    expect(initialIncomingText).toBe("TypeAnything");
 
     act(() => {
       input!.value = "Hello Motion";
@@ -144,6 +175,25 @@ describe("StaggeredTextProject", () => {
 
     expect(updatedOutgoingText).toBe("HelloMotion");
     expect(updatedIncomingText).toBe("HelloMotion");
+
+    act(() => {
+      input!.value = "   ";
+      input!.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const whitespaceFallbackOutgoingText = Array.from(
+      implementation?.querySelectorAll('[data-part="outgoing-glyph"]') ?? [],
+    )
+      .map((glyph) => glyph.textContent)
+      .join("");
+    const whitespaceFallbackIncomingText = Array.from(
+      implementation?.querySelectorAll('[data-part="incoming-glyph"]') ?? [],
+    )
+      .map((glyph) => glyph.textContent)
+      .join("");
+
+    expect(whitespaceFallbackOutgoingText).toBe("TypeAnything");
+    expect(whitespaceFallbackIncomingText).toBe("TypeAnything");
 
     act(() => {
       trigger?.dispatchEvent(new Event("pointerdown", { bubbles: true }));
@@ -174,13 +224,13 @@ describe("StaggeredTextProject", () => {
       input!.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    const fallbackOutgoingText = Array.from(
+    const emptyFallbackOutgoingText = Array.from(
       implementation?.querySelectorAll('[data-part="outgoing-glyph"]') ?? [],
     )
       .map((glyph) => glyph.textContent)
       .join("");
 
-    expect(fallbackOutgoingText).toBe("StartDeploying");
+    expect(emptyFallbackOutgoingText).toBe("TypeAnything");
   });
 
   it("assigns reverse stagger positions in hover mode so the release cascade can unwind from the last character", () => {

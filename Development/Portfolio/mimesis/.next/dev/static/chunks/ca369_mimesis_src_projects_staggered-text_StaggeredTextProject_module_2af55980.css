@@ -137,7 +137,9 @@
   z-index: 1;
   perspective: 1600px;
   font-family: var(--font-schibsted-grotesk), sans-serif;
-  letter-spacing: -.022em;
+  font-size: clamp(1.62rem, 4.35vw, 3.72rem);
+  font-weight: var(--wordmark-font-weight, 700);
+  letter-spacing: var(--wordmark-letter-spacing, -.022em);
   font-kerning: normal;
   text-transform: none;
   justify-content: center;
@@ -146,8 +148,6 @@
   max-width: 100%;
   min-height: 2.3em;
   padding-block: .5em .62em;
-  font-size: clamp(1.62rem, 4.35vw, 3.72rem);
-  font-weight: 700;
   line-height: .92;
   display: flex;
   position: relative;
@@ -291,7 +291,7 @@
   }
 
   .StaggeredTextProject-module__t0AzOq__wordmark {
-    letter-spacing: -.02em;
+    letter-spacing: var(--wordmark-letter-spacing, -.02em);
     min-height: 2.48em;
     padding-block: .58em .68em;
     font-size: clamp(1.6rem, 8.7vw, 2.82rem);

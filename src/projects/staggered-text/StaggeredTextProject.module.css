@@ -154,9 +154,9 @@
   perspective: 1600px;
   font-family: var(--font-schibsted-grotesk), sans-serif;
   font-size: clamp(1.62rem, 4.35vw, 3.72rem);
-  font-weight: 700;
+  font-weight: var(--wordmark-font-weight, 700);
   line-height: 0.92;
-  letter-spacing: -0.022em;
+  letter-spacing: var(--wordmark-letter-spacing, -0.022em);
   font-kerning: normal;
   text-transform: none;
   min-height: 2.3em;
@@ -325,7 +325,7 @@
 
   .wordmark {
     font-size: clamp(1.6rem, 8.7vw, 2.82rem);
-    letter-spacing: -0.02em;
+    letter-spacing: var(--wordmark-letter-spacing, -0.02em);
     min-height: 2.48em;
     padding-block: 0.58em 0.68em;
   }
