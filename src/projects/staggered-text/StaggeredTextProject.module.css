@@ -57,40 +57,52 @@
 }
 
 .buttonModePane {
+  position: relative;
   flex-direction: column;
-  gap: clamp(0.75rem, 2vw, 1rem);
 }
 
 .textInputRow {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  display: block;
 }
 
-.textInputLabel {
-  color: rgba(244, 247, 255, 0.72);
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+.textInputOverlay {
+  position: absolute;
+  top: clamp(1rem, 2vw, 1.4rem);
+  left: clamp(1rem, 2vw, 1.4rem);
+  right: clamp(1rem, 2vw, 1.4rem);
+  z-index: 2;
+  max-width: min(22rem, calc(100% - clamp(2rem, 4vw, 2.8rem)));
 }
 
 .textInput {
   width: 100%;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-soft);
-  background: rgba(5, 7, 10, 0.88);
-  color: #f4f7ff;
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid rgba(244, 247, 255, 0.28);
+  border-radius: 0;
+  background: transparent;
+  color: rgba(244, 247, 255, 0.9);
+  caret-color: #f4f7ff;
   font: inherit;
   transition:
     border-color var(--transition-base),
-    background-color var(--transition-base);
+    background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+.textInput::placeholder {
+  color: rgba(244, 247, 255, 0.42);
+}
+
+.textInput:hover {
+  border-bottom-color: rgba(244, 247, 255, 0.42);
 }
 
 .textInput:focus {
   outline: none;
-  border-color: rgba(244, 247, 255, 0.22);
-  background: rgba(8, 10, 14, 0.96);
+  border-bottom-color: rgba(244, 247, 255, 0.76);
+  background: transparent;
+  color: #f4f7ff;
 }
 
 @media (min-width: 1024px) {
@@ -138,6 +150,7 @@
 
 .buttonStage {
   min-height: 0;
+  height: 100%;
 }
 
 .trigger[data-active="true"] {
@@ -331,6 +344,6 @@
   }
 
   .textInput {
-    padding: 0.82rem 0.9rem;
+    padding: 0.68rem 0.8rem;
   }
 }

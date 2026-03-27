@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { act } from "react";
 import { createRoot, hydrateRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
@@ -142,6 +144,20 @@ describe("StaggeredTextProject", () => {
     expect(trigger?.getAttribute("data-active")).toBe("false");
     expect(input?.value).toBe("");
     expect(input?.getAttribute("placeholder")).toBe("Type Anything");
+    const textInputRow = container.querySelector("label");
+
+    expect(textInputRow?.className).toContain(styles.textInputRow);
+    expect(textInputRow?.className).toContain(styles.textInputOverlay);
+    expect(textInputRow?.querySelector("span")).toBeNull();
+    const stylesheet = readFileSync(
+      resolve(process.cwd(), "src/projects/staggered-text/StaggeredTextProject.module.css"),
+      "utf8",
+    );
+
+    expect(stylesheet).toContain("background: transparent;");
+    expect(stylesheet).toContain("border: none;");
+    expect(stylesheet).toContain("border-bottom: 1px solid rgba(244, 247, 255, 0.28);");
+    expect(implementation?.querySelector('[data-layout="button-stage-frame"]')).toBeNull();
 
     const initialOutgoingText = Array.from(
       implementation?.querySelectorAll('[data-part="outgoing-glyph"]') ?? [],

@@ -281,8 +281,7 @@ export function StaggeredTextButtonPreview({
 
   return (
     <div className={`${styles.interactivePane} ${styles.buttonModePane}`} data-implementation="button">
-      <label className={styles.textInputRow}>
-        <span className={styles.textInputLabel}>Text</span>
+      <label className={`${styles.textInputRow} ${styles.textInputOverlay}`}>
         <input
           type="text"
           className={styles.textInput}

@@ -59,36 +59,47 @@
 
 .StaggeredTextProject-module__t0AzOq__buttonModePane {
   flex-direction: column;
-  gap: clamp(.75rem, 2vw, 1rem);
+  position: relative;
 }
 
 .StaggeredTextProject-module__t0AzOq__textInputRow {
-  flex-direction: column;
-  gap: .45rem;
-  display: flex;
+  display: block;
 }
 
-.StaggeredTextProject-module__t0AzOq__textInputLabel {
-  color: #f4f7ffb8;
-  letter-spacing: .01em;
-  font-size: .82rem;
-  font-weight: 600;
+.StaggeredTextProject-module__t0AzOq__textInputOverlay {
+  z-index: 2;
+  max-width: min(22rem, 100% - clamp(2rem, 4vw, 2.8rem));
+  position: absolute;
+  top: clamp(1rem, 2vw, 1.4rem);
+  left: clamp(1rem, 2vw, 1.4rem);
+  right: clamp(1rem, 2vw, 1.4rem);
 }
 
 .StaggeredTextProject-module__t0AzOq__textInput {
-  border-radius: var(--radius-soft);
-  color: #f4f7ff;
+  color: #f4f7ffe6;
+  caret-color: #f4f7ff;
   width: 100%;
   font: inherit;
-  transition: border-color var(--transition-base), background-color var(--transition-base);
-  background: #05070ae0;
-  border: 1px solid #ffffff14;
-  padding: .9rem 1rem;
+  transition: border-color var(--transition-base), background-color var(--transition-base), color var(--transition-base);
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f4f7ff47;
+  border-radius: 0;
+  padding: .5rem 0;
+}
+
+.StaggeredTextProject-module__t0AzOq__textInput::placeholder {
+  color: #f4f7ff6b;
+}
+
+.StaggeredTextProject-module__t0AzOq__textInput:hover {
+  border-bottom-color: #f4f7ff6b;
 }
 
 .StaggeredTextProject-module__t0AzOq__textInput:focus {
-  background: #080a0ef5;
-  border-color: #f4f7ff38;
+  color: #f4f7ff;
+  background: none;
+  border-bottom-color: #f4f7ffc2;
   outline: none;
 }
 
@@ -126,6 +137,7 @@
 }
 
 .StaggeredTextProject-module__t0AzOq__buttonStage {
+  height: 100%;
   min-height: 0;
 }
 
@@ -298,7 +310,7 @@
   }
 
   .StaggeredTextProject-module__t0AzOq__textInput {
-    padding: .82rem .9rem;
+    padding: .68rem .8rem;
   }
 }
 

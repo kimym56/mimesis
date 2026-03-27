@@ -20,7 +20,7 @@ __turbopack_context__.v({
   "slotSizer": "StaggeredTextProject-module__t0AzOq__slotSizer",
   "space": "StaggeredTextProject-module__t0AzOq__space",
   "textInput": "StaggeredTextProject-module__t0AzOq__textInput",
-  "textInputLabel": "StaggeredTextProject-module__t0AzOq__textInputLabel",
+  "textInputOverlay": "StaggeredTextProject-module__t0AzOq__textInputOverlay",
   "textInputRow": "StaggeredTextProject-module__t0AzOq__textInputRow",
   "trigger": "StaggeredTextProject-module__t0AzOq__trigger",
   "wordmark": "StaggeredTextProject-module__t0AzOq__wordmark",
@@ -271,32 +271,22 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
         "data-implementation": "button",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].textInputRow,
-                children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                        className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].textInputLabel,
-                        children: "Text"
-                    }, void 0, false, {
-                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                        lineNumber: 285,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                        type: "text",
-                        className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].textInput,
-                        "aria-label": "Edit staggered text",
-                        placeholder: DEFAULT_BUTTON_TEXT,
-                        value: text,
-                        onInput: (event)=>{
-                            onTextChange(event.currentTarget.value);
-                        }
-                    }, void 0, false, {
-                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                        lineNumber: 286,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
+                className: `${__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].textInputRow} ${__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].textInputOverlay}`,
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                    type: "text",
+                    className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].textInput,
+                    "aria-label": "Edit staggered text",
+                    placeholder: DEFAULT_BUTTON_TEXT,
+                    value: text,
+                    onInput: (event)=>{
+                        onTextChange(event.currentTarget.value);
+                    }
+                }, void 0, false, {
+                    fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
+                    lineNumber: 285,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
                 lineNumber: 284,
                 columnNumber: 7
@@ -348,7 +338,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                 children: " "
                             }, slot.id, false, {
                                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                lineNumber: 339,
+                                lineNumber: 338,
                                 columnNumber: 17
                             }, this);
                         }
@@ -367,7 +357,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 357,
+                                    lineNumber: 356,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -385,12 +375,12 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                         children: slot.char
                                     }, void 0, false, {
                                         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                        lineNumber: 367,
+                                        lineNumber: 366,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 360,
+                                    lineNumber: 359,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -402,7 +392,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 377,
+                                    lineNumber: 376,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -414,24 +404,24 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 386,
+                                    lineNumber: 385,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, slot.id, true, {
                             fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                            lineNumber: 346,
+                            lineNumber: 345,
                             columnNumber: 15
                         }, this);
                     })
                 }, void 0, false, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                    lineNumber: 335,
+                    lineNumber: 334,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                lineNumber: 297,
+                lineNumber: 296,
                 columnNumber: 7
             }, this)
         ]
