@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
   type CSSProperties,
 } from "react";
+import { STAGGERED_TEXT_SHADOW_PROFILE } from "./staggeredTextShadowProfile";
 import type { StaggeredTextTuning } from "./staggeredTextTuning";
 import styles from "./StaggeredTextProject.module.css";
 
@@ -47,6 +48,9 @@ type TimingStyle = CSSProperties & {
   "--incoming-stagger-step"?: string;
   "--outgoing-duration"?: string;
   "--outgoing-stagger-step"?: string;
+  "--shadow-active-blur"?: string;
+  "--shadow-active-opacity"?: string;
+  "--shadow-rest-blur"?: string;
 };
 type WordmarkStyle = CSSProperties & {
   "--wordmark-font-weight"?: string;
@@ -127,6 +131,9 @@ export function StaggeredTextButtonPreview({
     "--incoming-stagger-step": `${incomingStaggerStepMs}ms`,
     "--outgoing-duration": `${outgoingDurationMs}ms`,
     "--outgoing-stagger-step": `${outgoingStaggerStepMs}ms`,
+    "--shadow-active-blur": `${STAGGERED_TEXT_SHADOW_PROFILE.activeBlurPx}px`,
+    "--shadow-active-opacity": `${STAGGERED_TEXT_SHADOW_PROFILE.activeOpacity}`,
+    "--shadow-rest-blur": `${STAGGERED_TEXT_SHADOW_PROFILE.restBlurPx}px`,
   };
   const wordmarkStyle: WordmarkStyle = {
     "--wordmark-font-weight": `${fontWeight}`,
@@ -202,13 +209,13 @@ export function StaggeredTextButtonPreview({
           shadowRefs.current[index],
           [
             {
-              filter: "blur(12px)",
+              filter: `blur(${STAGGERED_TEXT_SHADOW_PROFILE.restBlurPx}px)`,
               opacity: 0,
               transform: "translateY(0.28em) scale(1.03)",
             },
             {
-              filter: "blur(8px)",
-              opacity: 0.36,
+              filter: `blur(${STAGGERED_TEXT_SHADOW_PROFILE.activeBlurPx}px)`,
+              opacity: STAGGERED_TEXT_SHADOW_PROFILE.activeOpacity,
               transform: "translateY(-0.04em) scale(1.04)",
             },
           ],

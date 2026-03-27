@@ -267,7 +267,7 @@
 .StaggeredTextProject-module__t0AzOq__shadow {
   color: #f4f7ff2e;
   opacity: 0;
-  filter: blur(12px);
+  filter: blur(var(--shadow-rest-blur, 12px));
   transition: opacity var(--outgoing-duration) var(--ease-custom), transform var(--outgoing-duration) var(--ease-custom), filter var(--outgoing-duration) var(--ease-custom);
   transform: translateY(.28em)scale(1.03);
 }
@@ -294,8 +294,8 @@
 
 .StaggeredTextProject-module__t0AzOq__trigger[data-motion-driver="css"][data-active="true"] .StaggeredTextProject-module__t0AzOq__shadow {
   transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
-  opacity: .36;
-  filter: blur(8px);
+  opacity: var(--shadow-active-opacity, .22);
+  filter: blur(var(--shadow-active-blur, 6px));
   transform: translateY(-.04em)scale(1.04);
 }
 

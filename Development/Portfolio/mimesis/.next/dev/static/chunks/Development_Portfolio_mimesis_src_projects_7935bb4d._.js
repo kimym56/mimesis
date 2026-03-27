@@ -61,14 +61,14 @@ __turbopack_context__.v((parentImport) => {
 
 __turbopack_context__.v((parentImport) => {
     return Promise.all([
+  "static/chunks/88825_lil-gui_dist_lil-gui_esm_23f5c484.js",
+  "static/chunks/Development_Portfolio_mimesis_src_projects_staggered-text_8eaf45b1._.js",
   {
     "path": "static/chunks/ca369_mimesis_src_projects_staggered-text_StaggeredTextProject_module_2af55980.css",
     "included": [
       "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.module.css [app-client] (css)"
     ]
   },
-  "static/chunks/88825_lil-gui_dist_lil-gui_esm_23f5c484.js",
-  "static/chunks/Development_Portfolio_mimesis_src_projects_staggered-text_153cd929._.js",
   "static/chunks/06480_Portfolio_mimesis_src_projects_staggered-text_StaggeredTextProject_tsx_33a24e9d._.js"
 ].map((chunk) => __turbopack_context__.l(chunk))).then(() => {
         return parentImport("[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx [app-client] (ecmascript, next/dynamic entry)");

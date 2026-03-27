@@ -9,29 +9,29 @@
      ============================================ */
 
   /* Neutral Palette */
-  --background: #F9F9F7;
-  --surface: #FFFFFF;
-  --surface-elevated: #FEFEFE;
+  --background: #fbfbfa;
+  --surface: #ffffff;
+  --surface-elevated: #fefefe;
 
   /* Text */
   --foreground: #1c1c1c;
-  --foreground-muted: rgba(28, 28, 28, 0.60);
-  --foreground-subtle: rgba(28, 28, 28, 0.40);
+  --foreground-muted: rgba(28, 28, 28, 0.6);
+  --foreground-subtle: rgba(28, 28, 28, 0.4);
 
   /* Accents */
-  --accent: #2563EB;
-  --accent-hover: #1D4ED8;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
   --accent-soft: rgba(37, 99, 235, 0.08);
 
   /* Borders */
   --border: rgba(0, 0, 0, 0.06);
-  --border-strong: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.1);
   --border-focus: rgba(37, 99, 235, 0.5);
 
   /* States */
-  --focus-ring: #2563EB;
-  --error: #EF4444;
-  --success: #22C55E;
+  --focus-ring: #2563eb;
+  --error: #ef4444;
+  --success: #22c55e;
 
   /* Overlays */
   --overlay-hover: rgba(0, 0, 0, 0.18);
@@ -57,14 +57,14 @@
      SPACING
      ============================================ */
 
-  --space-xs: 0.25rem;   /* 4px */
-  --space-sm: 0.5rem;    /* 8px */
-  --space-md: 1rem;      /* 16px */
-  --space-lg: 1.5rem;    /* 24px */
-  --space-xl: 2rem;      /* 32px */
-  --space-2xl: 3rem;     /* 48px */
-  --space-3xl: 4rem;     /* 64px */
-  --space-4xl: 6rem;     /* 96px */
+  --space-xs: 0.25rem; /* 4px */
+  --space-sm: 0.5rem; /* 8px */
+  --space-md: 1rem; /* 16px */
+  --space-lg: 1.5rem; /* 24px */
+  --space-xl: 2rem; /* 32px */
+  --space-2xl: 3rem; /* 48px */
+  --space-3xl: 4rem; /* 64px */
+  --space-4xl: 6rem; /* 96px */
 
   /* ============================================
      TYPOGRAPHY
@@ -75,16 +75,16 @@
   --font-body: var(--font-space-grotesk), sans-serif;
 
   /* Font Sizes */
-  --text-xs: 0.75rem;      /* 12px */
-  --text-sm: 0.875rem;     /* 14px */
-  --text-base: 0.9375rem;  /* 15px */
-  --text-md: 1rem;         /* 16px */
-  --text-lg: 1.125rem;     /* 18px */
-  --text-xl: 1.25rem;      /* 20px */
-  --text-2xl: 1.5rem;      /* 24px */
-  --text-3xl: 1.875rem;    /* 30px */
-  --text-4xl: 2.25rem;     /* 36px */
-  --text-5xl: 2.5rem;      /* 40px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 0.9375rem; /* 15px */
+  --text-md: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 2.5rem; /* 40px */
 
   /* Font Weights */
   --font-normal: 400;
@@ -169,13 +169,13 @@
   :root:not([data-theme="light"]) {
     /* Backgrounds */
     --background: #121212;
-    --surface: #1A1A1A;
-    --surface-elevated: #1F1F1F;
+    --surface: #1a1a1a;
+    --surface-elevated: #1f1f1f;
 
     /* Text */
-    --foreground: #F5F5F3;
-    --foreground-muted: rgba(245, 245, 243, 0.60);
-    --foreground-subtle: rgba(245, 245, 243, 0.40);
+    --foreground: #f5f5f3;
+    --foreground-muted: rgba(245, 245, 243, 0.6);
+    --foreground-subtle: rgba(245, 245, 243, 0.4);
 
     /* Borders */
     --border: rgba(255, 255, 255, 0.08);
@@ -190,11 +190,11 @@
 
 [data-theme="dark"] {
   --background: #121212;
-  --surface: #1A1A1A;
-  --surface-elevated: #1F1F1F;
-  --foreground: #F5F5F3;
-  --foreground-muted: rgba(245, 245, 243, 0.60);
-  --foreground-subtle: rgba(245, 245, 243, 0.40);
+  --surface: #1a1a1a;
+  --surface-elevated: #1f1f1f;
+  --foreground: #f5f5f3;
+  --foreground-muted: rgba(245, 245, 243, 0.6);
+  --foreground-subtle: rgba(245, 245, 243, 0.4);
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.12);
   --border-focus: rgba(37, 99, 235, 0.4);

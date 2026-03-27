@@ -290,7 +290,7 @@
 .shadow {
   color: rgba(244, 247, 255, 0.18);
   opacity: 0;
-  filter: blur(12px);
+  filter: blur(var(--shadow-rest-blur, 12px));
   transform: translateY(0.28em) scale(1.03);
   transition:
     opacity var(--outgoing-duration) var(--ease-custom),
@@ -322,8 +322,8 @@
 
 .trigger[data-motion-driver="css"][data-active="true"] .shadow {
   transition-delay: calc(var(--char-index) * var(--outgoing-stagger-step));
-  opacity: 0.36;
-  filter: blur(8px);
+  opacity: var(--shadow-active-opacity, 0.22);
+  filter: blur(var(--shadow-active-blur, 6px));
   transform: translateY(-0.04em) scale(1.04);
 }
 

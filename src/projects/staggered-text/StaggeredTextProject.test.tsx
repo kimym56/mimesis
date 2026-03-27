@@ -79,6 +79,9 @@ describe("StaggeredTextProject", () => {
     expect(hoverImplementation?.style.getPropertyValue("--incoming-duration")).toBe(
       `${DEFAULT_STAGGERED_TEXT_TUNING.incomingDurationMs}ms`,
     );
+    expect(hoverImplementation?.style.getPropertyValue("--shadow-rest-blur")).toBe("12px");
+    expect(hoverImplementation?.style.getPropertyValue("--shadow-active-blur")).toBe("6px");
+    expect(hoverImplementation?.style.getPropertyValue("--shadow-active-opacity")).toBe("0.22");
     const hoverWordmark = hoverImplementation?.querySelector(`.${styles.wordmark}`) as HTMLElement | null;
     expect(hoverWordmark?.style.getPropertyValue("--wordmark-letter-spacing")).toBe(
       `${DEFAULT_STAGGERED_TEXT_TUNING.letterSpacingEm}em`,
@@ -333,6 +336,18 @@ describe("StaggeredTextProject", () => {
           13 * DEFAULT_STAGGERED_TEXT_TUNING.outgoingStaggerStepMs,
         fill: "both",
       });
+      expect(animateMock.mock.calls[3]?.[0]).toEqual([
+        {
+          filter: "blur(12px)",
+          opacity: 0,
+          transform: "translateY(0.28em) scale(1.03)",
+        },
+        {
+          filter: "blur(6px)",
+          opacity: 0.22,
+          transform: "translateY(-0.04em) scale(1.04)",
+        },
+      ]);
     } finally {
       if (originalAnimate) {
         Object.defineProperty(Element.prototype, "animate", {
