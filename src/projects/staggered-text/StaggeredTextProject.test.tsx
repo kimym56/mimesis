@@ -45,12 +45,14 @@ describe("StaggeredTextProject", () => {
       root.render(<StaggeredTextProject projectId="staggered-text" />);
     });
 
+    const instruction = container.querySelector('[data-preview-instruction]');
     const hoverImplementation = container.querySelector('[data-implementation="hover"]');
     const buttonImplementation = container.querySelector('[data-implementation="button"]');
     const toggleShell = container.querySelector('[role="tablist"]');
     const hoverToggle = container.querySelector('[data-mode-toggle="hover"]');
     const buttonToggle = container.querySelector('[data-mode-toggle="button"]');
 
+    expect(instruction?.textContent).toBe("Hover to preview");
     expect(hoverImplementation).not.toBeNull();
     expect(buttonImplementation).toBeNull();
     expect(toggleShell?.className).toContain(styles.modeToggle);
@@ -92,7 +94,9 @@ describe("StaggeredTextProject", () => {
     expect(container.querySelector('[data-implementation="hover"]')).toBeNull();
     const nextButtonImplementation = container.querySelector('[data-implementation="button"]');
     const buttonWordmark = nextButtonImplementation?.querySelector(`.${styles.wordmark}`) as HTMLElement | null;
+    const nextInstruction = container.querySelector('[data-preview-instruction]');
     expect(nextButtonImplementation).not.toBeNull();
+    expect(nextInstruction?.textContent).toBe("Press to preview");
     expect(buttonWordmark?.style.getPropertyValue("--wordmark-letter-spacing")).toBe(
       `${DEFAULT_STAGGERED_TEXT_TUNING.letterSpacingEm}em`,
     );
@@ -156,7 +160,8 @@ describe("StaggeredTextProject", () => {
 
     expect(stylesheet).toContain("background: transparent;");
     expect(stylesheet).toContain("border: none;");
-    expect(stylesheet).toContain("border-bottom: 1px solid rgba(244, 247, 255, 0.28);");
+    expect(stylesheet).toContain("font-size: 1rem;");
+    expect(stylesheet).toContain("width: 50%;");
     expect(implementation?.querySelector('[data-layout="button-stage-frame"]')).toBeNull();
 
     const initialOutgoingText = Array.from(

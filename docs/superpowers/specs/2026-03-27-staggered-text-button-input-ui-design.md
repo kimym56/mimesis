@@ -17,7 +17,8 @@ Keep the input in the current top-left overlay position and restyle it as an edi
 - Keep the label removed.
 - Remove the filled input box and replace it with a transparent surface.
 - Use light text and muted placeholder text directly on the black stage.
-- Use a thin bottom rule instead of a full border so the control feels integrated and less like standard app UI.
+- Increase the input type slightly so the control feels deliberate rather than undersized.
+- Use a thin bottom rule at 50% of the current width instead of a full border so the control feels integrated and less like standard app UI.
 - Keep a restrained focus state that brightens the text and underline without adding a boxed glow.
 - Preserve the existing preview-stage composition and motion behavior.
 
@@ -28,6 +29,6 @@ Keep the input in the current top-left overlay position and restyle it as an edi
 
 ## Validation
 
-- Update the existing button-mode test to assert that the label remains absent and that the input uses an underline-style treatment instead of the filled background.
-- Restyle the overlay field in `StaggeredTextProject.module.css` with transparent background, no full border, and a bottom rule without changing the trigger interaction model.
+- Update the existing button-mode test to assert that the label remains absent and that the input uses an underline-style treatment with the enlarged type and shortened rule.
+- Restyle the overlay field in `StaggeredTextProject.module.css` with transparent background, no full border, a 50% width underline, and slightly larger type without changing the trigger interaction model.
 - Run the targeted staggered-text test file and lint after the UI update.

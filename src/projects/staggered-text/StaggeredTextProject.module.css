@@ -45,9 +45,26 @@
 }
 
 .previewFrame {
+  position: relative;
   flex: 1;
   display: flex;
   min-height: 0;
+}
+
+.previewInstruction {
+  position: absolute;
+  top: clamp(0.9rem, 2vw, 1.25rem);
+  right: clamp(1rem, 2vw, 1.4rem);
+  z-index: 3;
+  margin: 0;
+  color: rgba(244, 247, 255, 0.52);
+  font-size: 0.68rem;
+  font-weight: var(--font-medium);
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
 }
 
 .interactivePane {
@@ -63,6 +80,17 @@
 
 .textInputRow {
   display: block;
+  position: relative;
+}
+
+.textInputRow::after {
+  content: "";
+  display: block;
+  width: 50%;
+  height: 1px;
+  margin-top: 0.06rem;
+  background: rgba(244, 247, 255, 0.28);
+  transition: background-color var(--transition-base);
 }
 
 .textInputOverlay {
@@ -76,14 +104,15 @@
 
 .textInput {
   width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0 0.28rem;
   border: none;
-  border-bottom: 1px solid rgba(244, 247, 255, 0.28);
   border-radius: 0;
   background: transparent;
   color: rgba(244, 247, 255, 0.9);
   caret-color: #f4f7ff;
   font: inherit;
+  font-size: 1rem;
+  line-height: 1.25;
   transition:
     border-color var(--transition-base),
     background-color var(--transition-base),
@@ -94,15 +123,18 @@
   color: rgba(244, 247, 255, 0.42);
 }
 
-.textInput:hover {
-  border-bottom-color: rgba(244, 247, 255, 0.42);
+.textInputRow:hover::after {
+  background: rgba(244, 247, 255, 0.42);
 }
 
 .textInput:focus {
   outline: none;
-  border-bottom-color: rgba(244, 247, 255, 0.76);
   background: transparent;
   color: #f4f7ff;
+}
+
+.textInputRow:focus-within::after {
+  background: rgba(244, 247, 255, 0.76);
 }
 
 @media (min-width: 1024px) {
