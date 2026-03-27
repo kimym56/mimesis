@@ -15,6 +15,7 @@ __turbopack_context__.v({
   "outgoingGlyph": "StaggeredTextProject-module__t0AzOq__outgoingGlyph",
   "previewFrame": "StaggeredTextProject-module__t0AzOq__previewFrame",
   "previewInstruction": "StaggeredTextProject-module__t0AzOq__previewInstruction",
+  "previewInstructionButton": "StaggeredTextProject-module__t0AzOq__previewInstructionButton",
   "projectShell": "StaggeredTextProject-module__t0AzOq__projectShell",
   "shadow": "StaggeredTextProject-module__t0AzOq__shadow",
   "slot": "StaggeredTextProject-module__t0AzOq__slot",
@@ -46,6 +47,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 const DEFAULT_BUTTON_TEXT = "Type Anything";
 const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
+const BUTTON_INSTRUCTION = "Press to preview";
 function createCharacterSlots(text) {
     const characterCount = Array.from(text).filter((char)=>char !== " ").length;
     let staggerIndex = 0;
@@ -284,12 +286,21 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                     }
                 }, void 0, false, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                    lineNumber: 285,
+                    lineNumber: 286,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                lineNumber: 284,
+                lineNumber: 285,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: `${__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].previewInstruction} ${__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].previewInstructionButton}`,
+                "data-preview-instruction": true,
+                children: BUTTON_INSTRUCTION
+            }, void 0, false, {
+                fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
+                lineNumber: 297,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -339,7 +350,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                 children: " "
                             }, slot.id, false, {
                                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                lineNumber: 338,
+                                lineNumber: 345,
                                 columnNumber: 17
                             }, this);
                         }
@@ -358,7 +369,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 356,
+                                    lineNumber: 363,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -376,12 +387,12 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                         children: slot.char
                                     }, void 0, false, {
                                         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                        lineNumber: 366,
+                                        lineNumber: 373,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 359,
+                                    lineNumber: 366,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -393,7 +404,7 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 376,
+                                    lineNumber: 383,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -405,30 +416,30 @@ function StaggeredTextButtonPreview({ onTextChange, text, tuning }) {
                                     children: slot.char
                                 }, void 0, false, {
                                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                                    lineNumber: 385,
+                                    lineNumber: 392,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, slot.id, true, {
                             fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                            lineNumber: 345,
+                            lineNumber: 352,
                             columnNumber: 15
                         }, this);
                     })
                 }, void 0, false, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                    lineNumber: 334,
+                    lineNumber: 341,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-                lineNumber: 296,
+                lineNumber: 303,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextButtonPreview.tsx",
-        lineNumber: 283,
+        lineNumber: 284,
         columnNumber: 5
     }, this);
 }
@@ -464,6 +475,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 const DISPLAY_TEXT = "Start Deploying";
 const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
+const HOVER_INSTRUCTION = "Hover to preview";
 function createCharacterSlots(text) {
     const characterCount = Array.from(text).filter((char)=>char !== " ").length;
     let staggerIndex = 0;
@@ -690,101 +702,112 @@ function StaggeredTextHoverPreview({ tuning }) {
         onPointerLeave: ()=>{
             setIsHovered(false);
         },
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-            className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].wordmark,
-            style: wordmarkStyle,
-            children: CHARACTER_SLOTS.map((slot)=>{
-                if (slot.isSpace) {
-                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                        className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].space,
-                        "aria-hidden": "true",
-                        children: " "
-                    }, slot.id, false, {
-                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                        lineNumber: 292,
-                        columnNumber: 15
-                    }, this);
-                }
-                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                    className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].slot,
-                    "data-slot": "character",
-                    style: {
-                        "--char-index": slot.staggerIndex,
-                        "--char-reverse-index": slot.reverseStaggerIndex
-                    },
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                            className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].slotSizer,
-                            "data-part": "slot-sizer",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].previewInstruction,
+                "data-preview-instruction": true,
+                children: HOVER_INSTRUCTION
+            }, void 0, false, {
+                fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                lineNumber: 289,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].wordmark,
+                style: wordmarkStyle,
+                children: CHARACTER_SLOTS.map((slot)=>{
+                    if (slot.isSpace) {
+                        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].space,
                             "aria-hidden": "true",
-                            children: slot.char
-                        }, void 0, false, {
+                            children: " "
+                        }, slot.id, false, {
                             fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                            lineNumber: 310,
+                            lineNumber: 296,
                             columnNumber: 15
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                            className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].outgoingArm,
-                            "data-part": "outgoing-arm",
-                            ref: (node)=>{
-                                outgoingArmRefs.current[slot.staggerIndex] = node;
-                            },
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].outgoingGlyph,
-                                "data-part": "outgoing-glyph",
+                        }, this);
+                    }
+                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].slot,
+                        "data-slot": "character",
+                        style: {
+                            "--char-index": slot.staggerIndex,
+                            "--char-reverse-index": slot.reverseStaggerIndex
+                        },
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].slotSizer,
+                                "data-part": "slot-sizer",
+                                "aria-hidden": "true",
+                                children: slot.char
+                            }, void 0, false, {
+                                fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                                lineNumber: 314,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].outgoingArm,
+                                "data-part": "outgoing-arm",
                                 ref: (node)=>{
-                                    outgoingGlyphRefs.current[slot.staggerIndex] = node;
+                                    outgoingArmRefs.current[slot.staggerIndex] = node;
+                                },
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].outgoingGlyph,
+                                    "data-part": "outgoing-glyph",
+                                    ref: (node)=>{
+                                        outgoingGlyphRefs.current[slot.staggerIndex] = node;
+                                    },
+                                    children: slot.char
+                                }, void 0, false, {
+                                    fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                                    lineNumber: 324,
+                                    columnNumber: 17
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                                lineNumber: 317,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].incomingGlyph,
+                                "data-part": "incoming-glyph",
+                                ref: (node)=>{
+                                    incomingGlyphRefs.current[slot.staggerIndex] = node;
                                 },
                                 children: slot.char
                             }, void 0, false, {
                                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                                lineNumber: 320,
-                                columnNumber: 17
+                                lineNumber: 334,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].shadow,
+                                "aria-hidden": "true",
+                                ref: (node)=>{
+                                    shadowRefs.current[slot.staggerIndex] = node;
+                                },
+                                children: slot.char
+                            }, void 0, false, {
+                                fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                                lineNumber: 343,
+                                columnNumber: 15
                             }, this)
-                        }, void 0, false, {
-                            fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                            lineNumber: 313,
-                            columnNumber: 15
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                            className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].incomingGlyph,
-                            "data-part": "incoming-glyph",
-                            ref: (node)=>{
-                                incomingGlyphRefs.current[slot.staggerIndex] = node;
-                            },
-                            children: slot.char
-                        }, void 0, false, {
-                            fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                            lineNumber: 330,
-                            columnNumber: 15
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                            className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].shadow,
-                            "aria-hidden": "true",
-                            ref: (node)=>{
-                                shadowRefs.current[slot.staggerIndex] = node;
-                            },
-                            children: slot.char
-                        }, void 0, false, {
-                            fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                            lineNumber: 339,
-                            columnNumber: 15
-                        }, this)
-                    ]
-                }, slot.id, true, {
-                    fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-                    lineNumber: 299,
-                    columnNumber: 13
-                }, this);
-            })
-        }, void 0, false, {
-            fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-            lineNumber: 288,
-            columnNumber: 7
-        }, this)
-    }, void 0, false, {
+                        ]
+                    }, slot.id, true, {
+                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                        lineNumber: 303,
+                        columnNumber: 13
+                    }, this);
+                })
+            }, void 0, false, {
+                fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
+                lineNumber: 292,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextHoverPreview.tsx",
-        lineNumber: 274,
+        lineNumber: 275,
         columnNumber: 5
     }, this);
 }
@@ -992,10 +1015,6 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 const DEFAULT_BUTTON_TEXT = "";
-const MODE_INSTRUCTION_COPY = {
-    hover: "Hover to preview",
-    button: "Press to preview"
-};
 function StaggeredTextProject({ projectId }) {
     _s();
     const [mode, setMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("hover");
@@ -1029,7 +1048,7 @@ function StaggeredTextProject({ projectId }) {
                             children: "Hover"
                         }, void 0, false, {
                             fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                            lineNumber: 40,
+                            lineNumber: 36,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1044,57 +1063,46 @@ function StaggeredTextProject({ projectId }) {
                             children: "Button"
                         }, void 0, false, {
                             fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                            lineNumber: 52,
+                            lineNumber: 48,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                    lineNumber: 35,
+                    lineNumber: 31,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                lineNumber: 34,
+                lineNumber: 30,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].previewFrame,
-                children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                        className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextProject$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].previewInstruction,
-                        "data-preview-instruction": true,
-                        children: MODE_INSTRUCTION_COPY[mode]
-                    }, void 0, false, {
-                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                        lineNumber: 67,
-                        columnNumber: 9
-                    }, this),
-                    mode === "hover" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextHoverPreview$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StaggeredTextHoverPreview"], {
-                        tuning: tuning
-                    }, void 0, false, {
-                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                        lineNumber: 71,
-                        columnNumber: 11
-                    }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextButtonPreview$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StaggeredTextButtonPreview"], {
-                        text: buttonText,
-                        onTextChange: setButtonText,
-                        tuning: tuning
-                    }, void 0, false, {
-                        fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                        lineNumber: 73,
-                        columnNumber: 11
-                    }, this)
-                ]
-            }, void 0, true, {
+                children: mode === "hover" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextHoverPreview$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StaggeredTextHoverPreview"], {
+                    tuning: tuning
+                }, void 0, false, {
+                    fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
+                    lineNumber: 64,
+                    columnNumber: 11
+                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$projects$2f$staggered$2d$text$2f$StaggeredTextButtonPreview$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StaggeredTextButtonPreview"], {
+                    text: buttonText,
+                    onTextChange: setButtonText,
+                    tuning: tuning
+                }, void 0, false, {
+                    fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
+                    lineNumber: 66,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-                lineNumber: 66,
+                lineNumber: 62,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/Development/Portfolio/mimesis/src/projects/staggered-text/StaggeredTextProject.tsx",
-        lineNumber: 33,
+        lineNumber: 29,
         columnNumber: 5
     }, this);
 }

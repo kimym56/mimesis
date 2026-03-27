@@ -503,7 +503,7 @@ a {
 
 .home-header {
   background-color: var(--background);
-  min-height: clamp(16rem, 72vw, 23rem);
+  min-height: clamp(14rem, 72vw, 16rem);
   box-shadow: none;
   isolation: isolate;
   border: 0;

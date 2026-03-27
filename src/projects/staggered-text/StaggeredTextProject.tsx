@@ -11,10 +11,6 @@ import { useStaggeredTextGui } from "./useStaggeredTextGui";
 type PreviewMode = "hover" | "button";
 
 const DEFAULT_BUTTON_TEXT = "";
-const MODE_INSTRUCTION_COPY: Record<PreviewMode, string> = {
-  hover: "Hover to preview",
-  button: "Press to preview",
-};
 
 export default function StaggeredTextProject({
   projectId,
@@ -64,9 +60,6 @@ export default function StaggeredTextProject({
         </div>
       </div>
       <div className={styles.previewFrame}>
-        <p className={styles.previewInstruction} data-preview-instruction>
-          {MODE_INSTRUCTION_COPY[mode]}
-        </p>
         {mode === "hover" ? (
           <StaggeredTextHoverPreview tuning={tuning} />
         ) : (

@@ -13,6 +13,7 @@ import styles from "./StaggeredTextProject.module.css";
 
 const DISPLAY_TEXT = "Start Deploying";
 const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
+const HOVER_INSTRUCTION = "Hover to preview";
 
 function createCharacterSlots(text: string) {
   const characterCount = Array.from(text).filter((char) => char !== " ").length;
@@ -285,6 +286,9 @@ export function StaggeredTextHoverPreview({
         setIsHovered(false);
       }}
     >
+      <p className={styles.previewInstruction} data-preview-instruction>
+        {HOVER_INSTRUCTION}
+      </p>
       <span className={styles.wordmark} style={wordmarkStyle}>
         {CHARACTER_SLOTS.map((slot) => {
           if (slot.isSpace) {

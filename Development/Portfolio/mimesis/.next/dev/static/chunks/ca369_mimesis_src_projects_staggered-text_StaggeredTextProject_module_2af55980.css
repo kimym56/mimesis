@@ -49,12 +49,11 @@
   flex: 1;
   min-height: 0;
   display: flex;
-  position: relative;
 }
 
 .StaggeredTextProject-module__t0AzOq__previewInstruction {
   z-index: 3;
-  color: #f4f7ff85;
+  color: #f4f7ff;
   font-size: .68rem;
   font-weight: var(--font-medium);
   letter-spacing: .16em;
@@ -62,11 +61,16 @@
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
+  text-shadow: 0 0 .01em;
   margin: 0;
   line-height: 1;
   position: absolute;
   top: clamp(.9rem, 2vw, 1.25rem);
   right: clamp(1rem, 2vw, 1.4rem);
+}
+
+.StaggeredTextProject-module__t0AzOq__previewInstructionButton {
+  top: clamp(1rem, 2vw, 1.4rem);
 }
 
 .StaggeredTextProject-module__t0AzOq__interactivePane {

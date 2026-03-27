@@ -45,14 +45,15 @@ describe("StaggeredTextProject", () => {
       root.render(<StaggeredTextProject projectId="staggered-text" />);
     });
 
-    const instruction = container.querySelector('[data-preview-instruction]');
     const hoverImplementation = container.querySelector('[data-implementation="hover"]');
     const buttonImplementation = container.querySelector('[data-implementation="button"]');
     const toggleShell = container.querySelector('[role="tablist"]');
     const hoverToggle = container.querySelector('[data-mode-toggle="hover"]');
     const buttonToggle = container.querySelector('[data-mode-toggle="button"]');
 
-    expect(instruction?.textContent).toBe("Hover to preview");
+    const hoverInstruction = hoverImplementation?.querySelector('[data-preview-instruction]');
+
+    expect(hoverInstruction?.textContent).toBe("Hover to preview");
     expect(hoverImplementation).not.toBeNull();
     expect(buttonImplementation).toBeNull();
     expect(toggleShell?.className).toContain(styles.modeToggle);
@@ -94,7 +95,7 @@ describe("StaggeredTextProject", () => {
     expect(container.querySelector('[data-implementation="hover"]')).toBeNull();
     const nextButtonImplementation = container.querySelector('[data-implementation="button"]');
     const buttonWordmark = nextButtonImplementation?.querySelector(`.${styles.wordmark}`) as HTMLElement | null;
-    const nextInstruction = container.querySelector('[data-preview-instruction]');
+    const nextInstruction = nextButtonImplementation?.querySelector('[data-preview-instruction]');
     expect(nextButtonImplementation).not.toBeNull();
     expect(nextInstruction?.textContent).toBe("Press to preview");
     expect(buttonWordmark?.style.getPropertyValue("--wordmark-letter-spacing")).toBe(

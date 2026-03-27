@@ -110,7 +110,7 @@ a {
   padding: 0;
   border: 0;
   border-radius: 0;
-  min-height: clamp(16rem, 72vw, 23rem);
+  min-height: clamp(14rem, 72vw, 16rem);
   overflow: hidden;
   background-color: var(--background);
   box-shadow: none;

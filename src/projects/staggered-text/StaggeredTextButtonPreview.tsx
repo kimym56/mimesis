@@ -14,6 +14,7 @@ import styles from "./StaggeredTextProject.module.css";
 
 const DEFAULT_BUTTON_TEXT = "Type Anything";
 const EASE_CUSTOM = "cubic-bezier(0.16, 1, 0.3, 1)";
+const BUTTON_INSTRUCTION = "Press to preview";
 
 function createCharacterSlots(text: string) {
   const characterCount = Array.from(text).filter((char) => char !== " ").length;
@@ -293,6 +294,12 @@ export function StaggeredTextButtonPreview({
           }}
         />
       </label>
+      <p
+        className={`${styles.previewInstruction} ${styles.previewInstructionButton}`}
+        data-preview-instruction
+      >
+        {BUTTON_INSTRUCTION}
+      </p>
       <button
         type="button"
         className={`${styles.trigger} ${styles.buttonStage}`}
