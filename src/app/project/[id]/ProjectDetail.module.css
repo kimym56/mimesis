@@ -3,8 +3,13 @@
    Design System: Mimesis
    ============================================ */
 
+.pageShell {
+  width: 100%;
+}
+
 .container {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: var(--space-xl) var(--container-padding);
   max-width: var(--container-max);
   margin: 0 auto;
@@ -15,8 +20,41 @@
 @media (min-width: 1024px) {
   .container {
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
+}
+
+:global(html[data-embed="true"]) .pageShell {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: var(--embed-shell-height, auto);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+:global(html[data-embed="true"]) .container {
+  width: var(--embed-stage-width, 1760px);
+  height: var(--embed-stage-height, 1160px);
+  min-height: var(--embed-stage-height, 1160px);
+  max-width: none;
+  margin: 0;
+  overflow: hidden;
+  transform: scale(var(--embed-stage-scale, 1));
+  transform-origin: top center;
+}
+
+:global(html[data-embed="true"]) .splitLayout {
+  flex-direction: row;
+  gap: var(--grid-gap-lg);
+  flex: 1;
+  min-height: 0;
+}
+
+:global(html[data-embed="true"]) .pane {
+  flex: 1 1 0;
 }
 
 .splitLayout {
@@ -42,6 +80,15 @@
   gap: var(--space-lg);
   min-height: 0;
   min-width: 0;
+}
+
+.pageShell[data-hide-top-chrome="true"] .pane:first-child {
+  height: 72dvh;
+}
+
+.pageShell[data-hide-top-chrome="true"] .pane:first-child [data-project-id] {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 @media (min-width: 1024px) {
@@ -138,6 +185,11 @@
   background-color: var(--border);
 }
 
+:global(html[data-embed="true"]) .imageContainer {
+  min-height: 0;
+  height: 100%;
+}
+
 @media (min-width: 1024px) {
   .imageContainer {
     min-height: 60vh;
@@ -163,6 +215,12 @@
   min-height: 40vh;
 }
 
+:global(html[data-embed="true"]) .iframeContainer {
+  min-height: 0;
+  height: 100%;
+  align-items: center;
+}
+
 @media (min-width: 1024px) {
   .iframeContainer {
     min-height: 60vh;
@@ -185,6 +243,11 @@
   border-radius: var(--radius-soft);
   background: var(--surface);
   min-height: 40vh;
+}
+
+:global(html[data-embed="true"]) .referenceCard {
+  min-height: 0;
+  height: 100%;
 }
 
 @media (min-width: 1024px) {
@@ -250,6 +313,11 @@
   min-height: 40vh;
   overflow: auto;
   border-radius: var(--radius-soft);
+}
+
+:global(html[data-embed="true"]) .threadsEmbedShell {
+  min-height: 0;
+  height: 100%;
 }
 
 @media (min-width: 1024px) {

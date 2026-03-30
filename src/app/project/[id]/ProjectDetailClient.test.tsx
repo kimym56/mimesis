@@ -76,4 +76,14 @@ describe("ProjectDetailClient", () => {
     expect(markup).not.toContain('aria-label="Back to projects"');
     expect(markup).not.toContain("My Mimesis");
   });
+
+  it("marks query-driven detail views so mobile sizing can prioritize the implementation pane", () => {
+    const markup = renderToStaticMarkup(
+      <ProjectDetailClient hideTopChrome initialMode="3d" project={project} />,
+    );
+
+    expect(markup).toContain('data-hide-top-chrome="true"');
+    expect(markup).toContain("Original Reference");
+    expect(markup).not.toContain("My Mimesis");
+  });
 });
