@@ -49,12 +49,8 @@ export const projects: Project[] = [
       poster: "/images/love-jones-cover.jpg",
       sources: [
         {
-          src: "/videos/ios-curl-animation-preview.webm?v=20260311e",
+          src: "/videos/ios_curl_animation.webm",
           type: "video/webm",
-        },
-        {
-          src: "/videos/ios-curl-animation-preview.mp4?v=20260311e",
-          type: "video/mp4",
         },
       ],
     },
@@ -79,12 +75,8 @@ export const projects: Project[] = [
       poster: "/images/wiper-typography-cover.png",
       sources: [
         {
-          src: "/videos/wiper-typography-preview.webm?v=20260311g",
+          src: "/videos/wiper_typography.webm",
           type: "video/webm",
-        },
-        {
-          src: "/videos/wiper-typography-preview.mp4?v=20260311g",
-          type: "video/mp4",
         },
       ],
     },
@@ -103,6 +95,16 @@ export const projects: Project[] = [
       "A monochrome yin-yang playground recreating SABUM's black and white circle study with a second pseudo-sync mode driven by YouTube playback time.",
     originalImage: "/images/black-white-circle-cover.svg",
     imitationImage: "/images/black-white-circle-cover.svg",
+    previewMedia: {
+      type: "video",
+      poster: "/images/black-white-circle-cover.svg",
+      sources: [
+        {
+          src: "/videos/black-white-circle.webm",
+          type: "video/webm",
+        },
+      ],
+    },
     interactive: true,
     interactiveDemo: "bw-circle",
     referencePreview: {
@@ -126,6 +128,16 @@ export const projects: Project[] = [
       "A CSS-first recreation of Rauno Freiberg's staggered hover lettering where each character flips through a soft 3D cascade on hover or press.",
     originalImage: "/images/staggered-text-cover.svg",
     imitationImage: "/images/staggered-text-cover.svg",
+    previewMedia: {
+      type: "video",
+      poster: "/images/staggered-text-cover.svg",
+      sources: [
+        {
+          src: "/videos/staggered-text.webm",
+          type: "video/webm",
+        },
+      ],
+    },
     interactive: true,
     interactiveDemo: "staggered-text",
     referencePreview: {
