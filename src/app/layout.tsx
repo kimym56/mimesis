@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, Schibsted_Grotesk, Space_Grotesk } from "next/font/google";
+import { Suspense } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
@@ -49,7 +50,9 @@ export default function RootLayout({
         <a href="#main" className="skip-link">
           Skip to main content
         </a>
-        <ThemeToggle />
+        <Suspense fallback={null}>
+          <ThemeToggle />
+        </Suspense>
         <main id="main">
           {children}
         </main>

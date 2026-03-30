@@ -22,4 +22,13 @@ describe("RootLayout font wiring", () => {
     expect(layoutSource).toContain("--embed-stage-scale");
     expect(layoutSource).toContain("window.addEventListener('resize',syncEmbedStage");
   });
+
+  it("wraps the theme toggle in Suspense so search params do not break static prerendering", () => {
+    const layoutSource = readSource("./layout.tsx");
+
+    expect(layoutSource).toContain('import { Suspense } from "react"');
+    expect(layoutSource).toContain("<Suspense fallback={null}>");
+    expect(layoutSource).toContain("<ThemeToggle />");
+    expect(layoutSource).toContain("</Suspense>");
+  });
 });
