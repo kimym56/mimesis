@@ -11,6 +11,7 @@ function resolveInitialMode(initialMode?: string): "2d" | "3d" {
 }
 
 export default function PageCurlProject({
+  hideControls,
   initialMode,
   projectId,
 }: InteractiveProjectProps) {
@@ -20,22 +21,24 @@ export default function PageCurlProject({
 
   return (
     <div className={styles.interactivePane} data-project-id={projectId}>
-      <div className={styles.modeToggle}>
-        <button
-          className={`${styles.modeButton} ${mode === "2d" ? styles.modeButtonActive : ""}`}
-          onClick={() => setMode("2d")}
-          type="button"
-        >
-          2D Canvas
-        </button>
-        <button
-          className={`${styles.modeButton} ${mode === "3d" ? styles.modeButtonActive : ""}`}
-          onClick={() => setMode("3d")}
-          type="button"
-        >
-          3D Shader
-        </button>
-      </div>
+      {!hideControls && (
+        <div className={styles.modeToggle}>
+          <button
+            className={`${styles.modeButton} ${mode === "2d" ? styles.modeButtonActive : ""}`}
+            onClick={() => setMode("2d")}
+            type="button"
+          >
+            2D Canvas
+          </button>
+          <button
+            className={`${styles.modeButton} ${mode === "3d" ? styles.modeButtonActive : ""}`}
+            onClick={() => setMode("3d")}
+            type="button"
+          >
+            3D Shader
+          </button>
+        </div>
+      )}
       {mode === "2d" ? <PageCurlEmbed /> : <PageCurlEmbed3D />}
     </div>
   );

@@ -62,4 +62,21 @@ describe("PageCurlProject", () => {
     expect(container.textContent).toContain("mock-3d-shader");
     expect(container.textContent).not.toContain("mock-2d-canvas");
   });
+
+  it("hides the mode toggle when controls are disabled", () => {
+    act(() => {
+      root.render(
+        <PageCurlProject
+          hideControls
+          initialMode="3d"
+          projectId="ios-curl-animation"
+        />,
+      );
+    });
+
+    expect(container.textContent).toContain("mock-3d-shader");
+    expect(container.textContent).not.toContain("2D Canvas");
+    expect(container.textContent).not.toContain("3D Shader");
+    expect(container.querySelectorAll("button")).toHaveLength(0);
+  });
 });
