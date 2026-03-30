@@ -13,7 +13,7 @@ export default async function ProjectPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ mode?: string | string[] | undefined }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
     const resolvedParams = await params;
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
@@ -21,10 +21,22 @@ export default async function ProjectPage({
     const initialMode = Array.isArray(resolvedSearchParams?.mode)
       ? resolvedSearchParams.mode[0]
       : resolvedSearchParams?.mode;
+    const hideTopChrome = Boolean(
+      resolvedSearchParams
+      && Object.values(resolvedSearchParams).some((value) =>
+        Array.isArray(value) ? value.length > 0 : typeof value === "string",
+      ),
+    );
 
     if (!project) {
         notFound();
     }
 
-    return <ProjectDetailClient initialMode={initialMode} project={project} />;
+    return (
+      <ProjectDetailClient
+        hideTopChrome={hideTopChrome}
+        initialMode={initialMode}
+        project={project}
+      />
+    );
 }

@@ -39,3 +39,11 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
+
+@media (max-width: 1023px) {
+  .mobileHidden {
+    opacity: 0;
+    transform: translateY(-0.75rem);
+    pointer-events: none;
+  }
+}

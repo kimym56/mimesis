@@ -13,6 +13,7 @@ function resolveInitialMode(initialMode?: string): WiperRenderMode {
 }
 
 export default function WiperTypographyProject({
+  hideControls,
   initialMode,
   projectId,
   onViewStateChange,
@@ -51,7 +52,9 @@ export default function WiperTypographyProject({
 
   return (
     <div className={styles.interactivePane} data-project-id={projectId}>
-      <WiperTypographyModeToggle activeMode={mode} onChange={setMode} />
+      {!hideControls && (
+        <WiperTypographyModeToggle activeMode={mode} onChange={setMode} />
+      )}
       {ActiveMode ? (
         <ActiveMode
           projectId={projectId}

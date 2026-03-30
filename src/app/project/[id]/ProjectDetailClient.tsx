@@ -11,15 +11,18 @@ import styles from "./ProjectDetail.module.css";
 import ProjectReferenceContent from "./ProjectReferenceContent";
 
 export default function ProjectDetailClient({
+  hideTopChrome = false,
   initialMode,
   project,
 }: {
+  hideTopChrome?: boolean;
   initialMode?: string;
   project: Project;
 }) {
   const shouldReduceMotion = useReducedMotion();
-  const [interactiveRenderMode, setInteractiveRenderMode] =
-    useState<string>(initialMode ?? "2d");
+  const [interactiveRenderMode, setInteractiveRenderMode] = useState<string>(
+    initialMode ?? "2d",
+  );
   const InteractiveProject = project.interactiveDemo
     ? interactiveProjectRegistry[project.interactiveDemo]
     : undefined;
@@ -39,24 +42,27 @@ export default function ProjectDetailClient({
 
   return (
     <div className={styles.container}>
-      <Link
-        href="/"
-        className={styles.backButton}
-        aria-label="Back to Projects"
-      >
-        <ArrowLeft size={18} aria-hidden="true" />
-        <span>Back to Projects</span>
-      </Link>
-
       <div className={styles.splitLayout}>
         {/* Left: Imitation */}
         <motion.div className={styles.pane} {...motionProps(-30)}>
           <div className={styles.paneHeader}>
-            <span className={styles.label}>My Mimesis</span>
+            {hideTopChrome ? null : (
+              <div className={styles.paneHeaderRow}>
+                <Link
+                  href="/"
+                  className={styles.backIconButton}
+                  aria-label="Back to projects"
+                >
+                  <ArrowLeft size={18} aria-hidden="true" />
+                </Link>
+                <span className={styles.label}>My Mimesis</span>
+              </div>
+            )}
           </div>
           {project.interactive ? (
             InteractiveProject ? (
               <InteractiveProject
+                hideControls={hideTopChrome}
                 initialMode={initialMode}
                 projectId={project.id}
                 onViewStateChange={(state) => {

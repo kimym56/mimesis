@@ -24,7 +24,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("./ProjectDetailClient", () => ({
-  default: (props: { initialMode?: string; project: { id: string } }) => ({
+  default: (props: {
+    hideTopChrome?: boolean;
+    initialMode?: string;
+    project: { id: string };
+  }) => ({
     props,
     type: "mock-project-detail-client",
   }),
@@ -37,9 +41,22 @@ describe("ProjectPage", () => {
     const result = (await ProjectPage({
       params: Promise.resolve({ id: "staggered-text" }),
       searchParams: Promise.resolve({ mode: "button" }),
-    })) as ReactElement<{ initialMode?: string }>;
+    })) as ReactElement<{ hideTopChrome?: boolean; initialMode?: string }>;
 
     expect(result.props.initialMode).toBe("button");
+    expect(result.props.hideTopChrome).toBe(true);
+  });
+
+  it("hides top chrome when any query param is present", async () => {
+    const { default: ProjectPage } = await import("./page");
+
+    const result = (await ProjectPage({
+      params: Promise.resolve({ id: "staggered-text" }),
+      searchParams: Promise.resolve({ preview: "immersive" }),
+    })) as ReactElement<{ hideTopChrome?: boolean; initialMode?: string }>;
+
+    expect(result.props.initialMode).toBeUndefined();
+    expect(result.props.hideTopChrome).toBe(true);
   });
 
   it("passes undefined when mode query param is missing", async () => {
@@ -48,8 +65,9 @@ describe("ProjectPage", () => {
     const result = (await ProjectPage({
       params: Promise.resolve({ id: "staggered-text" }),
       searchParams: Promise.resolve({}),
-    })) as ReactElement<{ initialMode?: string }>;
+    })) as ReactElement<{ hideTopChrome?: boolean; initialMode?: string }>;
 
     expect(result.props.initialMode).toBeUndefined();
+    expect(result.props.hideTopChrome).toBe(false);
   });
 });

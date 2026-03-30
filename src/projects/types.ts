@@ -4,6 +4,7 @@ export interface InteractiveProjectProps {
   initialMode?: string;
   projectId: string;
   onViewStateChange?: (state: { renderMode?: string }) => void;
+  hideControls?: boolean;
 }
 
 export type InteractiveProjectComponent =

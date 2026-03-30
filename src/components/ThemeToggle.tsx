@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import styles from "./ThemeToggle.module.css";
 
 type Theme = "light" | "dark";
@@ -58,18 +65,68 @@ function applyTheme(theme: Theme) {
 }
 
 export default function ThemeToggle() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const theme = useSyncExternalStore(
     subscribe,
     getThemeSnapshot,
     () => DEFAULT_THEME,
   );
+  const isProjectQueryMode =
+    pathname.startsWith("/project/") && searchParams.toString().length > 0;
+  const previousScrollYRef = useRef(0);
+  const [isMobileHidden, setIsMobileHidden] = useState(false);
+
+  const syncMobileVisibility = useEffectEvent(() => {
+    const isProjectDetailRoute = pathname.startsWith("/project/");
+    const isMobileViewport = window.innerWidth < 1024;
+    const currentScrollY = Math.max(window.scrollY, 0);
+
+    if (!isProjectDetailRoute || !isMobileViewport) {
+      previousScrollYRef.current = currentScrollY;
+      setIsMobileHidden(false);
+      return;
+    }
+
+    if (currentScrollY <= 8 || currentScrollY < previousScrollYRef.current) {
+      setIsMobileHidden(false);
+    } else if (currentScrollY > previousScrollYRef.current) {
+      setIsMobileHidden(true);
+    }
+
+    previousScrollYRef.current = currentScrollY;
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    previousScrollYRef.current = Math.max(window.scrollY, 0);
+    syncMobileVisibility();
+
+    const handleScroll = () => {
+      syncMobileVisibility();
+    };
+    const handleResize = () => {
+      syncMobileVisibility();
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [pathname]);
+
   function toggle() {
     applyTheme(theme === "dark" ? "light" : "dark");
+  }
+
+  if (isProjectQueryMode) {
+    return null;
   }
 
   const isDark = theme === "dark";
@@ -78,8 +135,9 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className={styles.toggle}
+      className={`${styles.toggle} ${isMobileHidden ? styles.mobileHidden : ""}`.trim()}
       data-theme-toggle="true"
+      data-mobile-hidden={String(isMobileHidden)}
       aria-label={label}
       title={label}
     >

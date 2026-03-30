@@ -19,27 +19,6 @@
   }
 }
 
-.backButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: var(--space-2xl);
-  font-size: var(--text-base);
-  font-weight: var(--font-medium);
-  color: var(--foreground);
-  cursor: pointer;
-  /* Minimum touch target */
-  min-height: 44px;
-  width: fit-content;
-  opacity: 0.75;
-  transition: opacity var(--transition-fast);
-  z-index: var(--z-sticky);
-}
-
-.backButton:hover {
-  opacity: 1;
-}
-
 .splitLayout {
   display: flex;
   flex-direction: column;
@@ -75,6 +54,38 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+}
+
+.paneHeaderRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: fit-content;
+}
+
+.backIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--foreground);
+  opacity: 0.75;
+  transition: opacity var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.backIconButton:hover {
+  opacity: 1;
+  transform: translateX(-2px);
+}
+
+.backIconButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-pill);
 }
 
 .label {
