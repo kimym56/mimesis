@@ -79,6 +79,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggle}
       className={styles.toggle}
+      data-theme-toggle="true"
       aria-label={label}
       title={label}
     >

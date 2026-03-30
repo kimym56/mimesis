@@ -84,6 +84,7 @@ function ThemeToggle() {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
         onClick: toggle,
         className: __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$src$2f$components$2f$ThemeToggle$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].toggle,
+        "data-theme-toggle": "true",
         "aria-label": label,
         title: label,
         children: isDark ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -104,20 +105,20 @@ function ThemeToggle() {
                     r: "4"
                 }, void 0, false, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/components/ThemeToggle.tsx",
-                    lineNumber: 98,
+                    lineNumber: 99,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                     d: "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
                 }, void 0, false, {
                     fileName: "[project]/Development/Portfolio/mimesis/src/components/ThemeToggle.tsx",
-                    lineNumber: 99,
+                    lineNumber: 100,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/Development/Portfolio/mimesis/src/components/ThemeToggle.tsx",
-            lineNumber: 86,
+            lineNumber: 87,
             columnNumber: 9
         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Development$2f$Portfolio$2f$mimesis$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
             xmlns: "http://www.w3.org/2000/svg",
@@ -134,12 +135,12 @@ function ThemeToggle() {
                 d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
             }, void 0, false, {
                 fileName: "[project]/Development/Portfolio/mimesis/src/components/ThemeToggle.tsx",
-                lineNumber: 114,
+                lineNumber: 115,
                 columnNumber: 11
             }, this)
         }, void 0, false, {
             fileName: "[project]/Development/Portfolio/mimesis/src/components/ThemeToggle.tsx",
-            lineNumber: 102,
+            lineNumber: 103,
             columnNumber: 9
         }, this)
     }, void 0, false, {

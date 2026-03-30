@@ -39,7 +39,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+            __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.setAttribute('data-theme',t);if(window.self!==window.top){var stageWidth=1440;var stageHeight=1120;var stagePadding=24;var syncEmbedStage=function(){var availableWidth=Math.max(window.innerWidth-stagePadding*2,320);var availableHeight=Math.max(window.innerHeight-stagePadding*2,320);var embedScale=Math.min(1,availableWidth/stageWidth,availableHeight/stageHeight);d.style.setProperty('--embed-stage-width',stageWidth+'px');d.style.setProperty('--embed-stage-height',stageHeight+'px');d.style.setProperty('--embed-stage-scale',String(embedScale));d.style.setProperty('--embed-shell-height',Math.round(stageHeight*embedScale)+'px');};document.documentElement.setAttribute('data-embed','true');syncEmbedStage();window.addEventListener('resize',syncEmbedStage,{passive:true});}}catch(e){}})();`,
           }}
         />
       </head>

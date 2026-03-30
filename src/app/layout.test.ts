@@ -13,4 +13,13 @@ describe("RootLayout font wiring", () => {
     expect(layoutSource).toContain('variable: "--font-schibsted-grotesk"');
     expect(layoutSource).toContain("schibstedGrotesk.variable");
   });
+
+  it("detects iframe embedding early and seeds desktop-stage CSS variables", () => {
+    const layoutSource = readSource("./layout.tsx");
+
+    expect(layoutSource).toContain("window.self!==window.top");
+    expect(layoutSource).toContain("document.documentElement.setAttribute('data-embed','true')");
+    expect(layoutSource).toContain("--embed-stage-scale");
+    expect(layoutSource).toContain("window.addEventListener('resize',syncEmbedStage");
+  });
 });

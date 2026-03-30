@@ -100,6 +100,32 @@ a {
   padding-bottom: var(--space-xl);
 }
 
+.home-page-shell {
+  width: 100%;
+}
+
+html[data-embed="true"] .home-page-shell {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: var(--embed-shell-height, auto);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+html[data-embed="true"] .home-page {
+  width: var(--embed-stage-width, 1440px);
+  min-height: var(--embed-stage-height, 1120px);
+  margin: 0;
+  transform: scale(var(--embed-stage-scale, 1));
+  transform-origin: top center;
+}
+
+html[data-embed="true"] [data-theme-toggle="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .home-header {
   position: relative;
   display: grid;
