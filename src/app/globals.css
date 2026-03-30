@@ -110,7 +110,7 @@ a {
   padding: 0;
   border: 0;
   border-radius: 0;
-  min-height: clamp(14rem, 72vw, 16rem);
+  min-height: clamp(10.5rem, 56vw, 13rem);
   overflow: hidden;
   background-color: var(--background);
   box-shadow: none;
@@ -156,7 +156,7 @@ a {
   position: relative;
   z-index: 1;
   object-fit: cover;
-  object-position: center 45%;
+  object-position: center 38%;
   opacity: 0.5;
   mix-blend-mode: normal;
   -webkit-mask-image: none;
