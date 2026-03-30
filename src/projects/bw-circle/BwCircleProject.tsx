@@ -39,10 +39,17 @@ const IDLE_AUDIO_SYNC_STATE: BwCircleAudioSyncState = {
 const AUDIO_SYNC_PERMISSION_COPY =
   "*Allow permission to use audio sync for this feature.";
 
+function resolveInitialMode(initialMode?: string): BwCircleProjectMode {
+  return initialMode === "sync" ? "sync" : "mimesis";
+}
+
 export default function BwCircleProject({
+  initialMode,
   projectId,
 }: InteractiveProjectProps) {
-  const [mode, setMode] = useState<BwCircleProjectMode>("mimesis");
+  const [mode, setMode] = useState<BwCircleProjectMode>(() =>
+    resolveInitialMode(initialMode),
+  );
   const [videoId, setVideoId] = useState<string | null>(null);
   const [audioSync, setAudioSync] = useState<BwCircleAudioSyncState>(
     IDLE_AUDIO_SYNC_STATE,

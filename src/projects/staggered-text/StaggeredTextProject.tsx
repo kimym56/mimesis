@@ -12,10 +12,17 @@ type PreviewMode = "hover" | "button";
 
 const DEFAULT_BUTTON_TEXT = "";
 
+function resolveInitialMode(initialMode?: string): PreviewMode {
+  return initialMode === "button" ? "button" : "hover";
+}
+
 export default function StaggeredTextProject({
+  initialMode,
   projectId,
 }: InteractiveProjectProps) {
-  const [mode, setMode] = useState<PreviewMode>("hover");
+  const [mode, setMode] = useState<PreviewMode>(() =>
+    resolveInitialMode(initialMode),
+  );
   const [buttonText, setButtonText] = useState(DEFAULT_BUTTON_TEXT);
   const [tuning, setTuning] = useState(DEFAULT_STAGGERED_TEXT_TUNING);
 

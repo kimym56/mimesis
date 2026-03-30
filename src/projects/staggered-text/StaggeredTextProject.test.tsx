@@ -472,4 +472,23 @@ describe("StaggeredTextProject", () => {
       }
     }
   });
+
+  it("starts in button mode when initialMode requests it", () => {
+    act(() => {
+      root.render(
+        <StaggeredTextProject
+          initialMode="button"
+          projectId="staggered-text"
+        />,
+      );
+    });
+
+    expect(container.querySelector('[data-implementation="hover"]')).toBeNull();
+    expect(container.querySelector('[data-implementation="button"]')).not.toBeNull();
+    expect(
+      container
+        .querySelector('[data-mode-toggle="button"]')
+        ?.getAttribute("aria-selected"),
+    ).toBe("true");
+  });
 });

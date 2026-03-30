@@ -125,4 +125,21 @@ describe("BwCircleProject", () => {
       ),
     ).not.toContain("N");
   });
+
+  it("starts in sync mode when initialMode requests it", () => {
+    act(() => {
+      root.render(
+        <BwCircleProject
+          initialMode="sync"
+          projectId="black-white-circle"
+        />,
+      );
+    });
+
+    expect(
+      container.querySelector(
+        'input[placeholder="https://youtu.be/97qr0BOdHkc?si=xgT_cD0WHCGQsn_C"]',
+      ),
+    ).not.toBeNull();
+  });
 });

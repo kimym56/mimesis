@@ -12,6 +12,7 @@ import {
   it,
   vi,
 } from "vitest";
+import styles from "./WiperTypographyProject.module.css";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -102,5 +103,28 @@ describe("WiperTypographyProject", () => {
 
     expect(moduleLoadState.driverViewLoads).toBe(1);
     expect(container.textContent).toContain("mock-3d-driver-view");
+  });
+
+  it("starts in 3d driver mode when initialMode requests it", async () => {
+    moduleLoadState.driverViewLoads = 0;
+    vi.resetModules();
+    const { default: WiperTypographyProject } = await import(
+      "./WiperTypographyProject"
+    );
+
+    await act(async () => {
+      root.render(
+        <WiperTypographyProject
+          initialMode="3d-driver"
+          projectId="wiper-typography"
+        />,
+      );
+      await vi.dynamicImportSettled();
+      await Promise.resolve();
+    });
+
+    expect(
+      container.querySelector('[data-mode="3d-driver"]')?.className,
+    ).toContain(styles.modeButtonActive);
   });
 });

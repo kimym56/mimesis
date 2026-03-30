@@ -10,10 +10,16 @@ import { useState } from "react";
 import styles from "./ProjectDetail.module.css";
 import ProjectReferenceContent from "./ProjectReferenceContent";
 
-export default function ProjectDetailClient({ project }: { project: Project }) {
+export default function ProjectDetailClient({
+  initialMode,
+  project,
+}: {
+  initialMode?: string;
+  project: Project;
+}) {
   const shouldReduceMotion = useReducedMotion();
   const [interactiveRenderMode, setInteractiveRenderMode] =
-    useState<string>("2d");
+    useState<string>(initialMode ?? "2d");
   const InteractiveProject = project.interactiveDemo
     ? interactiveProjectRegistry[project.interactiveDemo]
     : undefined;
@@ -51,6 +57,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
           {project.interactive ? (
             InteractiveProject ? (
               <InteractiveProject
+                initialMode={initialMode}
                 projectId={project.id}
                 onViewStateChange={(state) => {
                   if (typeof state.renderMode === "string") {

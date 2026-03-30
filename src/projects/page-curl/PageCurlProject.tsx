@@ -6,8 +6,17 @@ import PageCurlEmbed3D from "./PageCurlEmbed3D";
 import type { InteractiveProjectProps } from "../types";
 import styles from "./PageCurlProject.module.css";
 
-export default function PageCurlProject({ projectId }: InteractiveProjectProps) {
-  const [mode, setMode] = useState<"2d" | "3d">("2d");
+function resolveInitialMode(initialMode?: string): "2d" | "3d" {
+  return initialMode === "3d" ? "3d" : "2d";
+}
+
+export default function PageCurlProject({
+  initialMode,
+  projectId,
+}: InteractiveProjectProps) {
+  const [mode, setMode] = useState<"2d" | "3d">(() =>
+    resolveInitialMode(initialMode),
+  );
 
   return (
     <div className={styles.interactivePane} data-project-id={projectId}>

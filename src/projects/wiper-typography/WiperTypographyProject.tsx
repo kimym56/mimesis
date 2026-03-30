@@ -8,11 +8,18 @@ import WiperTypographyModeToggle, {
 } from "./WiperTypographyModeToggle";
 import styles from "./WiperTypographyProject.module.css";
 
+function resolveInitialMode(initialMode?: string): WiperRenderMode {
+  return initialMode === "3d-driver" ? "3d-driver" : "2d";
+}
+
 export default function WiperTypographyProject({
+  initialMode,
   projectId,
   onViewStateChange,
 }: InteractiveProjectProps) {
-  const [mode, setMode] = useState<WiperRenderMode>("2d");
+  const [mode, setMode] = useState<WiperRenderMode>(() =>
+    resolveInitialMode(initialMode),
+  );
   const [driverView3D, setDriverView3D] =
     useState<ComponentType<InteractiveProjectProps> | null>(null);
 
