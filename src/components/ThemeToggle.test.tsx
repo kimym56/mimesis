@@ -5,15 +5,16 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ThemeToggle from "./ThemeToggle";
 
-let mockPathname = "/";
-let mockQueryString = "";
+let mockPathname: string | null = "/";
+let mockQueryString: string | null = "";
 (
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
-  useSearchParams: () => new URLSearchParams(mockQueryString),
+  useSearchParams: () =>
+    mockQueryString === null ? null : new URLSearchParams(mockQueryString),
 }));
 
 describe("ThemeToggle", () => {
@@ -136,5 +137,18 @@ describe("ThemeToggle", () => {
     });
 
     expect(container.querySelector("button")).toBeNull();
+  });
+
+  it("renders safely when navigation state is temporarily unavailable", () => {
+    mockPathname = null;
+    mockQueryString = null;
+
+    root = createRoot(container);
+
+    act(() => {
+      root?.render(<ThemeToggle />);
+    });
+
+    expect(container.querySelector("button")).not.toBeNull();
   });
 });

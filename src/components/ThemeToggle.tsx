@@ -67,18 +67,20 @@ function applyTheme(theme: Theme) {
 export default function ThemeToggle() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const currentPathname = pathname ?? "";
+  const currentSearchParams = searchParams?.toString() ?? "";
   const theme = useSyncExternalStore(
     subscribe,
     getThemeSnapshot,
     () => DEFAULT_THEME,
   );
   const isProjectQueryMode =
-    pathname.startsWith("/project/") && searchParams.toString().length > 0;
+    currentPathname.startsWith("/project/") && currentSearchParams.length > 0;
   const previousScrollYRef = useRef(0);
   const [isMobileHidden, setIsMobileHidden] = useState(false);
 
   const syncMobileVisibility = useEffectEvent(() => {
-    const isProjectDetailRoute = pathname.startsWith("/project/");
+    const isProjectDetailRoute = currentPathname.startsWith("/project/");
     const isMobileViewport = window.innerWidth < 1024;
     const currentScrollY = Math.max(window.scrollY, 0);
 
@@ -119,7 +121,7 @@ export default function ThemeToggle() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
     };
-  }, [pathname]);
+  }, [currentPathname]);
 
   function toggle() {
     applyTheme(theme === "dark" ? "light" : "dark");
