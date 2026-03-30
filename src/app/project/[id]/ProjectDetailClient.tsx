@@ -41,52 +41,36 @@ export default function ProjectDetailClient({
         };
 
   return (
-    <div
-      className={styles.pageShell}
-      data-hide-top-chrome={hideTopChrome ? "true" : "false"}
-    >
-      <div className={styles.container}>
-        <div className={styles.splitLayout}>
-          {/* Left: Imitation */}
-          <motion.div className={styles.pane} {...motionProps(-30)}>
+    <div className={styles.container}>
+      <div className={styles.splitLayout}>
+        {/* Left: Imitation */}
+        <motion.div className={styles.pane} {...motionProps(-30)}>
+          <div className={styles.paneHeader}>
             {hideTopChrome ? null : (
-              <div className={styles.paneHeader}>
-                <div className={styles.paneHeaderRow}>
-                  <Link
-                    href="/"
-                    className={styles.backIconButton}
-                    aria-label="Back to projects"
-                  >
-                    <ArrowLeft size={18} aria-hidden="true" />
-                  </Link>
-                  <span className={styles.label}>My Mimesis</span>
-                </div>
+              <div className={styles.paneHeaderRow}>
+                <Link
+                  href="/"
+                  className={styles.backIconButton}
+                  aria-label="Back to projects"
+                >
+                  <ArrowLeft size={18} aria-hidden="true" />
+                </Link>
+                <span className={styles.label}>My Mimesis</span>
               </div>
             )}
-            {project.interactive ? (
-              InteractiveProject ? (
-                <InteractiveProject
-                  hideControls={hideTopChrome}
-                  initialMode={initialMode}
-                  projectId={project.id}
-                  onViewStateChange={(state) => {
-                    if (typeof state.renderMode === "string") {
-                      setInteractiveRenderMode(state.renderMode);
-                    }
-                  }}
-                />
-              ) : (
-                <div className={styles.imageContainer}>
-                  <Image
-                    src={project.imitationImage}
-                    alt={`${project.title} — imitation recreation`}
-                    fill
-                    className={styles.image}
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority
-                  />
-                </div>
-              )
+          </div>
+          {project.interactive ? (
+            InteractiveProject ? (
+              <InteractiveProject
+                hideControls={hideTopChrome}
+                initialMode={initialMode}
+                projectId={project.id}
+                onViewStateChange={(state) => {
+                  if (typeof state.renderMode === "string") {
+                    setInteractiveRenderMode(state.renderMode);
+                  }
+                }}
+              />
             ) : (
               <div className={styles.imageContainer}>
                 <Image
@@ -98,54 +82,65 @@ export default function ProjectDetailClient({
                   priority
                 />
               </div>
-            )}
-          </motion.div>
+            )
+          ) : (
+            <div className={styles.imageContainer}>
+              <Image
+                src={project.imitationImage}
+                alt={`${project.title} — imitation recreation`}
+                fill
+                className={styles.image}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
+              />
+            </div>
+          )}
+        </motion.div>
 
-          {/* Right: Original */}
-          <motion.div className={styles.pane} {...motionProps(30, 0.1)}>
-            <div className={styles.paneHeader}>
-              <span className={styles.label}>Original Reference</span>
-              <div className={styles.info}>
-                <h1 className={styles.title}>{project.title}</h1>
-                <p className={styles.description}>
-                  {project.description}
-                  {project.referenceUser && (
-                    <>
-                      {" "}
-                      Reference by{" "}
-                      <a
-                        href={project.referenceUser.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.referenceLink}
-                        style={{ textDecoration: "underline", color: "inherit" }}
-                      >
-                        {project.referenceUser.name}
-                      </a>
-                      .
-                    </>
-                  )}
-                </p>
-                {showWiperModelSource ? (
-                  <p className={styles.referenceMeta}>
-                    Model source{" "}
+        {/* Right: Original */}
+        <motion.div className={styles.pane} {...motionProps(30, 0.1)}>
+          <div className={styles.paneHeader}>
+            <span className={styles.label}>Original Reference</span>
+            <div className={styles.info}>
+              <h1 className={styles.title}>{project.title}</h1>
+              <p className={styles.description}>
+                {project.description}
+                {project.referenceUser && (
+                  <>
+                    {" "}
+                    Reference by{" "}
                     <a
-                      href="https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f"
+                      href={project.referenceUser.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.referenceLink}
                       style={{ textDecoration: "underline", color: "inherit" }}
                     >
-                      Tesla 2018 Model 3 (Sketchfab)
+                      {project.referenceUser.name}
                     </a>
                     .
-                  </p>
-                ) : null}
-              </div>
+                  </>
+                )}
+              </p>
+              {showWiperModelSource ? (
+                <p className={styles.referenceMeta}>
+                  Model source{" "}
+                  <a
+                    href="https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.referenceLink}
+                    style={{ textDecoration: "underline", color: "inherit" }}
+                  >
+                    Tesla 2018 Model 3 (Sketchfab)
+                  </a>
+                  .
+                </p>
+              ) : null}
             </div>
-            <ProjectReferenceContent project={project} />
-          </motion.div>
-        </div>
+          </div>
+          <ProjectReferenceContent project={project} />
+        </motion.div>
       </div>
     </div>
   );

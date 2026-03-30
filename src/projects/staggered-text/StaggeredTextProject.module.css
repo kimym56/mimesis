@@ -153,16 +153,6 @@
   }
 }
 
-:global(html[data-embed="true"]) .projectShell {
-  min-height: 0;
-  height: 100%;
-}
-
-:global(html[data-embed="true"]) .interactivePane {
-  min-height: 0;
-  height: 100%;
-}
-
 .trigger {
   position: relative;
   flex: 1;

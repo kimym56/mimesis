@@ -193,11 +193,6 @@
   }
 }
 
-:global(html[data-embed="true"]) .sceneShell {
-  min-height: 0;
-  height: 100%;
-}
-
 @media (max-width: 720px) {
   .inputRow {
     flex-wrap: wrap;

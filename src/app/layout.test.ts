@@ -18,7 +18,6 @@ describe("RootLayout font wiring", () => {
     const layoutSource = readSource("./layout.tsx");
 
     expect(layoutSource).toContain("window.self!==window.top");
-    expect(layoutSource).toContain("window.location.pathname.startsWith('/project/')");
     expect(layoutSource).toContain("document.documentElement.setAttribute('data-embed','true')");
     expect(layoutSource).toContain("--embed-stage-scale");
     expect(layoutSource).toContain("window.addEventListener('resize',syncEmbedStage");

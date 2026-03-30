@@ -56,11 +56,6 @@
   }
 }
 
-:global(html[data-embed="true"]) .wrapper {
-  min-height: 0;
-  height: 100%;
-}
-
 .canvas {
   position: absolute;
   inset: 0;
