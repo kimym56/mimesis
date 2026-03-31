@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: clamp(0.75rem, 2vw, 1rem);
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
 }
 
 .controls {
@@ -74,7 +74,7 @@
 .interactivePane {
   flex: 1;
   display: flex;
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
 }
 
 .buttonModePane {

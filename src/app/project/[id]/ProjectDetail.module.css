@@ -132,7 +132,7 @@
 .imageContainer {
   position: relative;
   flex: 1;
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
   border-radius: var(--radius-soft);
   overflow: hidden;
   background-color: var(--border);
@@ -160,7 +160,7 @@
   justify-content: center;
   overflow: hidden;
   border-radius: var(--radius-soft);
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
 }
 
 @media (min-width: 1024px) {
@@ -184,7 +184,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-soft);
   background: var(--surface);
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
 }
 
 @media (min-width: 1024px) {
@@ -247,7 +247,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
   overflow: auto;
   border-radius: var(--radius-soft);
 }

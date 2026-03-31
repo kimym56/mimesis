@@ -169,7 +169,7 @@
 .sceneShell {
   position: relative;
   flex: 1;
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
   overflow: hidden;
   border-radius: var(--radius-prominent);
   background:

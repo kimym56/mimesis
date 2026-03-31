@@ -44,7 +44,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
 }
 
 @media (min-width: 1024px) {

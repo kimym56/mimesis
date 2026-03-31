@@ -22,6 +22,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --project-mobile-pane-min-height: 40vh;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -124,6 +128,10 @@ html[data-embed="true"] .home-page {
 html[data-embed="true"] [data-theme-toggle="true"] {
   opacity: 0;
   pointer-events: none;
+}
+
+html[data-embed="true"] {
+  --project-mobile-pane-min-height: max(18rem, 40vh);
 }
 
 .home-header {

@@ -43,7 +43,7 @@
 .wrapper {
   position: relative;
   flex: 1;
-  min-height: 40vh;
+  min-height: var(--project-mobile-pane-min-height, 40vh);
   border-radius: var(--radius-soft);
   overflow: hidden;
   background: #1171b2;
