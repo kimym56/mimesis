@@ -39,7 +39,7 @@ export default function PageCurlProject({
           </button>
         </div>
       )}
-      {mode === "2d" ? <PageCurlEmbed /> : <PageCurlEmbed3D />}
+      {mode === "2d" ? <PageCurlEmbed /> : <PageCurlEmbed3D hideControls={hideControls} />}
     </div>
   );
 }

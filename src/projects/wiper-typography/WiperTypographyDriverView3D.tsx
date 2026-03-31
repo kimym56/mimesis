@@ -57,6 +57,10 @@ import {
   type TeslaDriverViewTuning,
 } from "./wiperTeslaDriverTuning";
 import {
+  resolveWiperDriverViewPerformanceSettings,
+  type WiperDriverViewPerformancePreset,
+} from "./wiperDriverViewPerformance";
+import {
   applyDriverViewCameraOffset,
   stepViewAngleToward,
   type WiperViewAngle,
@@ -78,8 +82,6 @@ const DRIVER_VIEW_INITIAL_CAMERA_POSITION: [number, number, number] = [
 const DRIVER_VIEW_INITIAL_LOOK_AT: [number, number, number] = [
   -0.23, 0.56, -0.82,
 ];
-const DRIVER_VIEW_TEXTURE_MAX_SIZE = 2048;
-const DRIVER_VIEW_TEXTURE_SCALE = 2;
 const DRIVER_VIEW_INITIAL_FOV = clampTeslaDriverViewFov(
   DEFAULT_TESLA_DRIVER_VIEW_TUNING.fov,
 );
@@ -148,15 +150,22 @@ function syncDriverViewOverlayCanvas(
   context: CanvasRenderingContext2D,
   pixelWidth: number,
   pixelHeight: number,
+  {
+    overlayTextureMaxSize,
+    overlayTextureScale,
+  }: Pick<
+    ReturnType<typeof resolveWiperDriverViewPerformanceSettings>,
+    "overlayTextureMaxSize" | "overlayTextureScale"
+  >,
 ) {
   const safePixelWidth = Math.max(pixelWidth, 1);
   const safePixelHeight = Math.max(pixelHeight, 1);
   const textureScale = Math.max(
     1,
     Math.min(
-      DRIVER_VIEW_TEXTURE_SCALE,
-      DRIVER_VIEW_TEXTURE_MAX_SIZE / safePixelWidth,
-      DRIVER_VIEW_TEXTURE_MAX_SIZE / safePixelHeight,
+      overlayTextureScale,
+      overlayTextureMaxSize / safePixelWidth,
+      overlayTextureMaxSize / safePixelHeight,
     ),
   );
   const textureWidth = Math.max(1, Math.round(safePixelWidth * textureScale));
@@ -197,6 +206,7 @@ function DriverViewGuiController({
 function DriverViewGlyphField({
   fovRef,
   onSceneReady,
+  performance,
   phaseRef,
   reducedMotion,
   tuning,
@@ -204,6 +214,7 @@ function DriverViewGlyphField({
 }: {
   fovRef: MutableRefObject<number | null>;
   onSceneReady: () => void;
+  performance: ReturnType<typeof resolveWiperDriverViewPerformanceSettings>;
   phaseRef: MutableRefObject<number>;
   reducedMotion: boolean;
   tuning: TeslaDriverViewTuning;
@@ -218,6 +229,7 @@ function DriverViewGlyphField({
   const layoutRef = useRef<TeslaDriverViewLayout | null>(null);
   const smoothedViewRef = useRef<WiperViewAngle>({ yaw: 0, pitch: 0 });
   const { pixelHeight, pixelWidth, simulation } = useWiperSceneSimulation3D({
+    particleCount: performance.particleCount,
     widthRatio: 0.74,
     heightRatio: 0.62,
   });
@@ -414,6 +426,7 @@ function DriverViewGlyphField({
       overlayContext,
       pixelWidth,
       pixelHeight,
+      performance,
     );
     overlayTexture.anisotropy = state.gl.capabilities.getMaxAnisotropy();
     drawWiperScene(overlayContext, simulation);
@@ -507,12 +520,14 @@ function DriverViewLoadingOverlay() {
 function DriverViewScene({
   fovRef,
   onSceneReady,
+  performance,
   reducedMotion,
   tuning,
   viewRef,
 }: {
   fovRef: MutableRefObject<number | null>;
   onSceneReady: () => void;
+  performance: ReturnType<typeof resolveWiperDriverViewPerformanceSettings>;
   reducedMotion: boolean;
   tuning: TeslaDriverViewTuning;
   viewRef: MutableRefObject<WiperViewRefValue>;
@@ -528,6 +543,7 @@ function DriverViewScene({
         <DriverViewGlyphField
           fovRef={fovRef}
           onSceneReady={onSceneReady}
+          performance={performance}
           phaseRef={phaseRef}
           reducedMotion={reducedMotion}
           tuning={tuning}
@@ -538,11 +554,18 @@ function DriverViewScene({
   );
 }
 
+interface WiperTypographyDriverView3DProps extends InteractiveProjectProps {
+  performancePreset?: WiperDriverViewPerformancePreset;
+}
+
 export default function WiperTypographyDriverView3D({
+  performancePreset = "default",
   projectId,
-}: InteractiveProjectProps) {
+}: WiperTypographyDriverView3DProps) {
   suppressThreeClockDeprecationWarning();
 
+  const performance =
+    resolveWiperDriverViewPerformanceSettings(performancePreset);
   const reducedMotion = useReducedMotion() ?? false;
   const [assetState, setAssetState] =
     useState<DriverViewAssetState>("checking");
@@ -628,7 +651,7 @@ export default function WiperTypographyDriverView3D({
           near: 0.01,
           far: 30,
         }}
-        dpr={[1, 2]}
+        dpr={performance.canvasDpr}
         onCreated={({ camera }) => {
           camera.lookAt(...DRIVER_VIEW_INITIAL_LOOK_AT);
         }}
@@ -638,6 +661,7 @@ export default function WiperTypographyDriverView3D({
         <DriverViewScene
           fovRef={fovRef}
           onSceneReady={handleSceneReady}
+          performance={performance}
           reducedMotion={reducedMotion}
           tuning={tuning}
           viewRef={viewRef}

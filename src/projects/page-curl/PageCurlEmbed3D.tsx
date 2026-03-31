@@ -4,6 +4,10 @@ import { useTexture } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import {
+    resolvePageCurlPerformanceSettings,
+    type PageCurlPerformancePreset,
+} from "./pageCurlPerformance";
 import styles from "./PageCurlProject.module.css";
 
 if (typeof console !== "undefined") {
@@ -195,12 +199,14 @@ void main() {
 function PageComponent({
     peelDist,
     angle,
+    meshSegments,
     opacity,
     size,
     liveAngleRadRef,
 }: {
     peelDist: number;
     angle: number;
+    meshSegments: number;
     opacity: number;
     size: { w: number; h: number };
     liveAngleRadRef: React.MutableRefObject<number>;
@@ -315,7 +321,7 @@ function PageComponent({
 
     return (
         <mesh receiveShadow castShadow>
-            <planeGeometry args={[size.w, size.h, 512, 512]} />
+            <planeGeometry args={[size.w, size.h, meshSegments, meshSegments]} />
 
             <shaderMaterial
                 vertexShader={vertexShader}
@@ -340,15 +346,19 @@ function PageComponent({
 function Scene({
     peelDist,
     angle,
+    meshSegments,
     opacity,
     maxDistRef,
     liveAngleRadRef,
+    shadowMapSize,
 }: {
     peelDist: number;
     angle: number;
+    meshSegments: number;
     opacity: number;
     maxDistRef: React.MutableRefObject<number>;
     liveAngleRadRef: React.MutableRefObject<number>;
+    shadowMapSize: number;
 }) {
     const { viewport } = useThree();
 
@@ -371,7 +381,7 @@ function Scene({
                 position={[6, 6, 5]}
                 intensity={1.2}
                 castShadow
-                shadow-mapSize={[4096, 4096]}
+                shadow-mapSize={[shadowMapSize, shadowMapSize]}
                 shadow-bias={-0.0001}
                 shadow-normalBias={0.02}
                 shadow-radius={1.5}
@@ -387,6 +397,7 @@ function Scene({
                 <PageComponent
                     peelDist={peelDist}
                     angle={angle}
+                    meshSegments={meshSegments}
                     opacity={opacity}
                     size={{ w: pageW, h: pageH }}
                     liveAngleRadRef={liveAngleRadRef}
@@ -401,13 +412,31 @@ function Scene({
     );
 }
 
-export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
-    const initialAngle = demo ? 45 : 225;
-    const initialOpacity = demo ? 0.5 : 1;
+interface PageCurlEmbed3DProps {
+    demo?: boolean;
+    hideControls?: boolean;
+    initialAngle?: number;
+    initialOpacity?: number;
+    initialPeelDist?: number;
+    interactive?: boolean;
+    performancePreset?: PageCurlPerformancePreset;
+}
 
+export default function PageCurlEmbed3D({
+    demo = false,
+    hideControls = demo,
+    initialAngle = demo ? 45 : 225,
+    initialOpacity = demo ? 0.5 : 1,
+    initialPeelDist = demo ? 1.5 : 0,
+    interactive = !demo,
+    performancePreset = "default",
+}: PageCurlEmbed3DProps) {
+    const performance = resolvePageCurlPerformanceSettings(performancePreset);
+    const canvasDprProps =
+        performance.canvasDpr === undefined ? {} : { dpr: performance.canvasDpr };
     const [angle, setAngle] = useState(initialAngle);
     const [opacity, setOpacity] = useState(initialOpacity);
-    const [peelDist, setPeelDist] = useState(demo ? 1.5 : 0);
+    const [peelDist, setPeelDist] = useState(initialPeelDist);
 
     const dragging = useRef(false);
     const downClient = useRef({ x: 0, y: 0 });
@@ -418,7 +447,7 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
     const canvasContainerRef = useRef<HTMLDivElement>(null);
 
     const handlePointerDown = (e: React.PointerEvent) => {
-        if (demo) return;
+        if (!interactive) return;
         dragging.current = true;
         downClient.current = { x: e.clientX, y: e.clientY };
         peelAtDown.current = peelDist;
@@ -426,7 +455,7 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
     };
 
     const handlePointerMove = (e: React.PointerEvent) => {
-        if (demo || !dragging.current) return;
+        if (!interactive || !dragging.current) return;
 
         const rect = canvasContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
@@ -458,7 +487,7 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
     };
 
     const handlePointerUp = (e: React.PointerEvent) => {
-        if (demo) return;
+        if (!interactive) return;
         dragging.current = false;
         if (e.currentTarget.hasPointerCapture(e.pointerId)) {
             e.currentTarget.releasePointerCapture(e.pointerId);
@@ -487,21 +516,27 @@ export default function PageCurlEmbed3D({ demo = false }: { demo?: boolean }) {
                 style={{
                     background: "transparent",
                     touchAction: "none",
-                    cursor: demo ? "default" : "grab",
+                    cursor: interactive ? "grab" : "default",
                 }}
             >
-                <Canvas shadows={true} camera={{ position: [0, 0, 5], fov: 50 }}>
+                <Canvas
+                    camera={{ position: [0, 0, 5], fov: 50 }}
+                    shadows={true}
+                    {...canvasDprProps}
+                >
                     <Scene
                         peelDist={peelDist}
                         angle={angle}
+                        meshSegments={performance.meshSegments}
                         opacity={opacity}
                         maxDistRef={maxDistRef}
                         liveAngleRadRef={liveAngleRadRef}
+                        shadowMapSize={performance.shadowMapSize}
                     />
                 </Canvas>
             </div>
 
-            {!demo && (
+            {!hideControls && (
                 <div
                     className={styles.embedControls}
                     onPointerDown={(e) => e.stopPropagation()}

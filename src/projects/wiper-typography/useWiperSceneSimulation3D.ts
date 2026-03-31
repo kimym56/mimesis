@@ -11,6 +11,7 @@ import {
 interface UseWiperSceneSimulation3DOptions {
   widthRatio: number;
   heightRatio: number;
+  particleCount?: number;
 }
 
 export interface WiperSceneSimulation3DModel {
@@ -28,9 +29,11 @@ export interface WiperSceneSimulation3DModel {
 export function useWiperSceneSimulation3D({
   widthRatio,
   heightRatio,
+  particleCount: particleCountOverride,
 }: UseWiperSceneSimulation3DOptions): WiperSceneSimulation3DModel {
   const { viewport, size } = useThree();
-  const [particleCount] = useState(detectWiperParticleCount);
+  const [detectedParticleCount] = useState(detectWiperParticleCount);
+  const particleCount = particleCountOverride ?? detectedParticleCount;
   const pixelWidth = Math.max(1, size.width);
   const pixelHeight = Math.max(1, size.height);
   const availableWidth = Math.max(1, viewport.width * widthRatio);

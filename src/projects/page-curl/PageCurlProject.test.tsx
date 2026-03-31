@@ -7,12 +7,16 @@ import PageCurlProject from "./PageCurlProject";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
+const { pageCurlEmbed3DSpy } = vi.hoisted(() => ({
+  pageCurlEmbed3DSpy: vi.fn(() => <div>mock-3d-shader</div>),
+}));
+
 vi.mock("./PageCurlEmbed", () => ({
   default: () => <div>mock-2d-canvas</div>,
 }));
 
 vi.mock("./PageCurlEmbed3D", () => ({
-  default: () => <div>mock-3d-shader</div>,
+  default: pageCurlEmbed3DSpy,
 }));
 
 describe("PageCurlProject", () => {
@@ -23,6 +27,7 @@ describe("PageCurlProject", () => {
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
+    pageCurlEmbed3DSpy.mockClear();
   });
 
   afterEach(() => {
@@ -78,5 +83,24 @@ describe("PageCurlProject", () => {
     expect(container.textContent).not.toContain("2D Canvas");
     expect(container.textContent).not.toContain("3D Shader");
     expect(container.querySelectorAll("button")).toHaveLength(0);
+  });
+
+  it("passes hidden controls through to the 3d embed", () => {
+    act(() => {
+      root.render(
+        <PageCurlProject
+          hideControls
+          initialMode="3d"
+          projectId="ios-curl-animation"
+        />,
+      );
+    });
+
+    expect(pageCurlEmbed3DSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hideControls: true,
+      }),
+      undefined,
+    );
   });
 });

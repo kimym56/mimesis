@@ -74,6 +74,35 @@ const { mockedCanvasState } = vi.hoisted(() => ({
   },
 }));
 
+const { mockedUseWiperSceneSimulation3D } = vi.hoisted(() => ({
+  mockedUseWiperSceneSimulation3D: vi.fn(() => ({
+    glyphScale: 0.33,
+    pixelHeight: 100,
+    pixelWidth: 100,
+    projectX: (value: number) => value,
+    projectY: (value: number) => value,
+    scale: 0.01,
+    simulation: {
+      bars: [],
+      glyphs: [
+        {
+          index: 0,
+          kind: "glyph",
+          radius: 20,
+          rotation: 0,
+          text: "T",
+          vx: 0,
+          vy: 0,
+          x: 10,
+          y: 20,
+        },
+      ],
+    },
+    worldHeight: 100,
+    worldWidth: 100,
+  })),
+}));
+
 vi.mock("@react-three/fiber", () => ({
   Canvas: ({
     children,
@@ -120,32 +149,7 @@ vi.mock("./WiperTypographyCockpitWipers3D", () => ({
 }));
 
 vi.mock("./useWiperSceneSimulation3D", () => ({
-  useWiperSceneSimulation3D: vi.fn(() => ({
-    glyphScale: 0.33,
-    pixelHeight: 100,
-    pixelWidth: 100,
-    projectX: (value: number) => value,
-    projectY: (value: number) => value,
-    scale: 0.01,
-    simulation: {
-      bars: [],
-      glyphs: [
-        {
-          index: 0,
-          kind: "glyph",
-          radius: 20,
-          rotation: 0,
-          text: "T",
-          vx: 0,
-          vy: 0,
-          x: 10,
-          y: 20,
-        },
-      ],
-    },
-    worldHeight: 100,
-    worldWidth: 100,
-  })),
+  useWiperSceneSimulation3D: mockedUseWiperSceneSimulation3D,
 }));
 
 describe("WiperTypographyDriverView3D", () => {
@@ -161,6 +165,7 @@ describe("WiperTypographyDriverView3D", () => {
     mockedTeslaModel.mockClear();
     mockedUseTeslaDriverViewGui.mockClear();
     mockedUseWiperInteraction.mockClear();
+    mockedUseWiperSceneSimulation3D.mockClear();
     mockedFetch.mockReset();
     mockedFetch.mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", mockedFetch);
@@ -201,6 +206,29 @@ describe("WiperTypographyDriverView3D", () => {
     expect(mockedCanvasState.propsHistory[0]).toMatchObject({
       shadows: { type: PCFShadowMap },
     });
+  });
+
+  it("uses a reduced driver-view render budget for slide embeds", async () => {
+    await act(async () => {
+      root.render(
+        <WiperTypographyDriverView3D
+          performancePreset="slides"
+          projectId="wiper-typography"
+        />,
+      );
+      await Promise.resolve();
+    });
+
+    expect(mockedCanvasState.propsHistory[0]).toMatchObject({
+      dpr: 1,
+    });
+    expect(mockedUseWiperSceneSimulation3D).toHaveBeenCalledWith(
+      expect.objectContaining({
+        heightRatio: 0.62,
+        particleCount: 48,
+        widthRatio: 0.74,
+      }),
+    );
   });
 
   it("enables the dev-only tuning gui when the 3d driver view is active", async () => {
