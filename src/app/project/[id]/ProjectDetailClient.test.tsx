@@ -6,8 +6,40 @@ import ProjectDetailClient from "./ProjectDetailClient";
 
 vi.mock("framer-motion", () => ({
   motion: {
-    div: ({ children, ...props }: ComponentPropsWithoutRef<"div">) => (
-      <div {...props}>{children}</div>
+    div: ({
+      animate,
+      children,
+      initial,
+      transition,
+      variants,
+      viewport,
+      whileInView,
+      ...props
+    }: ComponentPropsWithoutRef<"div"> & {
+      animate?: string;
+      initial?: string;
+      transition?: { delay?: number };
+      variants?: {
+        hidden?: object;
+        visible?: { transition?: { delayChildren?: number; staggerChildren?: number } };
+      };
+      viewport?: { amount?: number; once?: boolean };
+      whileInView?: string;
+    }) => (
+      <div
+        data-motion-animate={animate}
+        data-motion-delay={transition?.delay}
+        data-motion-delay-children={variants?.visible?.transition?.delayChildren}
+        data-motion-initial={initial}
+        data-motion-stagger={variants?.visible?.transition?.staggerChildren}
+        data-motion-variant-keys={variants ? Object.keys(variants).join(",") : undefined}
+        data-motion-viewport-amount={viewport?.amount}
+        data-motion-viewport-once={viewport?.once}
+        data-motion-while-in-view={whileInView}
+        {...props}
+      >
+        {children}
+      </div>
     ),
   },
   useReducedMotion: () => false,
@@ -52,6 +84,16 @@ const project: Project = {
 };
 
 describe("ProjectDetailClient", () => {
+  it("renders viewport-triggered stagger motion wrappers for detail sections", () => {
+    const markup = renderToStaticMarkup(
+      <ProjectDetailClient project={project} />,
+    );
+
+    expect(markup).toContain('data-motion-while-in-view="visible"');
+    expect(markup).toContain('data-motion-viewport-once="true"');
+    expect(markup).toContain('data-motion-stagger="0.12"');
+  });
+
   it("renders a simple back arrow control before the My Mimesis label", () => {
     const markup = renderToStaticMarkup(
       <ProjectDetailClient project={project} />,

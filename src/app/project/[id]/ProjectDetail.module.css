@@ -50,6 +50,19 @@
   }
 }
 
+.paneBody {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.paneBody > * {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
 .paneHeader {
   display: flex;
   flex-direction: column;
